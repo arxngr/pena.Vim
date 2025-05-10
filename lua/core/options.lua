@@ -42,3 +42,4 @@ vim.opt.iskeyword:append '-'
 vim.opt.formatoptions:remove { 'c', 'r', 'o' }
 vim.opt.runtimepath:remove '/usr/share/vim/vimfiles'
 vim.opt.laststatus = 3
+vim.o.mouse = ""

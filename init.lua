@@ -27,4 +27,9 @@ require('lazy').setup {
     require 'plugins.autocompletion',
     require 'plugins.persistence',
     require 'plugins.bufferline',
+    require 'plugins.git',
+    require 'plugins.dap',
+    require 'plugins.toggleterm',
+    require 'plugins.overseer',
+    require 'plugins.rainbow-delimiter',
 }
