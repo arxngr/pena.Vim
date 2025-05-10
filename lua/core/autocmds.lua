@@ -1,10 +1,3 @@
-vim.api.nvim_create_autocmd("VimLeavePre", {
-    callback = function()
-        require("lua.core.utils").save_session()
-    end,
-})
-
-
 vim.api.nvim_create_autocmd({ "FocusGained", "TermClose", "TermLeave" }, {
     callback = function()
         if vim.o.buftype ~= "nofile" then
@@ -107,3 +100,4 @@ vim.api.nvim_create_autocmd({ "BufWritePre" }, {
         vim.fn.mkdir(vim.fn.fnamemodify(file, ":p:h"), "p")
     end,
 })
+

@@ -31,7 +31,7 @@ vim.wo.signcolumn = 'yes'
 vim.o.fileencoding = 'utf-8'
 vim.o.cmdheight = 1
 vim.o.breakindent = true
-vim.o.updatetime = 250
+vim.o.updatetime =1000 
 vim.o.timeoutlen = 300
 vim.o.backup = false
 vim.o.writebackup = false
@@ -42,4 +42,5 @@ vim.opt.iskeyword:append '-'
 vim.opt.formatoptions:remove { 'c', 'r', 'o' }
 vim.opt.runtimepath:remove '/usr/share/vim/vimfiles'
 vim.opt.laststatus = 3
+vim.g.autoformat = true
 vim.o.mouse = ""

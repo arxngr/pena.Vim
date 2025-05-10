@@ -24,10 +24,10 @@ keymap("n", "<C-k>", "<C-w>k", opts)
 keymap("n", "<C-l>", "<C-w>l", opts)
 
 -- Resize windows with arrows
-keymap("n", "<Up>", ":resize -2<CR>", opts)
-keymap("n", "<Down>", ":resize +2<CR>", opts)
-keymap("n", "<Left>", ":vertical resize -2<CR>", opts)
-keymap("n", "<Right>", ":vertical resize +2<CR>", opts)
+keymap("n", "<C-Up>", ":resize -2<CR>", opts)
+keymap("n", "<C-Down>", ":resize +2<CR>", opts)
+keymap("n", "<C-Left>", ":vertical resize -2<CR>", opts)
+keymap("n", "<C-Right>", ":vertical resize +2<CR>", opts)
 
 -- quit file
 keymap('n', '<C-q>', '<cmd> q <CR>', opts)

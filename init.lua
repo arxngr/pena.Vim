@@ -32,4 +32,12 @@ require('lazy').setup {
     require 'plugins.toggleterm',
     require 'plugins.overseer',
     require 'plugins.rainbow-delimiter',
+    require 'plugins.which-key',
+    require 'plugins.conform',
+    require 'plugins.autopair',
+    require 'plugins.neotest',
+    require 'plugins.trouble',
+    require 'plugins.diff',
+    require 'plugins.move',
+    require 'plugins.colorscheme'
 }
