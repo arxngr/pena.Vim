@@ -39,5 +39,7 @@ require('lazy').setup {
     require 'plugins.trouble',
     require 'plugins.diff',
     require 'plugins.move',
-    require 'plugins.colorscheme'
+    require 'plugins.colorscheme',
+    require 'plugins.visual-multi'
+
 }
