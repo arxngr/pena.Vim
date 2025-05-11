@@ -42,4 +42,5 @@ require('lazy').setup {
     require 'plugins.colorscheme',
     require 'plugins.visual-multi',
     require 'plugins.grug-far',
+    require 'plugins.surround',
 }
