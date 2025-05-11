@@ -21,23 +21,6 @@ return {
     -- your optional config goes here, see below.
   end,
 },
-{ "bluz71/vim-moonfly-colors", name = "moonfly", lazy = false, priority = 1000 },
-{ 
-  'olivercederborg/poimandres.nvim',
-  lazy = false,
-  priority = 1000,
-  config = function()
-    require('poimandres').setup {
-      -- leave this setup function empty for default config
-      -- or refer to the configuration section
-      -- for configuration options
-    }
-  end,
-
-},
-        { "akinsho/horizon.nvim",            lazy = false,
- version = "*" },
-        { "miikanissi/modus-themes.nvim", priority = 1000 , lazy = false},
     },
  keys = {
       { "<leader>uc", "<cmd>Themery<CR>", desc = "Toggle Themery" },
@@ -46,7 +29,7 @@ return {
     config = function()
       require("themery").setup({
 
-  themes = {"onedark", "bluloco", "moonfly", "poimandres", "horizon", "modus"}
+  themes = {"onedark", "bluloco"}
       })
     end
   }

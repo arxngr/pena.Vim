@@ -40,6 +40,6 @@ require('lazy').setup {
     require 'plugins.diff',
     require 'plugins.move',
     require 'plugins.colorscheme',
-    require 'plugins.visual-multi'
-
+    require 'plugins.visual-multi',
+    require 'plugins.grug-far',
 }

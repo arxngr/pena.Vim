@@ -7,8 +7,8 @@ return {
     config = function()
       local mason_registry = require("mason-registry")
 
-      local function ensure_formatters_installed(formatters)
-        for _, name in ipairs(formatters) do
+      local function ensure_tools_installed(tools)
+        for _, name in ipairs(tools) do
           if not mason_registry.is_installed(name) then
             local pkg = mason_registry.get_package(name)
             if not pkg:is_installed() then
@@ -18,19 +18,27 @@ return {
         end
       end
 
-    require("conform").setup({
+      -- Set up conform (formatter plugin)
+      require("conform").setup({
         format_on_save = {
-        -- These options will be passed to conform.format()
-        timeout_ms = 500,
-        lsp_format = "fallback",
-      },
-    })
-      -- auto install required formatters
-      local all_formatters = {
+          timeout_ms = 500,
+          lsp_format = "fallback",
+        },
+      })
+
+      -- List of formatters to ensure
+      local formatters = {
         "stylua", "black", "gofumpt", "prettier", "shfmt",
-        "clang-format", "rustfmt"
+        "clang-format", "rustfmt",
       }
-      ensure_formatters_installed(all_formatters)
+
+      -- List of debug tools / DAP adapters to ensure
+      local debug_adapters = {
+        "codelldb", "cpptools", "delve", "js-debug-adapter", "node-debug2-adapter"
+      }
+
+      -- Ensure all are installed
+      ensure_tools_installed(vim.tbl_extend("force", formatters, debug_adapters))
     end,
   },
 }

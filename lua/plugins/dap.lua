@@ -136,7 +136,6 @@ return {
         },
       }
 
-      -- C / C++
       dap.adapters.cppdbg = {
         id = "cppdbg",
         type = "executable",
@@ -216,6 +215,11 @@ return {
         function() require("dap").toggle_breakpoint() end,
         desc = "Toggle breakpoint",
       },
+{
+  "<leader>dw",
+  function() require("dap.ui.widgets").hover() end,
+  desc = "Hover Variable",
+},
     { "<leader>td", function() require("neotest").run.run({strategy = "dap"}) end, desc = "Debug Nearest" },
     },
   },

@@ -38,3 +38,5 @@ keymap('n', '<S-Tab>', ':bprevious<CR>', opts)
 
 keymap("n", "<leader>ft", ":ToggleTerm<CR>", { noremap = true, silent = true, desc = "Terminal" })
 keymap("t", "<ESC>", [[<C-\><C-n>]], { desc = "Escape Terminal Mode" })
+keymap("n", "<leader>wv", "<Cmd>vsplit<CR>", { desc = "Vertical Split" })
+keymap("n", "<leader>hv", "<Cmd>split<CR>", { desc = "Horizontal Split" })
