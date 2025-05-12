@@ -34,7 +34,8 @@ return {
 
       -- List of debug tools / DAP adapters to ensure
       local debug_adapters = {
-        "codelldb", "cpptools", "delve", "js-debug-adapter", "node-debug2-adapter"
+        "codelldb", "cpptools", "delve", "js-debug-adapter", "node-debug2-adapter", "go-debug-adapter",
+                "debugpy"
       }
 
       -- Ensure all are installed
