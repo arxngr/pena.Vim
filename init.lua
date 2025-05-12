@@ -43,4 +43,5 @@ require('lazy').setup {
     require 'plugins.visual-multi',
     require 'plugins.grug-far',
     require 'plugins.surround',
+    require 'plugins.dashboard',
 }
