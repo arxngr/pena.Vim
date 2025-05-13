@@ -5,41 +5,83 @@ return {
       "williamboman/mason.nvim",
     },
     config = function()
-      local mason_registry = require("mason-registry")
+      require("mason").setup()
+      local registry = require("mason-registry")
 
-      local function ensure_tools_installed(tools)
-        for _, name in ipairs(tools) do
-          if not mason_registry.is_installed(name) then
-            local pkg = mason_registry.get_package(name)
-            if not pkg:is_installed() then
-              pkg:install()
-            end
+      local tools = {
+        -- Formatters
+        "stylua",
+        "black",
+        "prettier",
+        "shfmt",
+        "clang-format",
+        "rustfmt",
+        "gofumpt",
+
+        -- Debuggers / DAP
+        "codelldb",
+        "cpptools",
+        "delve",
+        "debugpy",
+        "js-debug-adapter",
+        "node-debug2-adapter",
+        "go-debug-adapter",
+
+        -- Linters (optional)
+        "eslint_d",
+        "shellcheck",
+      }
+
+      -- Ensure tools are installed
+      local function ensure_installed(tool_list)
+        for _, name in ipairs(tool_list) do
+          local ok, pkg = pcall(registry.get_package, name)
+          if ok and not pkg:is_installed() then
+            pkg:install()
+            vim.notify("Installing " .. name, vim.log.levels.INFO)
           end
         end
       end
 
-      -- Set up conform (formatter plugin)
+      -- Refresh registry and install
+      if registry.refresh then
+        registry.refresh(function()
+          ensure_installed(tools)
+        end)
+      else
+        ensure_installed(tools)
+      end
+
+      -- Configure conform.nvim
       require("conform").setup({
         format_on_save = {
-          timeout_ms = 500,
-          lsp_format = "fallback",
+          lsp_fallback = true,
+          timeout_ms = 1000,
+        },
+        formatters_by_ft = {
+          lua = { "stylua" },
+          python = { "black" },
+          go = { "gofumpt" },
+          javascript = { "prettier" },
+          typescript = { "prettier" },
+          json = { "prettier" },
+          yaml = { "prettier" },
+          html = { "prettier" },
+          css = { "prettier" },
+          sh = { "shfmt" },
+          rust = { "rustfmt" },
+          c = { "clang-format" },
+          cpp = { "clang-format" },
+        },
+        formatters = {
+          black = {
+            prepend_args = { "--fast" },
+          },
+          prettier = {
+            prepend_args = { "--tab-width", "2" },
+          },
         },
       })
-
-      -- List of formatters to ensure
-      local formatters = {
-        "stylua", "black", "gofumpt", "prettier", "shfmt",
-        "clang-format", "rustfmt",
-      }
-
-      -- List of debug tools / DAP adapters to ensure
-      local debug_adapters = {
-        "codelldb", "cpptools", "delve", "js-debug-adapter", "node-debug2-adapter", "go-debug-adapter",
-                "debugpy"
-      }
-
-      -- Ensure all are installed
-      ensure_tools_installed(vim.tbl_extend("force", formatters, debug_adapters))
     end,
   },
 }
