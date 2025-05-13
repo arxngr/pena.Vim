@@ -1,4 +1,5 @@
 return {
+    {
     -- Main LSP Configuration
     'neovim/nvim-lspconfig',
     dependencies = {
@@ -200,4 +201,20 @@ return {
             },
         }
     end,
+},
+
+{
+  "ray-x/lsp_signature.nvim",
+  event = "LspAttach",
+  config = function()
+    require("lsp_signature").setup({
+      bind = true,
+      handler_opts = {
+        border = "rounded",
+      },
+      hint_enable = false,                        -- disable inline hint
+      always_trigger = true, 
+    })
+  end,
+}
 }

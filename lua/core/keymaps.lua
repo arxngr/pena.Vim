@@ -40,3 +40,10 @@ keymap("n", "<leader>ft", ":ToggleTerm<CR>", { noremap = true, silent = true, de
 keymap("t", "<ESC>", [[<C-\><C-n>]], { desc = "Escape Terminal Mode" })
 keymap("n", "<leader>wv", "<Cmd>vsplit<CR>", { desc = "Vertical Split" })
 keymap("n", "<leader>hv", "<Cmd>split<CR>", { desc = "Horizontal Split" })
+
+keymap({ 'n' }, '<C-k>', function()       require('lsp_signature').toggle_float_win()
+end, { silent = true, noremap = true, desc = 'toggle signature' })
+
+keymap({ 'n' }, '<Leader>k', function()
+ vim.lsp.buf.signature_help()
+end, { silent = true, noremap = true, desc = 'toggle signature' })
