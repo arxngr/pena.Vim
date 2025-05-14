@@ -35,10 +35,6 @@ keymap("t", "<C-j>", [[<C-\><C-n><C-w>j]], opts)
 keymap("t", "<C-k>", [[<C-\><C-n><C-w>k]], opts)
 keymap("t", "<C-l>", [[<C-\><C-n><C-w>l]], opts)
 
-keymap("n", "<C-h>", [[<C-\><C-n><C-w>h]], opts)
-keymap("n", "<C-j>", [[<C-\><C-n><C-w>j]], opts)
-keymap("n", "<C-k>", [[<C-\><C-n><C-w>k]], opts)
-keymap("n", "<C-l>", [[<C-\><C-n><C-w>l]], opts)
 -- Resize windows with arrows
 keymap("n", "<Up>", ":resize -2<CR>", opts)
 keymap("n", "<Down>", ":resize +2<CR>", opts)
@@ -66,3 +62,10 @@ keymap({ "n" }, "<Leader>k", function()
 end, { silent = true, noremap = true, desc = "toggle signature" })
 
 keymap("n", "<leader>cr", vim.lsp.buf.rename, opts)
+keymap("v", "<", "<gv")
+keymap("v", ">", ">gv")
+
+keymap({ "n", "x" }, "j", "v:count == 0 ? 'gj' : 'j'", { desc = "Down", expr = true, silent = true })
+keymap({ "n", "x" }, "<Down>", "v:count == 0 ? 'gj' : 'j'", { desc = "Down", expr = true, silent = true })
+keymap({ "n", "x" }, "k", "v:count == 0 ? 'gk' : 'k'", { desc = "Up", expr = true, silent = true })
+keymap({ "n", "x" }, "<Up>", "v:count == 0 ? 'gk' : 'k'", { desc = "Up", expr = true, silent = true })
