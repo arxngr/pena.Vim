@@ -41,6 +41,8 @@ require("lazy").setup({
 	require("plugins.surround"),
 	require("plugins.lsp"),
 	require("plugins.telescope"),
-	require("plugins.which-key"),
 	require("plugins.toggleterm"),
+	require("plugins.snacks"),
+	require("plugins.which-key"),
+	require("plugins.noice"),
 })
