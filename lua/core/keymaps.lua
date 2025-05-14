@@ -34,6 +34,11 @@ keymap("t", "<C-h>", [[<C-\><C-n><C-w>h]], opts)
 keymap("t", "<C-j>", [[<C-\><C-n><C-w>j]], opts)
 keymap("t", "<C-k>", [[<C-\><C-n><C-w>k]], opts)
 keymap("t", "<C-l>", [[<C-\><C-n><C-w>l]], opts)
+
+keymap("n", "<C-h>", [[<C-\><C-n><C-w>h]], opts)
+keymap("n", "<C-j>", [[<C-\><C-n><C-w>j]], opts)
+keymap("n", "<C-k>", [[<C-\><C-n><C-w>k]], opts)
+keymap("n", "<C-l>", [[<C-\><C-n><C-w>l]], opts)
 -- Resize windows with arrows
 keymap("n", "<Up>", ":resize -2<CR>", opts)
 keymap("n", "<Down>", ":resize +2<CR>", opts)
@@ -41,23 +46,23 @@ keymap("n", "<Left>", ":vertical resize -2<CR>", opts)
 keymap("n", "<Right>", ":vertical resize +2<CR>", opts)
 
 -- quit file
-keymap('n', '<C-q>', '<cmd> q <CR>', opts)
+keymap("n", "<C-q>", "<cmd> q <CR>", opts)
 
 -- Buffers
-keymap('n', '<Tab>', ':bnext<CR>', opts)
-keymap('n', '<S-Tab>', ':bprevious<CR>', opts)
+keymap("n", "<Tab>", ":bnext<CR>", opts)
+keymap("n", "<S-Tab>", ":bprevious<CR>", opts)
 
 keymap("n", "<leader>ft", ":ToggleTerm<CR>", opts)
 keymap("t", "<ESC>", [[<C-\><C-n>]], { desc = "Escape Terminal Mode" })
 keymap("n", "<leader>wv", "<Cmd>vsplit<CR>", { desc = "Vertical Split" })
 keymap("n", "<leader>hv", "<Cmd>split<CR>", { desc = "Horizontal Split" })
 
-keymap({ 'n' }, '<C-k>', function()       require('lsp_signature').toggle_float_win()
-end, { silent = true, noremap = true, desc = 'toggle signature' })
+keymap({ "n" }, "<C-k>", function()
+	require("lsp_signature").toggle_float_win()
+end, { silent = true, noremap = true, desc = "toggle signature" })
 
-keymap({ 'n' }, '<Leader>k', function()
- vim.lsp.buf.signature_help()
-end, { silent = true, noremap = true, desc = 'toggle signature' })
-
+keymap({ "n" }, "<Leader>k", function()
+	vim.lsp.buf.signature_help()
+end, { silent = true, noremap = true, desc = "toggle signature" })
 
 keymap("n", "<leader>cr", vim.lsp.buf.rename, opts)
