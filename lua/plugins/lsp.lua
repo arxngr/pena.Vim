@@ -214,8 +214,9 @@ return {
 				handler_opts = {
 					border = "rounded",
 				},
-				hint_enable = false, -- disable inline hint
-				always_trigger = true,
+
+				hint_enable = false,
+				floating_window = false,
 			})
 		end,
 	},
