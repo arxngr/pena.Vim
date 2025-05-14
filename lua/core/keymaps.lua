@@ -34,13 +34,7 @@ keymap("t", "<C-h>", [[<C-\><C-n><C-w>h]], opts)
 keymap("t", "<C-j>", [[<C-\><C-n><C-w>j]], opts)
 keymap("t", "<C-k>", [[<C-\><C-n><C-w>k]], opts)
 keymap("t", "<C-l>", [[<C-\><C-n><C-w>l]], opts)
-
--- Resize windows with arrows
-keymap("n", "<Up>", ":resize -2<CR>", opts)
-keymap("n", "<Down>", ":resize +2<CR>", opts)
-keymap("n", "<Left>", ":vertical resize -2<CR>", opts)
-keymap("n", "<Right>", ":vertical resize +2<CR>", opts)
-
+--
 -- quit file
 keymap("n", "<C-q>", "<cmd> q <CR>", opts)
 
