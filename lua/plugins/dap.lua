@@ -32,8 +32,6 @@ return {
           })
         end,
       },
-              "leoluz/nvim-dap-go",
-
     },
     opts = function()
         require("overseer").enable_dap()
