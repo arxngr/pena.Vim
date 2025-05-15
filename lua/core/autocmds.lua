@@ -108,14 +108,3 @@ vim.api.nvim_create_autocmd({ "BufWritePre" }, {
 		vim.fn.mkdir(vim.fn.fnamemodify(file, ":p:h"), "p")
 	end,
 })
-
-vim.diagnostic.config({
-	virtual_text = {
-		prefix = "●", -- You can use "●", ">>", "→", etc.
-		spacing = 4,
-	},
-	signs = true,
-	underline = true,
-	update_in_insert = false, -- only update after leaving insert mode
-	severity_sort = true,
-})

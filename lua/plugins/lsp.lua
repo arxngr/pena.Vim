@@ -11,6 +11,17 @@ return {
 			"hrsh7th/cmp-nvim-lsp",
 		},
 		config = function()
+            vim.diagnostic.config({
+                virtual_text = {
+                    prefix = "●", -- You can use "●", ">>", "→", etc.
+                    spacing = 4,
+                },
+                signs = true,
+                underline = true,
+                update_in_insert = false, -- only update after leaving insert mode
+                severity_sort = true,
+            })
+
 			vim.api.nvim_create_autocmd("LspAttach", {
 				group = vim.api.nvim_create_augroup("kickstart-lsp-attach", { clear = true }),
 				callback = function(event)
@@ -30,6 +41,33 @@ return {
 					map("gD", vim.lsp.buf.declaration, "Goto Declaration")
 
 					local client = vim.lsp.get_client_by_id(event.data.client_id)
+
+                     vim.api.nvim_create_autocmd("BufWritePre", {
+                        buffer = event.buf,
+                        callback = function()
+                          -- Try organize imports if supported
+                          if client.supports_method("textDocument/codeAction") then
+                            local params = vim.lsp.util.make_range_params()
+                            params.context = { only = { "source.organizeImports" } }
+
+                            local result = vim.lsp.buf_request_sync(event.buf, "textDocument/codeAction", params, 1000)
+                            for _, res in pairs(result or {}) do
+                              for _, action in pairs(res.result or {}) do
+                                if action.edit then
+                                  vim.lsp.util.apply_workspace_edit(action.edit, client.offset_encoding or "utf-16")
+                                elseif action.command then
+                                  vim.lsp.buf.execute_command(action.command)
+                                end
+                              end
+                            end
+                          end
+                              -- Format if supported
+                          if client.supports_method("textDocument/formatting") then
+                            vim.lsp.buf.format({ async = false })
+                          end
+                        end,
+                      })
+
 					if client and client.supports_method(vim.lsp.protocol.Methods.textDocument_documentHighlight) then
 						local highlight_augroup =
 							vim.api.nvim_create_augroup("kickstart-lsp-highlight", { clear = false })
@@ -55,7 +93,7 @@ return {
 					end
 
 					if client and client.supports_method(vim.lsp.protocol.Methods.textDocument_inlayHint) then
-						map("<leader>th", function()
+						map("<leader>uh", function()
 							vim.lsp.inlay_hint.enable(not vim.lsp.inlay_hint.is_enabled({ bufnr = event.buf }))
 						end, "Toggle Inlay Hints")
 					end

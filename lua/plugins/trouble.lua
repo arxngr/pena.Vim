@@ -4,10 +4,10 @@ return {
 	opts = {
 		modes = {
 			diagnostics = {
-				win = { position = "right" },
+				win = { position = "bottom" },
 			},
 			lsp = {
-				win = { position = "right" },
+				win = { position = "bottom" },
 			},
 		},
 	},
