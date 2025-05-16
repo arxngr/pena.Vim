@@ -45,5 +45,3 @@ require("lazy").setup({
 	require("plugins.edgy"),
 	require("plugins.dap-ui"),
 })
-vim.api.nvim_set_hl(0, "CursorLine", { bg = "#1A364A" }) -- Deep blue
-vim.api.nvim_set_hl(0, "GitSignsCurrentLineBlame", { fg = "#4FA4D4", bg = "#1A364A", italic = true })

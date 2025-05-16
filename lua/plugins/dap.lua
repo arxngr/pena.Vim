@@ -120,8 +120,9 @@ return {
 				end)
 				vim.defer_fn(function()
 					callback({ type = "server", host = "127.0.0.1", port = port })
-				end, 100)
+				end, 5000)
 			end
+
 			dap.configurations.go = {
 				{
 					type = "go",
