@@ -22,11 +22,6 @@ return {
 				},
 
 				{
-					ft = "dapui_console",
-					title = "DAP Console",
-					size = { height = 0.2 },
-				},
-				{
 					ft = "toggleterm",
 					size = { height = 0.2 },
 					filter = function(buf, win)
