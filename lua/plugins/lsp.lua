@@ -34,7 +34,6 @@ return {
 			return ret
 		end,
 		config = function()
-			-- Configure diagnostics explicitly with all options spelled out
 			vim.diagnostic.config({
 				virtual_text = {
 					prefix = "●",
@@ -118,337 +117,15 @@ return {
 							end
 						end,
 					})
-
-					-- Handle document highlighting
-					if client and client.supports_method(vim.lsp.protocol.Methods.textDocument_documentHighlight) then
-						-- Create a specific highlight group for this feature
-						local highlight_augroup =
-							vim.api.nvim_create_augroup("kickstart-lsp-highlight", { clear = false })
-
-						-- Create autocmd for highlighting on cursor hold
-						vim.api.nvim_create_autocmd({ "CursorHold", "CursorHoldI" }, {
-							buffer = event.buf,
-							group = highlight_augroup,
-							callback = vim.lsp.buf.document_highlight,
-						})
-
-						-- Create autocmd for clearing highlights on cursor moved
-						vim.api.nvim_create_autocmd({ "CursorMoved", "CursorMovedI" }, {
-							buffer = event.buf,
-							group = highlight_augroup,
-							callback = vim.lsp.buf.clear_references,
-						})
-
-						-- Create a detach group and autocmd to clean up
-						local lsp_detach_group = vim.api.nvim_create_augroup("kickstart-lsp-detach", { clear = true })
-						vim.api.nvim_create_autocmd("LspDetach", {
-							group = lsp_detach_group,
-							callback = function(event2)
-								vim.lsp.buf.clear_references()
-								vim.api.nvim_clear_autocmds({ group = "kickstart-lsp-highlight", buffer = event2.buf })
-							end,
-						})
-					end
 				end,
 			})
 
 			-- Setup capabilities explicitly
 			local capabilities = vim.lsp.protocol.make_client_capabilities()
-			-- Enable semantic tokens explicitly
-			capabilities.textDocument.semanticTokens = {
-				dynamicRegistration = false,
-				tokenTypes = {
-					"namespace",
-					"type",
-					"class",
-					"enum",
-					"interface",
-					"struct",
-					"typeParameter",
-					"parameter",
-					"variable",
-					"property",
-					"enumMember",
-					"event",
-					"function",
-					"method",
-					"macro",
-					"keyword",
-					"modifier",
-					"comment",
-					"string",
-					"number",
-					"regexp",
-					"operator",
-					"decorator",
-				},
-				tokenModifiers = {
-					"declaration",
-					"definition",
-					"readonly",
-					"static",
-					"deprecated",
-					"abstract",
-					"async",
-					"modification",
-					"documentation",
-					"defaultLibrary",
-				},
-				formats = { "relative" },
-				requests = {
-					range = true,
-					full = { delta = true },
-				},
-				multilineTokenSupport = false,
-				overlappingTokenSupport = false,
-				serverCancellationSupport = true,
-				augmentsSyntaxTokens = true,
-			}
 			capabilities = vim.tbl_deep_extend("force", capabilities, require("cmp_nvim_lsp").default_capabilities())
 
 			-- Define server configurations - each one individually configured
-			local servers = {
-				clangd = {
-					keys = {
-						{ "<leader>ch", "<cmd>ClangdSwitchSourceHeader<cr>", desc = "Switch Source/Header (C/C++)" },
-					},
-					root_dir = function(fname)
-						return require("lspconfig.util").root_pattern(
-							"Makefile",
-							"configure.ac",
-							"configure.in",
-							"config.h.in",
-							"meson.build",
-							"meson_options.txt",
-							"build.ninja"
-						)(fname) or require("lspconfig.util").root_pattern(
-							"compile_commands.json",
-							"compile_flags.txt"
-						)(fname) or require("lspconfig.util").find_git_ancestor(fname)
-					end,
-					capabilities = {
-						offsetEncoding = { "utf-16" },
-					},
-					cmd = {
-						"clangd",
-						"--background-index",
-						"--clang-tidy",
-						"--header-insertion=iwyu",
-						"--completion-style=detailed",
-						"--function-arg-placeholders=0",
-						"--fallback-style=llvm",
-					},
-					init_options = {
-						usePlaceholders = false,
-						completeUnimported = true,
-						clangdFileStatus = true,
-					},
-				},
-				gopls = {
-					capabilities = capabilities,
-					cmd = { "gopls" },
-					filetypes = { "go", "gomod", "gowork", "gotmpl" },
-					root_dir = require("lspconfig.util").root_pattern("go.work", "go.mod", ".git"),
-				},
-				pyright = {
-					capabilities = capabilities,
-					cmd = { "pyright-langserver", "--stdio" },
-					filetypes = { "python" },
-					root_dir = require("lspconfig.util").root_pattern(
-						"pyproject.toml",
-						"setup.py",
-						"setup.cfg",
-						"requirements.txt",
-						".git"
-					),
-					settings = {
-						python = {
-							analysis = {
-								autoSearchPaths = true,
-								diagnosticMode = "workspace",
-								useLibraryCodeForTypes = true,
-							},
-						},
-					},
-				},
-				ts_ls = {
-					capabilities = capabilities,
-					cmd = { "typescript-language-server", "--stdio" },
-					filetypes = {
-						"javascript",
-						"javascriptreact",
-						"javascript.jsx",
-						"typescript",
-						"typescriptreact",
-						"typescript.tsx",
-					},
-					root_dir = require("lspconfig.util").root_pattern(
-						"package.json",
-						"tsconfig.json",
-						"jsconfig.json",
-						".git"
-					),
-					-- Explicitly enable semantic tokens for TypeScript/JavaScript
-					settings = {
-						typescript = {
-							semanticTokens = true,
-							inlayHints = {
-								includeInlayParameterNameHints = "all",
-								includeInlayParameterNameHintsWhenArgumentMatchesName = false,
-								includeInlayFunctionParameterTypeHints = true,
-								includeInlayVariableTypeHints = true,
-								includeInlayPropertyDeclarationTypeHints = true,
-								includeInlayFunctionLikeReturnTypeHints = true,
-								includeInlayEnumMemberValueHints = true,
-							},
-						},
-						javascript = {
-							semanticTokens = true,
-							inlayHints = {
-								includeInlayParameterNameHints = "all",
-								includeInlayParameterNameHintsWhenArgumentMatchesName = false,
-								includeInlayFunctionParameterTypeHints = true,
-								includeInlayVariableTypeHints = true,
-								includeInlayPropertyDeclarationTypeHints = true,
-								includeInlayFunctionLikeReturnTypeHints = true,
-								includeInlayEnumMemberValueHints = true,
-							},
-						},
-					},
-				},
-				ruff = {
-					capabilities = capabilities,
-					cmd = { "ruff-lsp" },
-					filetypes = { "python" },
-					root_dir = require("lspconfig.util").root_pattern(
-						"pyproject.toml",
-						"setup.py",
-						"setup.cfg",
-						"requirements.txt",
-						".git"
-					),
-				},
-				pylsp = {
-					capabilities = capabilities,
-					cmd = { "pylsp" },
-					filetypes = { "python" },
-					root_dir = require("lspconfig.util").root_pattern(
-						"pyproject.toml",
-						"setup.py",
-						"setup.cfg",
-						"requirements.txt",
-						".git"
-					),
-					settings = {
-						pylsp = {
-							plugins = {
-								pyflakes = { enabled = false },
-								pycodestyle = { enabled = false },
-								autopep8 = { enabled = false },
-								yapf = { enabled = false },
-								mccabe = { enabled = false },
-								pylsp_mypy = { enabled = false },
-								pylsp_black = { enabled = false },
-								pylsp_isort = { enabled = false },
-							},
-						},
-					},
-				},
-				html = {
-					capabilities = capabilities,
-					cmd = { "vscode-html-language-server", "--stdio" },
-					filetypes = { "html", "twig", "hbs" },
-					root_dir = require("lspconfig.util").root_pattern("package.json", ".git"),
-				},
-				cssls = {
-					capabilities = capabilities,
-					cmd = { "vscode-css-language-server", "--stdio" },
-					filetypes = { "css", "scss", "less" },
-					root_dir = require("lspconfig.util").root_pattern("package.json", ".git"),
-				},
-				tailwindcss = {
-					capabilities = capabilities,
-					cmd = { "tailwindcss-language-server", "--stdio" },
-					filetypes = {
-						"html",
-						"css",
-						"scss",
-						"javascript",
-						"javascriptreact",
-						"typescript",
-						"typescriptreact",
-					},
-					root_dir = require("lspconfig.util").root_pattern(
-						"tailwind.config.js",
-						"tailwind.config.ts",
-						"postcss.config.js",
-						"postcss.config.ts",
-						"package.json",
-						".git"
-					),
-				},
-				dockerls = {
-					capabilities = capabilities,
-					cmd = { "docker-langserver", "--stdio" },
-					filetypes = { "dockerfile" },
-					root_dir = require("lspconfig.util").root_pattern("Dockerfile", ".git"),
-				},
-				sqlls = {
-					capabilities = capabilities,
-					cmd = { "sql-language-server", "up", "--method", "stdio" },
-					filetypes = { "sql", "mysql", "postgresql" },
-					root_dir = require("lspconfig.util").root_pattern(".git"),
-				},
-				terraformls = {
-					capabilities = capabilities,
-					cmd = { "terraform-ls", "serve" },
-					filetypes = { "terraform", "terraform-vars" },
-					root_dir = require("lspconfig.util").root_pattern(".terraform", ".git"),
-				},
-				jsonls = {
-					capabilities = capabilities,
-					cmd = { "vscode-json-language-server", "--stdio" },
-					filetypes = { "json", "jsonc" },
-					root_dir = require("lspconfig.util").root_pattern(".git"),
-				},
-				yamlls = {
-					capabilities = capabilities,
-					cmd = { "yaml-language-server", "--stdio" },
-					filetypes = { "yaml", "yaml.docker-compose" },
-					root_dir = require("lspconfig.util").root_pattern(".git"),
-				},
-				lua_ls = {
-					capabilities = capabilities,
-					cmd = { "lua-language-server" },
-					filetypes = { "lua" },
-					root_dir = require("lspconfig.util").root_pattern(".git"),
-					settings = {
-						Lua = {
-							completion = {
-								callSnippet = "Replace",
-							},
-							runtime = { version = "LuaJIT" },
-							workspace = {
-								checkThirdParty = false,
-								library = {
-									"${3rd}/luv/library",
-									unpack(vim.api.nvim_get_runtime_file("", true)),
-								},
-							},
-							diagnostics = { disable = { "missing-fields" } },
-							format = {
-								enable = false,
-							},
-							-- Enable semantic tokens for Lua
-							semantic = {
-								enable = true,
-								annotations = true,
-								variables = true,
-							},
-						},
-					},
-				},
-			}
+			local servers = {}
 
 			-- Setup Mason
 			require("mason").setup({
@@ -465,14 +142,8 @@ return {
 
 			-- Create a dedicated list of servers to ensure are installed
 			local ensure_installed = {}
-			for server_name, _ in pairs(servers) do
-				table.insert(ensure_installed, server_name)
-			end
 
-			-- Add other tools explicitly
 			table.insert(ensure_installed, "stylua")
-
-			-- Setup the mason-tool-installer with the list we built
 			require("mason-tool-installer").setup({
 				ensure_installed = ensure_installed,
 				auto_update = false,
@@ -534,7 +205,6 @@ return {
 										unusedparams = true,
 										shadow = true,
 									},
-									staticcheck = true,
 									hints = {
 										assignVariableTypes = true,
 										compositeLiteralFields = true,
@@ -543,6 +213,23 @@ return {
 										functionTypeParameters = true,
 										parameterNames = true,
 										rangeVariableTypes = true,
+									},
+									analyses = {
+										nilness = true,
+										unusedparams = true,
+										unusedwrite = true,
+										useany = true,
+									},
+									gofumpt = true,
+									codelenses = {
+										gc_details = false,
+										generate = true,
+										regenerate_cgo = true,
+										run_govulncheck = true,
+										test = true,
+										tidy = true,
+										upgrade_dependency = true,
+										vendor = true,
 									},
 								},
 							},
@@ -565,6 +252,77 @@ return {
 						})
 					end,
 				},
+				["clangd"] = function()
+					require("lspconfig").clangd.setup({
+						capabilities = vim.tbl_deep_extend("force", {}, capabilities, {
+							offsetEncoding = { "utf-16" },
+							textDocument = {
+								semanticTokens = {
+									requests = {
+										range = true,
+										full = {
+											delta = true,
+										},
+									},
+									tokenTypes = {
+										"namespace",
+										"type",
+										"class",
+										"enum",
+										"interface",
+										"struct",
+										"typeParameter",
+										"parameter",
+										"variable",
+										"property",
+										"enumMember",
+										"event",
+										"function",
+										"method",
+										"macro",
+										"keyword",
+										"modifier",
+										"comment",
+										"string",
+										"number",
+										"regexp",
+										"operator",
+									},
+									tokenModifiers = {
+										"declaration",
+										"definition",
+										"readonly",
+										"static",
+										"deprecated",
+										"abstract",
+										"async",
+										"modification",
+										"documentation",
+										"defaultLibrary",
+									},
+									legend = {
+										tokenTypes = {},
+										tokenModifiers = {},
+									},
+								},
+							},
+						}),
+						cmd = {
+							"clangd",
+							"--background-index",
+							"--clang-tidy",
+							"--header-insertion=iwyu",
+							"--completion-style=detailed",
+							"--function-arg-placeholders=0",
+							"--fallback-style=llvm",
+						},
+						init_options = {
+							usePlaceholders = false,
+							completeUnimported = true,
+							clangdFileStatus = true,
+						},
+					})
+				end,
 			})
 		end,
 	},
