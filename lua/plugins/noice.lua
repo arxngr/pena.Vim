@@ -2,6 +2,15 @@ return {
 	"folke/noice.nvim",
 	event = "VeryLazy",
 	opts = {
+		options = {
+			filter = {
+				event = "notify",
+				any = {
+					{ find = "available" }, -- Example: Disable "No information available"
+					{ find = "presence" }, -- Example: Disable "presence" notifications
+				},
+			},
+		},
 		lsp = {
 			override = {
 				["vim.lsp.util.convert_input_to_markdown_lines"] = true,
@@ -19,7 +28,7 @@ return {
 						{ find = "; before #%d+" },
 					},
 				},
-				view = "mini",
+				view = "split",
 			},
 		},
 		presets = {

@@ -123,7 +123,52 @@ return {
 			-- Setup capabilities explicitly
 			local capabilities = vim.lsp.protocol.make_client_capabilities()
 			capabilities = vim.tbl_deep_extend("force", capabilities, require("cmp_nvim_lsp").default_capabilities())
-
+			capabilities.textDocument.semanticTokens = {
+				dynamicRegistration = false,
+				requests = {
+					range = true,
+					full = true,
+				},
+				tokenTypes = {
+					"namespace",
+					"type",
+					"class",
+					"enum",
+					"interface",
+					"struct",
+					"typeParameter",
+					"parameter",
+					"variable",
+					"property",
+					"enumMember",
+					"event",
+					"function",
+					"method",
+					"macro",
+					"keyword",
+					"modifier",
+					"comment",
+					"string",
+					"number",
+					"regexp",
+					"operator",
+				},
+				tokenModifiers = {
+					"declaration",
+					"definition",
+					"readonly",
+					"static",
+					"deprecated",
+					"abstract",
+					"async",
+					"modification",
+					"documentation",
+					"defaultLibrary",
+				},
+				formats = { "relative" },
+				overlappingTokenSupport = true,
+				multilineTokenSupport = true,
+			}
 			-- Define server configurations - each one individually configured
 			local servers = {}
 
@@ -141,9 +186,17 @@ return {
 			})
 
 			-- Create a dedicated list of servers to ensure are installed
-			local ensure_installed = {}
+			local ensure_installed = {
+				"stylua", -- Lua formatter
+				"gopls", -- Go language server
+				"clangd", -- C/C++ language server
+				"pyright", -- Python language server
+				"vtsls", -- TypeScript and JavaScript language server
+				"html", -- HTML language server
+				"cssls", -- CSS language server
+				"phpactor", -- PHP language server
+			}
 
-			table.insert(ensure_installed, "stylua")
 			require("mason-tool-installer").setup({
 				ensure_installed = ensure_installed,
 				auto_update = false,
@@ -256,56 +309,6 @@ return {
 					require("lspconfig").clangd.setup({
 						capabilities = vim.tbl_deep_extend("force", {}, capabilities, {
 							offsetEncoding = { "utf-16" },
-							textDocument = {
-								semanticTokens = {
-									requests = {
-										range = true,
-										full = {
-											delta = true,
-										},
-									},
-									tokenTypes = {
-										"namespace",
-										"type",
-										"class",
-										"enum",
-										"interface",
-										"struct",
-										"typeParameter",
-										"parameter",
-										"variable",
-										"property",
-										"enumMember",
-										"event",
-										"function",
-										"method",
-										"macro",
-										"keyword",
-										"modifier",
-										"comment",
-										"string",
-										"number",
-										"regexp",
-										"operator",
-									},
-									tokenModifiers = {
-										"declaration",
-										"definition",
-										"readonly",
-										"static",
-										"deprecated",
-										"abstract",
-										"async",
-										"modification",
-										"documentation",
-										"defaultLibrary",
-									},
-									legend = {
-										tokenTypes = {},
-										tokenModifiers = {},
-									},
-								},
-							},
 						}),
 						cmd = {
 							"clangd",
