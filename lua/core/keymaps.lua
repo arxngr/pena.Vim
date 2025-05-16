@@ -18,22 +18,24 @@ keymap("v", "<C-v>", '"+p', opts)
 keymap("n", "<C-d>", "mciw*<Cmd>nohl<CR>", { remap = true })
 
 -- Window navigation
-keymap("n", "<C-h>", "<C-w>h", opts)
-keymap("n", "<C-j>", "<C-w>j", opts)
-keymap("n", "<C-k>", "<C-w>k", opts)
-keymap("n", "<C-l>", "<C-w>l", opts)
+keymap({ "n", "x" }, "j", "v:count == 0 ? 'gj' : 'j'", { desc = "Down", expr = true, silent = true })
+keymap({ "n", "x" }, "<Down>", "v:count == 0 ? 'gj' : 'j'", { desc = "Down", expr = true, silent = true })
+keymap({ "n", "x" }, "k", "v:count == 0 ? 'gk' : 'k'", { desc = "Up", expr = true, silent = true })
+keymap({ "n", "x" }, "<Up>", "v:count == 0 ? 'gk' : 'k'", { desc = "Up", expr = true, silent = true })
 
--- Insert mode window navigation (escape to normal mode, then move)
-keymap("i", "<C-h>", [[<C-\><C-n><C-w>h]], opts)
-keymap("i", "<C-j>", [[<C-\><C-n><C-w>j]], opts)
-keymap("i", "<C-k>", [[<C-\><C-n><C-w>k]], opts)
-keymap("i", "<C-l>", [[<C-\><C-n><C-w>l]], opts)
+-- Move to window using the <ctrl> hjkl keys
+keymap("n", "<C-h>", "<C-w>h", { desc = "Go to Left Window", remap = true })
+keymap("n", "<C-j>", "<C-w>j", { desc = "Go to Lower Window", remap = true })
+keymap("n", "<C-k>", "<C-w>k", { desc = "Go to Upper Window", remap = true })
+keymap("n", "<C-l>", "<C-w>l", { desc = "Go to Right Window", remap = true })
 
--- Terminal mode window navigation (escape to normal mode, then move)
-keymap("t", "<C-h>", [[<C-\><C-n><C-w>h]], opts)
-keymap("t", "<C-j>", [[<C-\><C-n><C-w>j]], opts)
-keymap("t", "<C-k>", [[<C-\><C-n><C-w>k]], opts)
-keymap("t", "<C-l>", [[<C-\><C-n><C-w>l]], opts)
+keymap("n", "<A-j>", "<cmd>execute 'move .+' . v:count1<cr>==", { desc = "Move Down" })
+keymap("n", "<A-k>", "<cmd>execute 'move .-' . (v:count1 + 1)<cr>==", { desc = "Move Up" })
+keymap("i", "<A-j>", "<esc><cmd>m .+1<cr>==gi", { desc = "Move Down" })
+keymap("i", "<A-k>", "<esc><cmd>m .-2<cr>==gi", { desc = "Move Up" })
+keymap("v", "<A-j>", ":<C-u>execute \"'<,'>move '>+\" . v:count1<cr>gv=gv", { desc = "Move Down" })
+keymap("v", "<A-k>", ":<C-u>execute \"'<,'>move '<-\" . (v:count1 + 1)<cr>gv=gv", { desc = "Move Up" })
+
 --
 -- quit file
 keymap("n", "<C-q>", "<cmd> q <CR>", opts)
@@ -58,8 +60,3 @@ end, { silent = true, noremap = true, desc = "toggle signature" })
 keymap("n", "<leader>cr", vim.lsp.buf.rename, opts)
 keymap("v", "<", "<gv")
 keymap("v", ">", ">gv")
-
-keymap({ "n", "x" }, "j", "v:count == 0 ? 'gj' : 'j'", { desc = "Down", expr = true, silent = true })
-keymap({ "n", "x" }, "<Down>", "v:count == 0 ? 'gj' : 'j'", { desc = "Down", expr = true, silent = true })
-keymap({ "n", "x" }, "k", "v:count == 0 ? 'gk' : 'k'", { desc = "Up", expr = true, silent = true })
-keymap({ "n", "x" }, "<Up>", "v:count == 0 ? 'gk' : 'k'", { desc = "Up", expr = true, silent = true })
