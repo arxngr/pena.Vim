@@ -110,7 +110,6 @@ return {
 									end
 								end
 							end
-
 							-- Apply formatting if supported
 							if client.supports_method("textDocument/formatting") then
 								vim.lsp.buf.format({ async = false })
