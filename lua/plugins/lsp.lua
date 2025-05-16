@@ -207,10 +207,6 @@ return {
 								gopls = {
 									semanticTokens = true,
 									usePlaceholders = false,
-									analyses = {
-										unusedparams = true,
-										shadow = true,
-									},
 									hints = {
 										assignVariableTypes = true,
 										compositeLiteralFields = true,
