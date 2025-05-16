@@ -1,13 +1,18 @@
 return {
 	{
-		"f-person/git-blame.nvim",
-		event = "VeryLazy",
-		opts = {
-			enabled = true,
-			message_template = " <author> • <summary> • <date> • <<sha>>",
-			date_format = "%m-%d-%Y %H:%M:%S",
-			virtual_text_column = 1,
-		},
+		"lewis6991/gitsigns.nvim",
+		config = function()
+			require("gitsigns").setup({
+				current_line_blame = true,
+				current_line_blame_opts = {
+					virt_text = true,
+					virt_text_pos = "eol", -- 'eol' | 'overlay' | 'right_align'
+					delay = 300,
+					ignore_whitespace = false,
+				},
+				current_line_blame_formatter = "<author>, <author_time:%Y-%m-%d %H:%M> - <summary>",
+			})
+		end,
 	},
 	{
 		"kdheepak/lazygit.nvim",

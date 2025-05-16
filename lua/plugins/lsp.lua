@@ -122,52 +122,6 @@ return {
 			-- Setup capabilities explicitly
 			local capabilities = vim.lsp.protocol.make_client_capabilities()
 			capabilities = vim.tbl_deep_extend("force", capabilities, require("cmp_nvim_lsp").default_capabilities())
-			capabilities.textDocument.semanticTokens = {
-				dynamicRegistration = false,
-				requests = {
-					range = true,
-					full = true,
-				},
-				tokenTypes = {
-					"namespace",
-					"type",
-					"class",
-					"enum",
-					"interface",
-					"struct",
-					"typeParameter",
-					"parameter",
-					"variable",
-					"property",
-					"enumMember",
-					"event",
-					"function",
-					"method",
-					"macro",
-					"keyword",
-					"modifier",
-					"comment",
-					"string",
-					"number",
-					"regexp",
-					"operator",
-				},
-				tokenModifiers = {
-					"declaration",
-					"definition",
-					"readonly",
-					"static",
-					"deprecated",
-					"abstract",
-					"async",
-					"modification",
-					"documentation",
-					"defaultLibrary",
-				},
-				formats = { "relative" },
-				overlappingTokenSupport = true,
-				multilineTokenSupport = true,
-			}
 			-- Define server configurations - each one individually configured
 			local servers = {}
 
@@ -325,6 +279,44 @@ return {
 						},
 					})
 				end,
+			})
+		end,
+		["tsserver"] = function()
+			require("lspconfig").tsserver.setup({
+				capabilities = capabilities,
+				settings = {
+					typescript = {
+						inlayHints = {
+							includeInlayParameterNameHints = "all",
+							includeInlayParameterNameHintsWhenArgumentMatchesName = false,
+							includeInlayFunctionParameterTypeHints = true,
+							includeInlayVariableTypeHints = true,
+							includeInlayPropertyDeclarationTypeHints = true,
+							includeInlayFunctionLikeReturnTypeHints = true,
+							includeInlayEnumMemberValueHints = true,
+						},
+					},
+					javascript = {
+						inlayHints = {
+							includeInlayParameterNameHints = "all",
+							includeInlayParameterNameHintsWhenArgumentMatchesName = false,
+							includeInlayFunctionParameterTypeHints = true,
+							includeInlayVariableTypeHints = true,
+							includeInlayPropertyDeclarationTypeHints = true,
+							includeInlayFunctionLikeReturnTypeHints = true,
+							includeInlayEnumMemberValueHints = true,
+						},
+					},
+				},
+				init_options = {
+					preferences = {
+						includeInlayParameterNameHints = "all",
+						includeInlayVariableTypeHints = true,
+						includeInlayFunctionParameterTypeHints = true,
+						includeInlayFunctionLikeReturnTypeHints = true,
+						includeInlayPropertyDeclarationTypeHints = true,
+					},
+				},
 			})
 		end,
 	},
