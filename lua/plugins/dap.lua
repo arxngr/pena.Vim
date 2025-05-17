@@ -31,6 +31,9 @@ return {
 					})
 				end,
 			},
+			{
+				"leoluz/nvim-dap-go",
+			},
 		},
 		opts = function()
 			require("overseer").enable_dap()
@@ -38,6 +41,23 @@ return {
 		config = function()
 			local dap = require("dap")
 
+			local function load_dotenv(filename)
+				local env_file = io.open(filename, "r")
+				if not env_file then
+					return
+				end
+				for line in env_file:lines() do
+					local key, val = line:match("^([%w_]+)%s*=%s*(.*)$")
+					if key and val then
+						-- Strip quotes if any
+						val = val:gsub([["(.*)"]], "%1"):gsub([[\'(.*)\']], "%1")
+						vim.fn.setenv(key, val)
+					end
+				end
+				env_file:close()
+			end
+
+			load_dotenv(".env") -- <-- this loads your .env variables into the environment
 			vim.api.nvim_set_hl(0, "DapStoppedLine", { default = true, link = "Visual" })
 
 			-- JS/TS/React
@@ -81,6 +101,12 @@ return {
 						sourceMaps = true,
 						userDataDir = false,
 					},
+					-- Divider for the launch.json derived configs
+					{
+						name = "----- ↓ launch.json configs ↓ -----",
+						type = "",
+						request = "launch",
+					},
 				}
 			end
 
@@ -99,6 +125,11 @@ return {
 					pythonPath = function()
 						return vim.fn.exepath("python") or "python"
 					end,
+				},
+				{
+					name = "----- ↓ launch.json configs ↓ -----",
+					type = "",
+					request = "launch",
 				},
 			}
 
@@ -120,7 +151,8 @@ return {
 				end)
 				vim.defer_fn(function()
 					callback({ type = "server", host = "127.0.0.1", port = port })
-				end, 5000)
+					vim.cmd("lua require('dapui').open()")
+				end, 100)
 			end
 
 			dap.configurations.go = {
@@ -137,6 +169,11 @@ return {
 					mode = "test",
 					program = "${file}",
 				},
+				{
+					name = "----- ↓ launch.json configs ↓ -----",
+					type = "",
+					request = "launch",
+				},
 			}
 
 			dap.adapters.cppdbg = {
@@ -146,26 +183,9 @@ return {
 			}
 			dap.configurations.cpp = {
 				{
-					name = "Launch file",
-					type = "cppdbg",
+					name = "----- ↓ launch.json configs ↓ -----",
+					type = "",
 					request = "launch",
-					program = function()
-						return vim.fn.input("Path to executable: ", vim.fn.getcwd() .. "/", "file")
-					end,
-					cwd = "${workspaceFolder}",
-					stopAtEntry = true,
-				},
-				{
-					name = "Attach to gdbserver :1234",
-					type = "cppdbg",
-					request = "launch",
-					MIMode = "gdb",
-					miDebuggerServerAddress = "localhost:1234",
-					miDebuggerPath = "/usr/bin/gdb",
-					cwd = "${workspaceFolder}",
-					program = function()
-						return vim.fn.input("Path to executable: ", vim.fn.getcwd() .. "/", "file")
-					end,
 				},
 			}
 			dap.configurations.c = dap.configurations.cpp
@@ -179,6 +199,7 @@ return {
 							["pwa-node"] = js_based_languages,
 							["chrome"] = js_based_languages,
 							["pwa-chrome"] = js_based_languages,
+							["go"] = go,
 						})
 					end
 					require("dap").continue()
@@ -209,7 +230,7 @@ return {
 			{
 				"<leader>dr",
 				function()
-					require("dap").repl.open()
+					require("dap").repl.toggle()
 				end,
 				desc = "Open DAP REPL",
 			},

@@ -55,6 +55,7 @@ vim.api.nvim_create_autocmd("FileType", {
 		"tsplayground",
 		"dap-float",
 		"toggleterm",
+		"vim",
 	},
 	callback = function(event)
 		vim.bo[event.buf].buflisted = false
