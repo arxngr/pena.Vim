@@ -36,23 +36,17 @@ return {
 						return vim.bo[buf].buftype == "help"
 					end,
 				},
-				{ title = "Spectre", ft = "spectre_panel", size = { height = 0.4 } },
 				{ title = "Neotest Output", ft = "neotest-output-panel", size = { height = 15 } },
 			},
 			left = {
 				{
-					title = "DAP Scopes",
-					ft = "dapui_scopes",
-					size = { width = 0.20 },
+					title = "DAP Stacks",
+					ft = "dapui_stacks",
+					size = { height = 0.3, width = 0.20 },
 				},
 				{
 					title = "DAP Breakpoints",
 					ft = "dapui_breakpoints",
-					size = { height = 0.2 },
-				},
-				{
-					title = "DAP Stacks",
-					ft = "dapui_stacks",
 					size = { height = 0.2 },
 				},
 				{

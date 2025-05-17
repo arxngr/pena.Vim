@@ -1,6 +1,12 @@
 return {
 	"rcarriga/nvim-dap-ui",
-	dependencies = { "nvim-neotest/nvim-nio" },
+	dependencies = {
+		"nvim-neotest/nvim-nio",
+		{
+			"theHamsta/nvim-dap-virtual-text",
+			opts = {},
+		},
+	},
 	-- stylua: ignore
 	keys = {
 		{ "<leader>du", function() require("dapui").toggle({}) end, desc = "Dap UI" },
@@ -10,7 +16,6 @@ return {
 		layouts = {
 			{
 				elements = {
-					{ id = "scopes", size = 0.25 },
 					{ id = "breakpoints", size = 0.25 },
 					{ id = "stacks", size = 0.25 },
 					{ id = "watches", size = 0.25 },

@@ -7,7 +7,6 @@ return {
 			{ "williamboman/mason-lspconfig.nvim", version = "^1.0.0" },
 			"WhoIsSethDaniel/mason-tool-installer.nvim",
 			{ "j-hui/fidget.nvim", opts = {} },
-			"hrsh7th/cmp-nvim-lsp",
 		},
 		opts = function()
 			local ret = {
