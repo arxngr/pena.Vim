@@ -57,58 +57,81 @@ return {
 				env_file:close()
 			end
 
-			load_dotenv(".env") -- <-- this loads your .env variables into the environment
-			vim.api.nvim_set_hl(0, "DapStoppedLine", { default = true, link = "Visual" })
-
-			-- JS/TS/React
-			for _, language in ipairs(js_based_languages) do
-				dap.configurations[language] = {
-					{
-						type = "pwa-node",
-						request = "launch",
-						name = "Launch file",
-						program = "${file}",
-						cwd = vim.fn.getcwd(),
-						sourceMaps = true,
-					},
-					{
-						type = "pwa-node",
-						request = "attach",
-						name = "Attach",
-						processId = require("dap.utils").pick_process,
-						cwd = vim.fn.getcwd(),
-						sourceMaps = true,
-					},
-					{
-						type = "pwa-chrome",
-						request = "launch",
-						name = "Launch & Debug Chrome",
-						url = function()
-							local co = coroutine.running()
-							return coroutine.create(function()
-								vim.ui.input(
-									{ prompt = "Enter URL: ", default = "http://localhost:3000" },
-									function(url)
-										if url and url ~= "" then
-											coroutine.resume(co, url)
-										end
-									end
-								)
-							end)
-						end,
-						webRoot = vim.fn.getcwd(),
-						protocol = "inspector",
-						sourceMaps = true,
-						userDataDir = false,
-					},
-					-- Divider for the launch.json derived configs
-					{
-						name = "----- ↓ launch.json configs ↓ -----",
-						type = "",
-						request = "launch",
-					},
-				}
+			-- Helper to get package path
+			local function get_pkg_path(pkg, path)
+				pcall(require, "mason")
+				local root = vim.env.MASON or (vim.fn.stdpath("data") .. "/mason")
+				path = path or ""
+				return root .. "/packages/" .. pkg .. "/" .. path
 			end
+
+			-- Set up JS/TS debugging adapter once
+			dap.adapters["pwa-node"] = {
+				type = "server",
+				host = "localhost",
+				port = "${port}",
+				executable = {
+					command = "node",
+					args = {
+						get_pkg_path("js-debug-adapter", "/js-debug/src/dapDebugServer.js"),
+						"${port}",
+					},
+				},
+			}
+
+			-- Define common configurations for JavaScript-based languages
+			local js_configs = {
+				{
+					type = "pwa-node",
+					request = "launch",
+					name = "Launch file",
+					program = "${file}",
+					cwd = vim.fn.getcwd(),
+					sourceMaps = true,
+				},
+				{
+					type = "pwa-node",
+					request = "attach",
+					name = "Attach",
+					processId = require("dap.utils").pick_process,
+					cwd = vim.fn.getcwd(),
+					sourceMaps = true,
+				},
+				{
+					type = "pwa-chrome",
+					request = "launch",
+					name = "Launch & Debug Chrome",
+					url = function()
+						local co = coroutine.running()
+						return coroutine.create(function()
+							vim.ui.input({ prompt = "Enter URL: ", default = "http://localhost:3000" }, function(url)
+								if url and url ~= "" then
+									coroutine.resume(co, url)
+								end
+							end)
+						end)
+					end,
+					webRoot = vim.fn.getcwd(),
+					protocol = "inspector",
+					sourceMaps = true,
+					userDataDir = false,
+				},
+				-- Divider for the launch.json derived configs
+				{
+					name = "----- ↓ launch.json configs ↓ -----",
+					type = "",
+					request = "launch",
+				},
+			}
+
+			-- Apply configurations to all JavaScript-based languages
+			local js_based_languages = { "javascript", "typescript", "javascriptreact", "typescriptreact" }
+			for _, language in ipairs(js_based_languages) do
+				dap.configurations[language] = js_configs
+			end
+
+			load_dotenv(".env")
+			vim.api.nvim_set_hl(0, "DapStoppedLine", { default = true, link = "Visual" })
 
 			-- Python
 			dap.adapters.python = {
