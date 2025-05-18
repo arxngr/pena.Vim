@@ -76,8 +76,6 @@ return {
 						map("<leader>uh", function()
 							vim.lsp.inlay_hint.enable(not vim.lsp.inlay_hint.is_enabled())
 						end, "Toggle Inlay Hints")
-
-						vim.lsp.inlay_hint.enable()
 					end
 
 					-- Create a BufWritePre autocmd specifically for this buffer

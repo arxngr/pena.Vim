@@ -4,7 +4,17 @@ return {
 		"nvim-neotest/nvim-nio",
 		{
 			"theHamsta/nvim-dap-virtual-text",
-			opts = {},
+			opts = {
+				enabled = true,
+				display_callback = function(variable, _buf, _stackframe, _node)
+					local value = variable.value or ""
+					local max_length = 30
+					if #value > max_length then
+						value = value:sub(1, max_length) .. "..."
+					end
+					return variable.name .. " = " .. value
+				end,
+			},
 		},
 	},
 	-- stylua: ignore
@@ -38,7 +48,7 @@ return {
 		local dapui = require("dapui")
 		dapui.setup(opts)
 
-		dap.listeners.after.event_initialized["dapui_config"] = function()
+		dap.listeners.before.event_initialized["dapui_config"] = function()
 			dapui.open({})
 		end
 		dap.listeners.after.event_terminated["dapui_config"] = function() end

@@ -17,12 +17,12 @@ return {
 			bottom = {
 				{
 					ft = "dap-repl",
-					title = "DAP REPL",
+					title = "REPL",
 					size = { height = 0.2 },
 				},
 				{
 					ft = "toggleterm",
-					title = "Terminal",
+					title = "Console",
 					size = { height = 0.2 },
 				},
 				{
@@ -45,24 +45,24 @@ return {
 			},
 			left = {
 				{
-					title = "DAP Stacks",
+					title = "Stacks",
 					ft = "dapui_stacks",
 					size = { height = 0.3, width = 0.20 },
 				},
 				{
-					title = "DAP Breakpoints",
+					title = "Breakpoints",
 					ft = "dapui_breakpoints",
 					size = { height = 0.2 },
 				},
 				{
-					title = "DAP Watches",
+					title = "Watches",
 					ft = "dapui_watches",
 					size = { height = 0.2 },
 				},
-				{ title = "Neotest Summary", ft = "neotest-summary" },
+				{ title = "Test Summary", ft = "neotest-summary" },
 			},
 			right = {
-				{ title = "Grug Far", ft = "grug-far", size = { width = 0.35 } },
+				{ title = "Search & Replace", ft = "grug-far", size = { width = 0.35 } },
 			},
 			keys = {
 				["<c-Right>"] = function(win)

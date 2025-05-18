@@ -111,7 +111,6 @@ return {
 					name = "Launch file",
 					program = "${file}",
 					cwd = vim.fn.getcwd(),
-					sourceMaps = true,
 					protocol = "inspector",
 				},
 				{
@@ -120,7 +119,6 @@ return {
 					name = "Attach",
 					processId = require("dap.utils").pick_process,
 					cwd = vim.fn.getcwd(),
-					sourceMaps = true,
 					protocol = "inspector",
 				},
 				{
@@ -139,7 +137,6 @@ return {
 					end,
 					webRoot = vim.fn.getcwd(),
 					protocol = "inspector",
-					sourceMaps = true,
 					userDataDir = false,
 				},
 				-- Divider for the launch.json derived configs
