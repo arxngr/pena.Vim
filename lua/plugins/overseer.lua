@@ -17,7 +17,6 @@ return {
 	},
 	opts = {
 		dap = true,
-
 		strategy = "toggleterm",
 		task_list = {
 			bindings = {

@@ -21,6 +21,11 @@ return {
 					size = { height = 0.2 },
 				},
 				{
+					ft = "toggleterm",
+					title = "Terminal",
+					size = { height = 0.2 },
+				},
+				{
 					ft = "noice",
 					size = { height = 0.2 },
 					filter = function(buf, win)

@@ -56,6 +56,7 @@ vim.api.nvim_create_autocmd("FileType", {
 		"dap-float",
 		"toggleterm",
 		"vim",
+		"floaterm",
 	},
 	callback = function(event)
 		vim.bo[event.buf].buflisted = false

@@ -40,6 +40,7 @@ return {
 		end,
 		config = function()
 			local dap = require("dap")
+			local Terminal = require("toggleterm.terminal").Terminal
 
 			local function load_dotenv(filename)
 				local env_file = io.open(filename, "r")
@@ -65,21 +66,44 @@ return {
 				return root .. "/packages/" .. pkg .. "/" .. path
 			end
 
-			-- Set up JS/TS debugging adapter once
-			dap.adapters["pwa-node"] = {
-				type = "server",
-				host = "localhost",
-				port = "${port}",
-				executable = {
-					command = "node",
-					args = {
-						get_pkg_path("js-debug-adapter", "/js-debug/src/dapDebugServer.js"),
-						"${port}",
-					},
-				},
-			}
+			-- Prevent for toggle the term again and again
+			local js_debug_port = 8123
+			local js_debug_term = nil
+			dap.adapters["pwa-node"] = function(callback)
+				if js_debug_term and js_debug_term:is_open() then
+					callback({
+						type = "server",
+						host = "127.0.0.1",
+						port = js_debug_port,
+					})
+					return
+				end
 
-			-- Define common configurations for JavaScript-based languages
+				js_debug_term = Terminal:new({
+					cmd = string.format(
+						"node %s %d",
+						get_pkg_path("js-debug-adapter", "/js-debug/src/dapDebugServer.js"),
+						js_debug_port
+					),
+					close_on_exit = true,
+					hidden = false,
+					on_open = function(term)
+						vim.defer_fn(function()
+							callback({
+								type = "server",
+								host = "127.0.0.1",
+								port = js_debug_port,
+							})
+							require("dapui").open()
+						end, 100)
+					end,
+					on_exit = function(term, job, exit_code, event)
+						js_debug_term = nil
+					end,
+				})
+				js_debug_term:toggle()
+			end
+
 			local js_configs = {
 				{
 					type = "pwa-node",
@@ -88,6 +112,7 @@ return {
 					program = "${file}",
 					cwd = vim.fn.getcwd(),
 					sourceMaps = true,
+					protocol = "inspector",
 				},
 				{
 					type = "pwa-node",
@@ -96,6 +121,7 @@ return {
 					processId = require("dap.utils").pick_process,
 					cwd = vim.fn.getcwd(),
 					sourceMaps = true,
+					protocol = "inspector",
 				},
 				{
 					type = "pwa-chrome",
@@ -159,23 +185,20 @@ return {
 			-- Go
 			dap.adapters.go = function(callback)
 				local port = 38697
-				local handle
-				local stdout = vim.loop.new_pipe(false)
-				handle = vim.loop.spawn("dlv", {
-					stdio = { nil, stdout },
-					args = { "dap", "-l", "127.0.0.1:" .. port },
-					detached = true,
-				}, function(code)
-					stdout:close()
-					handle:close()
-					if code ~= 0 then
-						print("dlv exited with code", code)
-					end
-				end)
-				vim.defer_fn(function()
-					callback({ type = "server", host = "127.0.0.1", port = port })
-					vim.cmd("lua require('dapui').open()")
-				end, 100)
+				local dlv_cmd = string.format("dlv dap -l 127.0.0.1:%d", port)
+
+				local term = Terminal:new({
+					cmd = dlv_cmd,
+					close_on_exit = true,
+					on_open = function(term)
+						vim.defer_fn(function()
+							callback({ type = "server", host = "127.0.0.1", port = port })
+							require("dapui").open()
+						end, 100) -- give dlv time to start
+					end,
+				})
+
+				term:toggle()
 			end
 
 			dap.configurations.go = {
