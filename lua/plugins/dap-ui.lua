@@ -21,25 +21,19 @@ return {
 	keys = {
 		{ "<leader>du", function() require("dapui").toggle({}) end, desc = "Dap UI" },
 		{ "<leader>de", function() require("dapui").eval() end, desc = "Eval", mode = { "n", "v" } },
+        { "<leader>ds", function() require("dapui").float_element("stacks", { enter = true, position = "center" }) end, desc = "Stacks Float" },
+        { "<leader>dr", function() require("dapui").float_element("repl", { enter = true, position = "center" }) end, desc = "REPL Float" },
+        { "<leader>dlb", function() require("dapui").float_element("breakpoints", { enter = true, position = "center" }) end, desc = "Breakpoints Float" },
+        { "<leader>dw", function() require("dapui").float_element("watches", { enter = true, position = "center" }) end, desc = "Watches Float" },
+        { "<leader>dt", "<cmd>ToggleTerm<cr>", desc = "ToggleTerm Float" },
 	},
 	opts = {
-		layouts = {
-			{
-				elements = {
-					{ id = "breakpoints", size = 0.25 },
-					{ id = "stacks", size = 0.25 },
-					{ id = "watches", size = 0.25 },
-				},
-				size = 40,
-				position = "left",
-			},
-			{
-				elements = {
-					-- { id = "console", size = 1.0 },
-					{ id = "repl", size = 1.0 },
-				},
-				size = 10,
-				position = "bottom",
+		layouts = {}, -- Disable sidebar/bottom splits
+		floating = {
+			max_height = 0.6,
+			max_width = 0.6,
+			mappings = {
+				close = { "q", "<Esc>" },
 			},
 		},
 	},

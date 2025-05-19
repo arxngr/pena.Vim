@@ -86,6 +86,7 @@ return {
 						js_debug_port
 					),
 					close_on_exit = true,
+					direction = "float",
 					hidden = false,
 					on_open = function(term)
 						vim.defer_fn(function()
@@ -94,7 +95,6 @@ return {
 								host = "127.0.0.1",
 								port = js_debug_port,
 							})
-							require("dapui").open()
 						end, 100)
 					end,
 					on_exit = function(term, job, exit_code, event)
@@ -187,10 +187,11 @@ return {
 				local term = Terminal:new({
 					cmd = dlv_cmd,
 					close_on_exit = true,
+					hidden = false,
+					direction = "float",
 					on_open = function(term)
 						vim.defer_fn(function()
 							callback({ type = "server", host = "127.0.0.1", port = port })
-							require("dapui").open()
 						end, 100) -- give dlv time to start
 					end,
 				})

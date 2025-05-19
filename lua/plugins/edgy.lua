@@ -16,16 +16,6 @@ return {
 		local opts = {
 			bottom = {
 				{
-					ft = "dap-repl",
-					title = "REPL",
-					size = { height = 0.2 },
-				},
-				{
-					ft = "toggleterm",
-					title = "Console",
-					size = { height = 0.2 },
-				},
-				{
 					ft = "noice",
 					size = { height = 0.2 },
 					filter = function(buf, win)
@@ -44,21 +34,6 @@ return {
 				{ title = "Neotest Output", ft = "neotest-output-panel", size = { height = 15 } },
 			},
 			left = {
-				{
-					title = "Stacks",
-					ft = "dapui_stacks",
-					size = { height = 0.3, width = 0.20 },
-				},
-				{
-					title = "Breakpoints",
-					ft = "dapui_breakpoints",
-					size = { height = 0.2 },
-				},
-				{
-					title = "Watches",
-					ft = "dapui_watches",
-					size = { height = 0.2 },
-				},
 				{ title = "Test Summary", ft = "neotest-summary" },
 			},
 			right = {
