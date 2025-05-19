@@ -85,8 +85,8 @@ return {
 						get_pkg_path("js-debug-adapter", "/js-debug/src/dapDebugServer.js"),
 						js_debug_port
 					),
-					close_on_exit = true,
-					direction = "float",
+					close_on_exit = false,
+					direction = "horizontal",
 					hidden = false,
 					on_open = function(term)
 						vim.defer_fn(function()
@@ -186,9 +186,9 @@ return {
 
 				local term = Terminal:new({
 					cmd = dlv_cmd,
-					close_on_exit = true,
+					close_on_exit = false,
 					hidden = false,
-					direction = "float",
+					direction = "horizontal",
 					on_open = function(term)
 						vim.defer_fn(function()
 							callback({ type = "server", host = "127.0.0.1", port = port })
@@ -272,13 +272,6 @@ return {
 				desc = "Step Over",
 			},
 			{
-				"<leader>dr",
-				function()
-					require("dap").repl.toggle()
-				end,
-				desc = "Open DAP REPL",
-			},
-			{
 				"<leader>dq",
 				function()
 					require("dap").clear_breakpoints()
@@ -303,9 +296,32 @@ return {
 			{
 				"<leader>td",
 				function()
+					local dapui = require("dapui")
+					local dap = require("dap")
+
+					-- Attach a one-time listener to open the REPL in a float after DAP starts
+					local repl_opened = false
+					local function open_repl_once()
+						if not repl_opened then
+							dapui.float_element("repl", {
+								enter = true,
+								width = 100,
+								height = 20,
+							})
+							repl_opened = true
+						end
+					end
+
+					-- Add a one-time listener (and remove it right after it runs)
+					local listener_id = "open-floating-repl"
+					dap.listeners.after.event_initialized[listener_id] = function()
+						open_repl_once()
+					end
+
+					-- Run the test with dap
 					require("neotest").run.run({ strategy = "dap" })
 				end,
-				desc = "Debug Nearest",
+				desc = "Debug Nearest (Floating REPL)",
 			},
 		},
 	},

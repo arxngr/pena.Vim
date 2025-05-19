@@ -16,9 +16,12 @@ return {
 			lazy = true,
 			priority = 1000,
 			dependencies = { "rktjmp/lush.nvim" },
-			config = function()
-				-- your optional config goes here, see below.
-			end,
+			config = function() end,
+		},
+		{
+			"zootedb0t/citruszest.nvim",
+			lazy = false,
+			priority = 1000,
 		},
 	},
 	keys = {
@@ -28,7 +31,7 @@ return {
 	config = function()
 		require("themery").setup({
 
-			themes = { "onedark", "bluloco" },
+			themes = { "onedark", "bluloco", "citruszest" },
 		})
 	end,
 }

@@ -57,6 +57,7 @@ vim.api.nvim_create_autocmd("FileType", {
 		"toggleterm",
 		"vim",
 		"floaterm",
+		"oil",
 	},
 	callback = function(event)
 		vim.bo[event.buf].buflisted = false
@@ -109,5 +110,14 @@ vim.api.nvim_create_autocmd({ "BufWritePre" }, {
 		end
 		local file = vim.uv.fs_realpath(event.match) or event.match
 		vim.fn.mkdir(vim.fn.fnamemodify(file, ":p:h"), "p")
+	end,
+})
+
+vim.api.nvim_create_autocmd("User", {
+	pattern = "OilActionsPost",
+	callback = function(event)
+		if event.data.actions.type == "move" then
+			Snacks.rename.on_rename_file(event.data.actions.src_url, event.data.actions.dest_url)
+		end
 	end,
 })

@@ -19,7 +19,7 @@ end
 vim.opt.rtp:prepend(lazypath)
 
 require("lazy").setup({
-	require("plugins.neotree"),
+	require("plugins.oil"),
 	require("plugins.lualine"),
 	require("plugins.treesitter"),
 	require("plugins.cmp"),
