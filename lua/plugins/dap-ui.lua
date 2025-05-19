@@ -25,7 +25,7 @@ return {
         { "<leader>dr", function() require("dapui").float_element("repl", { enter = true, position = "center" }) end, desc = "REPL Float" },
         { "<leader>dlb", function() require("dapui").float_element("breakpoints", { enter = true, position = "center" }) end, desc = "Breakpoints Float" },
         { "<leader>dw", function() require("dapui").float_element("watches", { enter = true, position = "center" }) end, desc = "Watches Float" },
-        { "<leader>dt", "<cmd>ToggleTerm<cr>", desc = "ToggleTerm Float" },
+        { "<leader>dt", "<cmd>ToggleTerm direction=float<cr>", desc = "ToggleTerm Float" },
 	},
 	opts = {
 		layouts = {}, -- Disable sidebar/bottom splits
