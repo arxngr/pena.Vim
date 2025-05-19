@@ -42,6 +42,5 @@ require("lazy").setup({
 	require("plugins.snacks"),
 	require("plugins.which-key"),
 	require("plugins.noice"),
-	require("plugins.edgy"),
 	require("plugins.dap-ui"),
 })
