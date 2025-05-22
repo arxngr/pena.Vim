@@ -43,4 +43,6 @@ require("lazy").setup({
 	require("plugins.which-key"),
 	require("plugins.noice"),
 	require("plugins.dap-ui"),
+	require("plugins.lush"),
+	require("plugins.edgy"),
 })

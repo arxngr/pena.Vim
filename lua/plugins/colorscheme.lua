@@ -19,7 +19,7 @@ return {
 			config = function() end,
 		},
 		{
-			"zootedb0t/citruszest.nvim",
+			"ardi-nugraha/tinta.nvim",
 			lazy = false,
 			priority = 1000,
 		},
@@ -31,7 +31,7 @@ return {
 	config = function()
 		require("themery").setup({
 
-			themes = { "onedark", "bluloco", "citruszest" },
+			themes = { "onedark", "bluloco", "tinta" },
 		})
 	end,
 }
