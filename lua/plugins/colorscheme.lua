@@ -19,7 +19,7 @@ return {
 			config = function() end,
 		},
 		{
-			"ardi-nugraha/tinta.nvim",
+			"anxdn/tinta.nvim",
 			lazy = false,
 			priority = 1000,
 		},
