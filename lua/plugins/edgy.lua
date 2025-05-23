@@ -13,6 +13,11 @@ return {
 					size = { height = 0.23 }, -- 23% of total height
 					pinned = false,
 					open = "ToggleTerm direction=horizontal",
+					filter = function(buf, win)
+						-- Only open if not already visible
+
+						return vim.api.nvim_win_get_config(win).relative == ""
+					end,
 				},
 				{
 					title = "DAP REPL",

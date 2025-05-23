@@ -19,7 +19,7 @@ return {
 			config = function() end,
 		},
 		{
-			"anxdn/tinta.nvim",
+			"arxngr/tinta.nvim",
 			lazy = false,
 			priority = 1000,
 		},
