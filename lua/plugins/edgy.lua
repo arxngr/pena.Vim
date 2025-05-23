@@ -28,6 +28,15 @@ return {
 						require("dap").repl.open()
 					end,
 				},
+				{
+					title = "Console",
+					ft = "", -- match all filetypes (or empty)
+					size = { height = 0.25 },
+					filter = function(buf)
+						local buftype = vim.api.nvim_buf_get_option(buf, "buftype")
+						return buftype == "terminal"
+					end,
+				},
 			},
 		})
 	end,

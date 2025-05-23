@@ -29,7 +29,7 @@ return {
         { "<leader>dt", "<cmd>ToggleTerm direction=horizontal<cr>", desc = "ToggleTerm" },
 	},
 	opts = {
-		layouts = {}, -- Disable sidebar/bottom splits
+		layouts = {},
 		floating = {
 			max_height = 0.7,
 			max_width = 0.7,

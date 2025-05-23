@@ -58,6 +58,7 @@ vim.api.nvim_create_autocmd("FileType", {
 		"vim",
 		"floaterm",
 		"oil",
+		"terminal",
 	},
 	callback = function(event)
 		vim.bo[event.buf].buflisted = false
