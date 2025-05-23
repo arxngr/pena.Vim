@@ -74,13 +74,6 @@ vim.api.nvim_create_autocmd("FileType", {
 	end,
 })
 
-vim.api.nvim_create_autocmd("TermOpen", {
-	pattern = { "term://*toggleterm#*", "term://*lazygit" },
-	callback = function()
-		vim.keymap.set("n", "q", "<cmd>bd!<CR>", { buffer = 0, noremap = true, silent = true, desc = "Close terminal" })
-	end,
-})
-
 vim.api.nvim_create_autocmd("FileType", {
 	pattern = { "man" },
 	callback = function(event)

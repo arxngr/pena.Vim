@@ -28,6 +28,7 @@ keymap("t", "<C-h>", [[<C-\><C-n><C-w>h]], { desc = "Terminal left" })
 keymap("t", "<C-j>", [[<C-\><C-n><C-w>j]], { desc = "Terminal down" })
 keymap("t", "<C-k>", [[<C-\><C-n><C-w>k]], { desc = "Terminal up" })
 keymap("t", "<C-l>", [[<C-\><C-n><C-w>l]], { desc = "Terminal right" })
+keymap("t", "<C-x>", [[<C-\><C-n>]], { desc = "Escape Terminal Mode" })
 
 -- quit file
 keymap("n", "<C-q>", "<cmd> q <CR>", opts)
@@ -37,7 +38,6 @@ keymap("n", "<Tab>", ":bnext<CR>", opts)
 keymap("n", "<S-Tab>", ":bprevious<CR>", opts)
 
 keymap("n", "<leader>ft", ":FloatermToggle<CR>", opts)
-keymap("t", "<ESC>", [[<C-\><C-n>]], { desc = "Escape Terminal Mode" })
 keymap("n", "<leader>wv", "<Cmd>vsplit<CR>", { desc = "Vertical Split" })
 keymap("n", "<leader>hv", "<Cmd>split<CR>", { desc = "Horizontal Split" })
 
