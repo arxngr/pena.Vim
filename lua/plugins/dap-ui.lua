@@ -46,7 +46,9 @@ return {
 		dap.listeners.before.event_initialized["dapui_config"] = function()
 			dapui.open({})
 		end
-		dap.listeners.after.event_terminated["dapui_config"] = function() end
+		dap.listeners.after.event_terminated["dapui_config"] = function()
+			dap.disconnect({ terminateDebuggee = true }) -- force terminate debuggee
+		end
 		dap.listeners.before.event_exited["dapui_config"] = function() end
 	end,
 }
