@@ -46,4 +46,5 @@ require("lazy").setup({
 	require("plugins.lush"),
 	require("plugins.edgy"),
 	require("plugins.hbac"),
+	require("plugins.transparent"),
 })
