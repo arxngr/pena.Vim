@@ -6,6 +6,35 @@ Modular Neovim configuration tailored for developers seeking a streamlined and e
 
 ---
 
+## 📑 Table of Contents
+
+* [Pena.Vim](#penavim)
+* [📦 Features](#-features)
+* [🚀 Installation](#-installation)
+
+  * [🔧 Prerequisites](#prerequisites)
+  * [📥 Steps](#steps)
+* [📦 Installing LuaRocks](#-installing-luarocks)
+
+  * [💻 For Unix/Linux/macOS](#for-unixlinuxmacos)
+  * [🪟 For Windows](#for-windows)
+* [🗝️ Keybindings](#-keybindings)
+
+  * [🪄 General](#-general)
+  * [🪟 Window & Terminal Navigation](#-window--terminal-navigation)
+  * [🔍 Telescope](#-telescope)
+  * [🧪 Neotest](#-neotest)
+  * [🐞 Debugging (nvim-dap)](#-debugging-nvim-dap)
+  * [🔧 Code](#-code)
+  * [🧱 Misc Plugins](#-misc-plugins)
+  * [📋 Trouble.nvim](#-troublenvim)
+* [📂 Project Tasks (Overseer)](#-project-tasks-overseer)
+* [📄 License](#-license)
+* [🙏 Acknowledgments](#-acknowledgments)
+
+---
+
+
 ## 📦 Features
 
 * 🔧 LSP and autocompletion
