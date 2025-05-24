@@ -6,14 +6,19 @@ Modular Neovim configuration tailored for developers seeking a streamlined and e
 
 ---
 
-## ✨ Features
+## 📦 Features
 
-* **Lazy-loaded plugins** for optimal startup time
-* **LSP (Language Server Protocol)** integration for enhanced code intelligence
-* **Treesitter** for advanced syntax highlighting
-* **Telescope** for fuzzy finding and navigation
-* **Custom key mappings** for improved workflow
-* **LuaRocks** integration for managing Lua dependencies([Reddit][2], [GitHub][3])
+* 🔧 LSP and autocompletion
+* 🧪 Testing with [Neotest](https://github.com/nvim-neotest/neotest)
+* 🐞 Debugging with [nvim-dap](https://github.com/mfussenegger/nvim-dap)
+* 🗂️ File navigation with [Telescope](https://github.com/nvim-telescope/telescope.nvim)
+* 🧰 Terminal management with [ToggleTerm](https://github.com/akinsho/toggleterm.nvim)
+* 🛠️ Project tasks via [Overseer](https://github.com/stevearc/overseer.nvim)
+* 🌲 Floating file explorer using [Oil.nvim](https://github.com/stevearc/oil.nvim)
+* 🎨 Theme switching with [Themery](https://github.com/zaldih/themery.nvim)
+* 🔍 Search and Replace with [grug-far](https://github.com/jesseleite/grug-far.nvim)
+* 🚨 Diagnostics with [Trouble](https://github.com/folke/trouble.nvim)
+
 
 ---
 
@@ -177,6 +182,135 @@ Once installed, pena.Vim provides a robust Neovim environment with sensible defa
 
 ---
 
+
+## 🗝️ Keybindings
+
+Default & Custom Setting
+By default, Vim uses \ (backslash) as the "leader" key, but most users redefine it to something easier to reach—commonly the spacebar for faster access:
+
+### 🪄 General
+
+| Mode  | Key       | Description              |
+| ----- | --------- | ------------------------ |
+| `n`   | `c`       | Open config              |
+| `n`   | `<C-q>`   | Quit file                |
+| `n`   | `<Tab>`   | Next buffer              |
+| `n`   | `<S-Tab>` | Previous buffer          |
+| `v`   | `<` / `>` | Indent left/right        |
+| `n`   | `<C-c>`   | Copy to system clipboard |
+| `n/v` | `<C-v>`   | Paste from clipboard     |
+
+### 🪟 Window & Terminal Navigation
+
+| Mode | Key           | Action                          |
+| ---- | ------------- | ------------------------------- |
+| `n`  | `<C-h/j/k/l>` | Move between windows            |
+| `t`  | `<C-h/j/k/l>` | Move between windows (terminal) |
+| `t`  | `<C-x>`       | Exit terminal mode              |
+
+---
+
+### 🔍 Telescope
+
+| Key                | Description              |
+| ------------------ | ------------------------ |
+| `<leader>ff`       | Find files               |
+| `<leader>sb`       | Search in current buffer |
+| `<leader>sg`       | Live grep                |
+| `<leader>ss`       | Telescope built-ins      |
+| `<leader>sd`       | Diagnostics              |
+| `<leader><leader>` | List open buffers        |
+
+---
+
+### 🧪 Neotest
+
+| Key          | Description         |
+| ------------ | ------------------- |
+| `<leader>tt` | Run current file    |
+| `<leader>tr` | Run nearest test    |
+| `<leader>tl` | Run last test       |
+| `<leader>ts` | Toggle summary      |
+| `<leader>to` | Show output         |
+| `<leader>tO` | Toggle output panel |
+| `<leader>tS` | Stop tests          |
+| `<leader>tw` | Toggle watch mode   |
+
+---
+
+### 🐞 Debugging (nvim-dap)
+
+| Key           | Description             |
+| ------------- | ----------------------- |
+| `<leader>da`  | Start Debugging         |
+| `<leader>dc`  | Continue                |
+| `<leader>db`  | Toggle breakpoint       |
+| `<leader>dq`  | Clear breakpoints       |
+| `<leader>do`  | Step over               |
+| `<leader>dO`  | Step out                |
+| `<leader>dr`  | Toggle REPL             |
+| `<leader>dv`  | View scopes             |
+| `<leader>dw`  | Hover variable          |
+| `<leader>ds`  | View stacks             |
+| `<leader>dlb` | View breakpoints float  |
+| `<leader>dh`  | View watches            |
+| `<leader>td`  | Debug nearest (Neotest) |
+
+---
+
+### 🔧 Code
+
+| Key          | Description      |
+| ------------ | ---------------- |
+| `gd`         | Goto definition  |
+| `gr`         | References       |
+| `gI`         | Implementations  |
+| `gt`         | Type definitions |
+| `<leader>rn` | Rename symbol    |
+| `<leader>ca` | Code actions     |
+
+---
+
+### 🧱 Misc Plugins
+
+| Key          | Description              |
+| ------------ | ------------------------ |
+| `<leader>ft` | Toggle floating terminal |
+| `<leader>wv` | Vertical split           |
+| `<leader>hv` | Horizontal split         |
+| `<leader>e`  | Toggle Oil file explorer |
+| `<leader>ut` | Toggle transparency      |
+| `<leader>gg` | LazyGit                  |
+
+---
+
+### 📋 Trouble.nvim
+
+| Key          | Description                   |
+| ------------ | ----------------------------- |
+| `<leader>xx` | Toggle diagnostics            |
+| `<leader>xX` | Buffer diagnostics            |
+| `<leader>cs` | Toggle symbols                |
+| `<leader>cS` | LSP references/defs           |
+| `<leader>xL` | Location list                 |
+| `<leader>xQ` | Quickfix list                 |
+| `[q` / `]q`  | Prev/next quickfix or Trouble |
+
+---
+
+## 📂 Project Tasks (Overseer)
+
+| Key          | Description                 |
+| ------------ | --------------------------- |
+| `<leader>ow` | Toggle task list            |
+| `<leader>oo` | Run task                    |
+| `<leader>oq` | Quick action on recent task |
+| `<leader>oi` | View task info              |
+| `<leader>ob` | Open task builder           |
+| `<leader>ot` | Task action menu            |
+| `<leader>oc` | Clear task cache            |
+
+
 ## 📄 License
 
 This project is licensed under the [MIT License](LICENSE).
@@ -191,10 +325,10 @@ This project is licensed under the [MIT License](LICENSE).
 
 ---
 
-Feel free to customize this `README.md` further to match any specific details or preferences for your configuration.
-
 [1]: https://github.com/vhyrro/luarocks.nvim?utm_source=chatgpt.com "Easily install luarocks with lazy.nvim - GitHub"
 [2]: https://www.reddit.com/r/neovim/comments/1bd499s/how_to_use_a_lua_module_from_luarocks_in_my/?utm_source=chatgpt.com "How to use a lua module from luarocks in my neovim plugin - Reddit"
 [3]: https://github.com/camspiers/luarocks?utm_source=chatgpt.com "Easily install luarocks with lazy.nvim - GitHub"
 [4]: https://luarocks.org/?utm_source=chatgpt.com "LuaRocks - The Lua package manager"
 [5]: https://esouimods.github.io/1-install_luarocks.html?utm_source=chatgpt.com "Installing LuaRocks | ESOUI Code Collection - GitHub Pages"
+
+
