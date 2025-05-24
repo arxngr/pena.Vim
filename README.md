@@ -41,12 +41,12 @@ Ensure you have the following installed:
    mv ~/.cache/nvim ~/.cache/nvim.backup:contentReference[oaicite:39]{index=39}
    ```
 
-2. **Clone AnVim Repository**
+2. **Clone Repository**
 
-   Clone the AnVim repository into your Neovim configuration directory:
+   Clone therepository into your Neovim configuration directory:
 
    ```bash
-   git clone https://github.com/ardi-nugraha/AnVim ~/.config/nvim
+   git clone https://github.com/arxngr/pena.Vim ~/.config/nvim
    ```
 
 
@@ -173,7 +173,7 @@ luarocks --version
 
 ## 🛠️ Usage
 
-Once installed, AnVim provides a robust Neovim environment with sensible defaults and powerful plugins. Explore and customize the configuration to suit your workflow.
+Once installed, pena.Vim provides a robust Neovim environment with sensible defaults and powerful plugins. Explore and customize the configuration to suit your workflow.
 
 ---
 
@@ -191,7 +191,7 @@ This project is licensed under the [MIT License](LICENSE).
 
 ---
 
-Feel free to customize this `README.md` further to match any specific details or preferences for your AnVim configuration.
+Feel free to customize this `README.md` further to match any specific details or preferences for your configuration.
 
 [1]: https://github.com/vhyrro/luarocks.nvim?utm_source=chatgpt.com "Easily install luarocks with lazy.nvim - GitHub"
 [2]: https://www.reddit.com/r/neovim/comments/1bd499s/how_to_use_a_lua_module_from_luarocks_in_my/?utm_source=chatgpt.com "How to use a lua module from luarocks in my neovim plugin - Reddit"
