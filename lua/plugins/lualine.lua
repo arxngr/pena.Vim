@@ -52,7 +52,7 @@ return {
 			"diagnostics",
 			sources = { "nvim_diagnostic" },
 			sections = { "error", "warn" },
-			symbols = { error = " ", warn = " ", info = " ", hint = " " },
+			symbols = { error = " ", warn = " ", info = " ", hint = " " },
 			colored = true,
 			update_in_insert = false,
 			always_visible = false,
@@ -69,7 +69,7 @@ return {
 		require("lualine").setup({
 			options = {
 				icons_enabled = true,
-				theme = "ayu_dark", -- Set theme based on environment variable
+				theme = "auto", -- Set theme based on environment variable
 				-- Some useful glyphs:
 				-- https://www.nerdfonts.com/cheat-sheet
 				--        
