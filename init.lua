@@ -47,4 +47,5 @@ require("lazy").setup({
 	require("plugins.edgy"),
 	require("plugins.hbac"),
 	require("plugins.transparent"),
+    	require("plugins.wakatime"),
 })
