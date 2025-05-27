@@ -82,11 +82,6 @@ return {
 					vim.api.nvim_create_autocmd("BufWritePre", {
 						buffer = event.buf,
 						callback = function()
-							-- Apply inlay hints if supported
-							if client.supports_method("textDocument/inlayHint") then
-								vim.lsp.inlay_hint(event.buf, true)
-							end
-
 							-- Handle imports organization if supported
 							if client.supports_method("textDocument/codeAction") then
 								local params = vim.lsp.util.make_range_params()
@@ -109,7 +104,7 @@ return {
 							end
 							-- Apply formatting if supported
 							if client.supports_method("textDocument/formatting") then
-								vim.lsp.buf.format({ async = false })
+								vim.lsp.buf.format({ async = true })
 							end
 						end,
 					})
@@ -229,6 +224,15 @@ return {
 										tidy = true,
 										upgrade_dependency = true,
 										vendor = true,
+										completeUnimported = true,
+										staticcheck = true,
+										directoryFilters = {
+											"-.git",
+											"-.vscode",
+											"-.idea",
+											"-.vscode-test",
+											"-node_modules",
+										},
 									},
 								},
 							},
