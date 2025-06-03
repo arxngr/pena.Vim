@@ -3,6 +3,32 @@ return {
 	cmd = { "Trouble" },
 	opts = {
 		modes = {
+			symbols = {
+				filter = {
+					-- remove Package since luals uses it for control flow structures
+					["not"] = { ft = "lua", kind = "Package" },
+					any = {
+						-- all symbol kinds for help / markdown files
+						ft = { "help", "markdown" },
+						-- default set of symbol kinds
+						kind = {
+							"Class",
+							"Constructor",
+							"Enum",
+							"Field",
+							"Function",
+							"Interface",
+							"Method",
+							"Module",
+							"Namespace",
+							"Package",
+							"Struct",
+							"Trait",
+							"Variable",
+						},
+					},
+				},
+			},
 			diagnostics = {
 				win = { position = "bottom" },
 			},

@@ -44,6 +44,8 @@ return {
 				severity_sort = true,
 			})
 
+			local navic = require("nvim-navic")
+
 			-- Create a dedicated autocmd group for LSP attach events
 			local lsp_attach_group = vim.api.nvim_create_augroup("kickstart-lsp-attach", { clear = true })
 
@@ -76,6 +78,13 @@ return {
 						map("<leader>uh", function()
 							vim.lsp.inlay_hint.enable(not vim.lsp.inlay_hint.is_enabled())
 						end, "Toggle Inlay Hints")
+					end
+
+					if client and client.server_capabilities.documentSymbolProvider then
+						local ok, navic = pcall(require, "nvim-navic")
+						if ok then
+							navic.attach(client, event.buf)
+						end
 					end
 
 					-- Create a BufWritePre autocmd specifically for this buffer

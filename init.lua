@@ -48,4 +48,6 @@ require("lazy").setup({
 	require("plugins.hbac"),
 	require("plugins.transparent"),
 	require("plugins.wakatime"),
+	require("plugins.color-highlight"),
+	require("plugins.navic"),
 })
