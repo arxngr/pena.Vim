@@ -122,15 +122,3 @@ vim.api.nvim_create_autocmd("FileType", {
 		vim.keymap.set("n", "c", require("utils").open_config, { desc = "Open config", buffer = true })
 	end,
 })
-
-vim.api.nvim_create_autocmd("InsertEnter", {
-	callback = function()
-		vim.cmd("highlight CursorLine guibg=#1e222a")
-	end,
-})
-
-vim.api.nvim_create_autocmd("InsertLeave", {
-	callback = function()
-		vim.cmd("highlight CursorLine guibg=#2c313c")
-	end,
-})
