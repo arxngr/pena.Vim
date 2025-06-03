@@ -5,7 +5,6 @@ local opts = { noremap = true, silent = true }
 vim.g.mapleader = " "
 
 -- General
-keymap("n", "c", utils.open_config, { desc = "Open config" })
 keymap("n", "d", '"_d', opts)
 keymap("x", "d", '"_d', opts)
 keymap("x", "<leader>p", '"_dP', opts)
