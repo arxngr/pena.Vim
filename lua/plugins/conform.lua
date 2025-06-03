@@ -55,7 +55,6 @@ return {
 			-- Configure conform.nvim
 			require("conform").setup({
 				format_after_save = {
-					lsp_fallback = true,
 					async = true,
 				},
 				formatters_by_ft = {
