@@ -6,6 +6,7 @@ return {
 	},
 	config = function()
 		require("edgy").setup({
+			left = {},
 			bottom = {
 				{
 					title = "ToggleTerm",
@@ -31,7 +32,7 @@ return {
 				{
 					title = "Console",
 					ft = "", -- match all filetypes (or empty)
-					size = { height = 0.25 },
+					size = { height = 0.23 },
 					filter = function(buf)
 						local buftype = vim.api.nvim_buf_get_option(buf, "buftype")
 						return buftype == "terminal"
