@@ -85,7 +85,7 @@ return {
 						get_pkg_path("js-debug-adapter", "/js-debug/src/dapDebugServer.js"),
 						js_debug_port
 					),
-					close_on_exit = true,
+					close_on_exit = false,
 					direction = "horizontal",
 					hidden = false,
 					on_open = function(term)
@@ -128,11 +128,11 @@ return {
 					url = function()
 						local co = coroutine.running()
 						return coroutine.create(function()
-							vim.ui.input({ prompt = "Enter URL: ", default = "http://localhost:3000" }, function(url)
+							vim.ui.input(function(url)
 								if url and url ~= "" then
 									coroutine.resume(co, url)
 								end
-							end)
+							end, { prompt = "Enter URL: ", default = "http://localhost:3000" })
 						end)
 					end,
 					webRoot = vim.fn.getcwd(),
@@ -186,7 +186,7 @@ return {
 
 				local term = Terminal:new({
 					cmd = dlv_cmd,
-					close_on_exit = true,
+					close_on_exit = false,
 					hidden = false,
 					direction = "horizontal",
 					on_open = function(term)
