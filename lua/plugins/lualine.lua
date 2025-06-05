@@ -81,7 +81,7 @@ return {
 			sections = {
 				lualine_a = { mode },
 				lualine_b = { "branch" },
-				lualine_c = { project_name, filename, "navic" },
+				lualine_c = { project_name, filename },
 				lualine_x = {
 					diagnostics,
 					diff,
