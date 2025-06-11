@@ -1,5 +1,4 @@
 vim.wo.number = true
-vim.o.cursorline = true -- Enable highlight for the line where the cursor is
 vim.o.relativenumber = true
 vim.o.clipboard = "unnamedplus"
 vim.o.wrap = false
