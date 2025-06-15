@@ -34,7 +34,11 @@ return {
 		end,
 		config = function()
 			vim.diagnostic.config({
-				virtual_lines = {},
+				virtual_lines = {
+					format = function(d)
+						return d.message:gsub("\n", " "):sub(1, 999)
+					end,
+				},
 				signs = true,
 				underline = true,
 				update_in_insert = false,
