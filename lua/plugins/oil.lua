@@ -5,8 +5,8 @@ return {
 	opts = {
 		float = {
 			padding = 2,
-			max_width = 80,
-			max_height = 35,
+			max_width = 100,
+			max_height = 45,
 			border = "rounded",
 			win_options = {
 				winblend = 0,

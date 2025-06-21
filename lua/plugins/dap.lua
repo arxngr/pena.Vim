@@ -181,12 +181,12 @@ return {
 
 			-- Go
 			dap.adapters.go = function(callback)
-				local port = 38697
+				local port = 2345
 				local dlv_cmd = string.format("dlv dap -l 127.0.0.1:%d", port)
 
 				local term = Terminal:new({
 					cmd = dlv_cmd,
-					close_on_exit = false,
+					close_on_exit = true,
 					hidden = false,
 					direction = "horizontal",
 					on_open = function(term)
@@ -200,6 +200,14 @@ return {
 			end
 
 			dap.configurations.go = {
+				{
+					type = "go",
+					name = "Attach to running",
+					request = "attach",
+					mode = "remote",
+					port = 2345,
+					host = "127.0.0.1",
+				},
 				{
 					type = "go",
 					name = "Debug",
