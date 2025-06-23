@@ -50,4 +50,5 @@ require("lazy").setup({
 	require("plugins.wakatime"),
 	require("plugins.color-highlight"),
 	require("plugins.navic"),
+	require("plugins.ufo"),
 })
