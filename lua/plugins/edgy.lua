@@ -28,7 +28,7 @@ return {
 				{
 					title = "ToggleTerm",
 					ft = "toggleterm",
-					size = { height = 0.23 }, -- 23% of total height
+					size = { height = 0.25 }, -- 23% of total height
 					pinned = false,
 					open = "ToggleTerm direction=horizontal",
 					filter = function(buf, win)
