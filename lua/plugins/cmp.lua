@@ -127,9 +127,14 @@ return { -- Autocompletion
 				-- Select next/previous item with Tab / Shift + Tab
 				["<Tab>"] = cmp.mapping(function(fallback)
 					if cmp.visible() then
+						-- You could replace select_next_item() with confirm({ select = true }) to get VS Code autocompletion behavior
 						cmp.select_next_item()
-					elseif luasnip.expand_or_locally_jumpable() then
-						luasnip.expand_or_jump()
+					elseif vim.snippet.active({ direction = 1 }) then
+						vim.schedule(function()
+							vim.snippet.jump(1)
+						end)
+					elseif has_words_before() then
+						cmp.complete()
 					else
 						fallback()
 					end
@@ -137,8 +142,10 @@ return { -- Autocompletion
 				["<S-Tab>"] = cmp.mapping(function(fallback)
 					if cmp.visible() then
 						cmp.select_prev_item()
-					elseif luasnip.locally_jumpable(-1) then
-						luasnip.jump(-1)
+					elseif vim.snippet.active({ direction = -1 }) then
+						vim.schedule(function()
+							vim.snippet.jump(-1)
+						end)
 					else
 						fallback()
 					end
