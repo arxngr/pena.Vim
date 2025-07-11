@@ -1,4 +1,3 @@
-local utils = require("core.utils")
 local keymap = vim.keymap.set
 local opts = { noremap = true, silent = true }
 
@@ -42,8 +41,9 @@ keymap("n", "<leader>hv", "<Cmd>split<CR>", { desc = "Horizontal Split" })
 
 keymap({ "n" }, "<Leader>k", function()
 	vim.lsp.buf.signature_help()
-end, { silent = true, noremap = true, desc = "toggle signature" })
+end, { silent = true, noremap = true, desc = "Toggle signature" })
 
 keymap("n", "<leader>cr", vim.lsp.buf.rename, opts)
 keymap("v", "<", "<gv")
 keymap("v", ">", ">gv")
+keymap("n", "<leader>bd", ":bd<CR>", { desc = "Close Buffer" })

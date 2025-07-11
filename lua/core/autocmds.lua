@@ -120,6 +120,9 @@ vim.api.nvim_create_autocmd("FileType", {
 	pattern = { "alpha", "starter", "dashboard" }, -- Adjust to match your startup plugin
 	callback = function()
 		vim.keymap.set("n", "c", require("utils").open_config, { desc = "Open config", buffer = true })
+		vim.keymap.set("n", "s", function()
+			require("persistence").load()
+		end, { desc = "Restore session for current dir", buffer = true })
 	end,
 })
 
