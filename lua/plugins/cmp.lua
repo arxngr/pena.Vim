@@ -1,4 +1,4 @@
-return { -- Autocompletion
+return { -- Autocompetion
 	"hrsh7th/nvim-cmp",
 	dependencies = {
 		{
