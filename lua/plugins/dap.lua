@@ -187,7 +187,7 @@ return {
 				local term = Terminal:new({
 					cmd = dlv_cmd,
 					close_on_exit = true,
-					hidden = false,
+					hidden = true,
 					direction = "horizontal",
 					on_open = function(term)
 						vim.defer_fn(function()
