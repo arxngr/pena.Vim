@@ -53,9 +53,6 @@ return {
 				},
 			},
 		},
-		presets = {
-			command_palette = true, -- optional style
-		},
 	},
 	keys = {
 		{ "<leader>sn", "", desc = "+noice" },
