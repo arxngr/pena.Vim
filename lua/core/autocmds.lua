@@ -1,3 +1,41 @@
+local function toggle_toggleterm(bufnr)
+	local Terminal = require("toggleterm.terminal")
+	if Terminal.get_terminal_by_bufnr then
+		local term = Terminal.get_terminal_by_bufnr(bufnr)
+		if term then
+			term:toggle()
+			return true
+		end
+	end
+	return false
+end
+
+local function toggle_dap_repl()
+	local ok, dap = pcall(require, "dap")
+	if ok and dap.repl and dap.repl.toggle then
+		dap.repl.toggle()
+		return true
+	end
+	return false
+end
+
+local function quit_or_toggle(bufnr)
+	local ft = vim.bo[bufnr].filetype
+
+	if ft == "toggleterm" then
+		if not toggle_toggleterm(bufnr) then
+			vim.cmd("close")
+		end
+	elseif ft == "dap-repl" then
+		if not toggle_dap_repl() then
+			vim.cmd("close")
+		end
+	else
+		vim.cmd("close")
+		pcall(vim.api.nvim_buf_delete, bufnr, { force = true })
+	end
+end
+
 vim.api.nvim_create_autocmd({ "FocusGained", "TermClose", "TermLeave" }, {
 	callback = function()
 		if vim.o.buftype ~= "nofile" then
@@ -55,6 +93,7 @@ vim.api.nvim_create_autocmd("FileType", {
 		"tsplayground",
 		"dap-float",
 		"toggleterm",
+		"dap-repl",
 		"vim",
 		"floaterm",
 		"oil",
@@ -64,12 +103,11 @@ vim.api.nvim_create_autocmd("FileType", {
 		vim.bo[event.buf].buflisted = false
 		vim.schedule(function()
 			vim.keymap.set("n", "q", function()
-				vim.cmd("close")
-				pcall(vim.api.nvim_buf_delete, event.buf, { force = true })
+				quit_or_toggle(event.buf)
 			end, {
 				buffer = event.buf,
 				silent = true,
-				desc = "Quit buffer",
+				desc = "Quit buffer or toggle terminal/dap-repl",
 			})
 		end)
 	end,
