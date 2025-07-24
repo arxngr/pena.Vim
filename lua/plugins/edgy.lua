@@ -15,10 +15,11 @@ return {
 					pinned = true,
 					title = "Sidebar",
 					filter = function(_buf, win)
-						-- this is dumb but it works only on this stage kek
 						vim.api.nvim_set_hl(0, "TroubleNormal", { bg = "none", ctermbg = "none" })
 						vim.api.nvim_set_hl(0, "TroubleNormalNC", { bg = "none", ctermbg = "none" })
-						return vim.w[win].trouble.mode == "symbols"
+
+						local trouble_data = vim.w[win] and vim.w[win].trouble
+						return trouble_data and trouble_data.mode == "symbols"
 					end,
 					open = "Trouble symbols position=left focus=false filter.buf=0",
 					size = { width = 0.15 },
