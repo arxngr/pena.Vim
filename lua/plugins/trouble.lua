@@ -54,12 +54,15 @@ return {
 					opts.key,
 					function()
 						local trouble = require("trouble")
+
+						-- Toggle Trouble if already open
 						if trouble.is_open() then
 							trouble.close()
-						else
-							trouble.toggle(mode_name, opts.toggle_opts)
-							trouble.focus()
+							return
 						end
+
+						trouble.toggle(mode_name, opts.toggle_opts)
+						trouble.focus()
 					end,
 					desc = desc,
 					mode = "n",
@@ -80,9 +83,12 @@ return {
 					toggle_opts = { buf = 0 },
 				}),
 				map_toggle_focus("symbols", "Symbols (Trouble)", { key = "<leader>cs" }),
-				map_toggle_focus("lsp", "LSP references/definitions/... (Trouble)", { key = "<leader>cS" }),
+				map_toggle_focus("lsp", "LSP References (Trouble)", {
+					key = "<leader>cS",
+				}),
 				map_toggle_focus("loclist", "Location List (Trouble)", { key = "<leader>xL" }),
 				map_toggle_focus("qflist", "Quickfix List (Trouble)", { key = "<leader>xQ" }),
+
 				{
 					"[q",
 					function()
@@ -125,6 +131,27 @@ return {
 						n = { ["<c-t>"] = open_with_trouble },
 					},
 				},
+			})
+			vim.api.nvim_create_autocmd("FileType", {
+				pattern = "trouble",
+				callback = function()
+					local buf = vim.api.nvim_get_current_buf()
+					local trouble = require("trouble")
+
+					local function jump_and_close()
+						trouble.jump({ open = false })
+						vim.schedule_wrap(function()
+							trouble.close()
+						end)()
+					end
+
+					vim.defer_fn(function()
+						if vim.api.nvim_buf_is_valid(buf) then
+							vim.keymap.set("n", "<CR>", jump_and_close, { buffer = buf, silent = true })
+							vim.keymap.set("n", "o", jump_and_close, { buffer = buf, silent = true })
+						end
+					end, 50)
+				end,
 			})
 		end,
 	},
