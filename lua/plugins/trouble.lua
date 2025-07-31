@@ -28,6 +28,7 @@ return {
 					},
 				},
 				diagnostics = {
+					update_in_insert = true,
 					win = {
 						type = "float",
 						relative = "editor",

@@ -26,14 +26,9 @@ return {
 		},
 		config = function()
 			vim.diagnostic.config({
-				virtual_lines = {
-					format = function(d)
-						return d.message:gsub("\n", " "):sub(1, 150)
-					end,
-				},
+				virtual_text = true,
 				signs = true,
-				underline = true,
-				update_in_insert = false,
+				update_in_insert = true,
 				severity_sort = true,
 			})
 
