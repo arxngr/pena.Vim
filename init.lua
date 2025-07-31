@@ -45,7 +45,6 @@ require("lazy").setup({
 	require("plugins.dap-ui"),
 	require("plugins.lush"),
 	require("plugins.edgy"),
-	require("plugins.hbac"),
 	require("plugins.transparent"),
 	require("plugins.wakatime"),
 	require("plugins.color-highlight"),
