@@ -37,7 +37,6 @@ require("lazy").setup({
 	require("plugins.grug-far"),
 	require("plugins.mini"),
 	require("plugins.lsp"),
-	require("plugins.telescope"),
 	require("plugins.terminal"),
 	require("plugins.snacks"),
 	require("plugins.which-key"),

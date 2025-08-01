@@ -122,17 +122,6 @@ return {
 			local trouble = require("trouble")
 			trouble.setup(opts)
 
-			local telescope = require("telescope")
-			local open_with_trouble = require("trouble.sources.telescope").open
-
-			telescope.setup({
-				defaults = {
-					mappings = {
-						i = { ["<c-t>"] = open_with_trouble },
-						n = { ["<c-t>"] = open_with_trouble },
-					},
-				},
-			})
 			vim.api.nvim_create_autocmd("FileType", {
 				pattern = "trouble",
 				callback = function()

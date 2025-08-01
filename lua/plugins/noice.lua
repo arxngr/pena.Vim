@@ -93,13 +93,6 @@ return {
 			desc = "Dismiss All",
 		},
 		{
-			"<leader>snt",
-			function()
-				require("noice").cmd("pick")
-			end,
-			desc = "Noice Picker (Telescope/FzfLua)",
-		},
-		{
 			"<c-f>",
 			function()
 				if not require("noice.lsp").scroll(4) then

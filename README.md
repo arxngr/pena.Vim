@@ -19,7 +19,7 @@ Modular Neovim configuration tailored for developers seeking a streamlined and e
 * [🗝️ Keybindings](#-keybindings)
   * [🪄 General](#-general)
   * [🪟 Window & Terminal Navigation](#-window--terminal-navigation)
-  * [🔍 Telescope](#-telescope)
+  * [🔍 Picker](#-picker)
   * [🧪 Neotest](#-neotest)
   * [🐞 Debugging (nvim-dap)](#-debugging-nvim-dap)
   * [🔧 Code](#-code)
@@ -37,7 +37,7 @@ Modular Neovim configuration tailored for developers seeking a streamlined and e
 * 🔧 LSP and autocompletion
 * 🧪 Testing with [Neotest](https://github.com/nvim-neotest/neotest)
 * 🐞 Debugging with [nvim-dap](https://github.com/mfussenegger/nvim-dap)
-* 🗂️ File navigation with [Telescope](https://github.com/nvim-telescope/telescope.nvim)
+* 🗂️ File navigation with [Picker](https://github.com/nvim-telescope/snacks.nvim)
 * 🧰 Terminal management with [ToggleTerm](https://github.com/akinsho/toggleterm.nvim)
 * 🛠️ Project tasks via [Overseer](https://github.com/stevearc/overseer.nvim)
 * 🌲 Floating file explorer using [Oil.nvim](https://github.com/stevearc/oil.nvim)
@@ -236,14 +236,13 @@ By default, Vim uses \ (backslash) as the "leader" key, but most users redefine 
 
 ---
 
-### 🔍 Telescope
+### 🔍 Picker 
 
 | Key                | Description              |
 | ------------------ | ------------------------ |
 | `<leader>ff`       | Find files               |
 | `<leader>sb`       | Search in current buffer |
 | `<leader>sg`       | Live grep                |
-| `<leader>ss`       | Telescope built-ins      |
 | `<leader>sd`       | Diagnostics              |
 | `<leader><leader>` | List open buffers        |
 
