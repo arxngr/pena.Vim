@@ -124,16 +124,16 @@ return -- lazy.nvim
 				default = {
 					layout = {
 						backdrop = false,
-						width = 0.8,
+						width = 0.85,
 						min_width = 80,
-						height = 0.7,
+						height = 0.85,
 						min_height = 3,
 						box = "vertical",
 						border = "rounded",
 						title = "{title}",
 						title_pos = "center",
 
-						{ win = "preview", title = "{preview}", height = 0.7, border = "bottom" },
+						{ win = "preview", title = "{preview}", height = 0.6, border = "bottom" },
 						{ win = "list", border = "none" },
 						{ win = "input", height = 1, border = "top" },
 					},
