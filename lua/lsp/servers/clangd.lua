@@ -10,7 +10,6 @@ return {
 		"--completion-style=detailed",
 		"--function-arg-placeholders=0",
 		"--fallback-style=llvm",
-		"--malloc-trim", -- Help with memory usage
 		"--pch-storage=memory", -- Store PCH in memory for faster access
 	},
 	init_options = {
