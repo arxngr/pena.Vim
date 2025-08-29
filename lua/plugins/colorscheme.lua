@@ -22,7 +22,9 @@ return {
 			"arxngr/tinta.nvim",
 			lazy = false,
 			priority = 1000,
-			config = function() end,
+			config = function()
+				require("tinta").setup({ palette = "tinta-darker", guicursor = false })
+			end,
 		},
 		{
 			"0xstepit/flow.nvim",
