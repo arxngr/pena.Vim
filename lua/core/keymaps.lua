@@ -35,7 +35,6 @@ keymap("n", "<C-q>", "<cmd> q <CR>", opts)
 keymap("n", "<Tab>", ":bnext<CR>", opts)
 keymap("n", "<S-Tab>", ":bprevious<CR>", opts)
 
-keymap("n", "<leader>ft", ":FloatermToggle<CR>", opts)
 keymap("n", "<leader>wv", "<Cmd>vsplit<CR>", { desc = "Vertical Split" })
 keymap("n", "<leader>hv", "<Cmd>split<CR>", { desc = "Horizontal Split" })
 
@@ -43,7 +42,9 @@ keymap({ "n" }, "<Leader>k", function()
 	vim.lsp.buf.signature_help()
 end, { silent = true, noremap = true, desc = "Toggle signature" })
 
-keymap("n", "<leader>cr", vim.lsp.buf.rename, opts)
+keymap("n", "<leader>cr", vim.lsp.buf.rename, { desc = "Rename code", remap = true })
 keymap("v", "<", "<gv")
 keymap("v", ">", ">gv")
 keymap("n", "<leader>bd", ":bd<CR>", { desc = "Close Buffer" })
+
+keymap("n", "<leader>cd", vim.diagnostic.open_float, { desc = "Open float diagnostic", remap = true })

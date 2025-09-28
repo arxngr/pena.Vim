@@ -23,7 +23,7 @@ return {
 			lazy = false,
 			priority = 1000,
 			config = function()
-				require("tinta").setup({ palette = "tinta-darker", bg_color = "#32363e" })
+				require("tinta").setup({ palette = "tinta-darker" })
 			end,
 		},
 		{
