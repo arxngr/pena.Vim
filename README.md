@@ -3,6 +3,7 @@
 # Pena.Vim
 
 Modular Neovim configuration tailored for developers seeking a streamlined and efficient coding environment. Built with Lua, it leverages the power of `lazy.nvim` for plugin management, offering a clean and extensible setup out of the box.([GitHub][1])
+<img width="2884" height="1920" alt="image" src="https://github.com/user-attachments/assets/910c83fd-d163-490e-8784-77a349a56e0e" />
 
 ---
 
