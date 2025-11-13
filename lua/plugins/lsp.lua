@@ -110,18 +110,24 @@ return {
 				return {}
 			end
 
-			require("mason-lspconfig").setup({
-				handlers = {
-					function(server_name)
-						local server_config = load_server_config(server_name)
+			local capabilities = vim.lsp.protocol.make_client_capabilities()
 
-						server_config.capabilities =
-							vim.tbl_deep_extend("force", {}, capabilities, server_config.capabilities or {})
+			local function load_server_config(server_name)
+				return {}
+			end
 
-						require("lspconfig")[server_name].setup(server_config)
-					end,
-				},
-			})
+			for _, server_name in ipairs(ensure_installed) do
+				local server_config = load_server_config(server_name)
+
+				server_config.capabilities =
+					vim.tbl_deep_extend("force", {}, capabilities, server_config.capabilities or {})
+
+				server_config.flags = server_config.flags or {}
+				server_config.flags.debounce_text_changes = server_config.flags.debounce_text_changes or 300
+
+				vim.lsp.config(server_name, server_config)
+				vim.lsp.enable({ server_name })
+			end
 		end,
 	},
 
