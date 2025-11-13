@@ -110,8 +110,6 @@ return {
 				return {}
 			end
 
-			local capabilities = vim.lsp.protocol.make_client_capabilities()
-
 			local function load_server_config(server_name)
 				return {}
 			end
