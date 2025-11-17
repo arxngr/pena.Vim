@@ -34,6 +34,7 @@ return {
         { "<leader>dlb", function() require("dapui").float_element("breakpoints", { enter = true, position = "center" }) end, desc = "Breakpoints Float" },
         { "<leader>dh",  function() require("dapui").float_element("watches", { enter = true, position = "center" }) end,     desc = "Watches Float" },
         { "<leader>dv",  function() require("dapui").float_element("scopes", { enter = true, position = "center" }) end,      desc = "Scopes Float" },
+
     },
 	opts = {
 		layouts = {},

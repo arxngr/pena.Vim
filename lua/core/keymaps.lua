@@ -48,3 +48,4 @@ keymap("v", ">", ">gv")
 keymap("n", "<leader>bd", ":bd<CR>", { desc = "Close Buffer" })
 
 keymap("n", "<leader>cd", vim.diagnostic.open_float, { desc = "Open float diagnostic", remap = true })
+
