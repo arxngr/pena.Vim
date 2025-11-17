@@ -3,14 +3,12 @@ return {
 	opts = function(_, opts)
 		local cmp = require("cmp")
 
-		opts.snippet = {
-			expand = function() end, -- no snippet engine
-		}
-
 		opts.mapping = cmp.mapping.preset.insert({
 			["<Tab>"] = cmp.mapping(function(fallback)
 				if cmp.visible() then
 					cmp.select_next_item()
+				elseif require("luasnip").expand_or_jumpable() then
+					require("luasnip").expand_or_jump()
 				else
 					fallback()
 				end
@@ -19,14 +17,8 @@ return {
 			["<S-Tab>"] = cmp.mapping(function(fallback)
 				if cmp.visible() then
 					cmp.select_prev_item()
-				else
-					fallback()
-				end
-			end, { "i", "s" }),
-
-			["<M-Tab>"] = cmp.mapping(function(fallback) -- Alt+Tab behavior
-				if cmp.visible() then
-					cmp.select_prev_item()
+				elseif require("luasnip").jumpable(-1) then
+					require("luasnip").jump(-1)
 				else
 					fallback()
 				end
@@ -35,12 +27,6 @@ return {
 			["<CR>"] = cmp.mapping.confirm({ select = true }),
 			["<C-d>"] = cmp.mapping.scroll_docs(-4),
 			["<C-f>"] = cmp.mapping.scroll_docs(4),
-		})
-
-		opts.sources = cmp.config.sources({
-			{ name = "nvim_lsp" },
-			{ name = "buffer" },
-			{ name = "path" },
 		})
 
 		return opts
