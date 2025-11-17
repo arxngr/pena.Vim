@@ -2,7 +2,7 @@ return {
 	{
 		"stevearc/conform.nvim",
 		dependencies = {
-			"williamboman/mason.nvim",
+			"mason-org/mason.nvim",
 		},
 		config = function()
 			require("mason").setup()

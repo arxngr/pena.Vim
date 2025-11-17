@@ -23,6 +23,14 @@ return {
         { "<leader>de",  function() require("dapui").eval() end,                                                              desc = "Eval",             mode = { "n", "v" } },
         { "<leader>ds",  function() require("dapui").float_element("stacks", { enter = true, position = "center" }) end,      desc = "Stacks Float" },
         { "<leader>dr",  function() require("dap").repl.toggle() end,                                                         desc = "Toggle REPL" },
+        {
+            "<leader>dq",
+            function()
+              require("dap").clear_breakpoints()
+              vim.notify("Breakpoints cleared", vim.log.levels.INFO)
+            end,
+            desc = "Clear all breakpoints",
+        },
         { "<leader>dlb", function() require("dapui").float_element("breakpoints", { enter = true, position = "center" }) end, desc = "Breakpoints Float" },
         { "<leader>dh",  function() require("dapui").float_element("watches", { enter = true, position = "center" }) end,     desc = "Watches Float" },
         { "<leader>dv",  function() require("dapui").float_element("scopes", { enter = true, position = "center" }) end,      desc = "Scopes Float" },
