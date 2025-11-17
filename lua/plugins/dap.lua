@@ -179,20 +179,31 @@ return {
 				},
 			}
 
-			-- Go
+			local function pick_random_port()
+				math.randomseed(os.time())
+				return math.random(30000, 45000)
+			end
+
 			dap.adapters.go = function(callback)
-				local port = 2345
-				local dlv_cmd = string.format("dlv dap -l 127.0.0.1:%d", port)
+				local port = pick_random_port()
+
+				print("Starting Delve on port: " .. port)
+
+				local dlv_cmd = string.format("dlv dap --listen=127.0.0.1:%d --log", port)
 
 				local term = Terminal:new({
 					cmd = dlv_cmd,
-					close_on_exit = true,
-					hidden = true,
+					close_on_exit = false,
+					hidden = false,
 					direction = "horizontal",
-					on_open = function(term)
+					on_open = function()
 						vim.defer_fn(function()
-							callback({ type = "server", host = "127.0.0.1", port = port })
-						end, 100) -- give dlv time to start
+							callback({
+								type = "server",
+								host = "127.0.0.1",
+								port = port,
+							})
+						end, 300)
 					end,
 				})
 
@@ -307,10 +318,8 @@ return {
 					local dapui = require("dapui")
 					local dap = require("dap")
 
-					-- Ensure dapui is opened with layout (including bottom REPL)
 					local listener_id = "open-panel-repl"
 
-					-- Open dapui layout with REPL (not floating)
 					dap.listeners.after.event_initialized[listener_id] = function()
 						dapui.open()
 					end
