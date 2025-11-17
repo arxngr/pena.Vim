@@ -31,10 +31,6 @@ keymap("t", "<C-x>", [[<C-\><C-n>]], { desc = "Escape Terminal Mode" })
 -- quit file
 keymap("n", "<C-q>", "<cmd> q <CR>", opts)
 
--- Buffers
-keymap("n", "<Tab>", ":bnext<CR>", opts)
-keymap("n", "<S-Tab>", ":bprevious<CR>", opts)
-
 keymap("n", "<leader>wv", "<Cmd>vsplit<CR>", { desc = "Vertical Split" })
 keymap("n", "<leader>hv", "<Cmd>split<CR>", { desc = "Horizontal Split" })
 
@@ -48,4 +44,3 @@ keymap("v", ">", ">gv")
 keymap("n", "<leader>bd", ":bd<CR>", { desc = "Close Buffer" })
 
 keymap("n", "<leader>cd", vim.diagnostic.open_float, { desc = "Open float diagnostic", remap = true })
-
