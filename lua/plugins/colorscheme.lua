@@ -57,7 +57,7 @@ return {
 		},
 	},
 	keys = {
-		{ "<leader>uc", "<cmd>Themery<CR>", desc = "Toggle Themery" },
+		{ "<leader>uq", "<cmd>Themery<CR>", desc = "Toggle Themery" },
 	},
 	lazy = false,
 	config = function()
