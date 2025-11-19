@@ -49,4 +49,5 @@ vim.g.autoformat = true
 vim.o.mouse = ""
 vim.opt.sessionoptions = { "buffers", "curdir", "tabpages", "winsize", "help", "globals", "skiprtp", "folds" }
 vim.opt.formatexpr = ""
+vim.g.snacks_animate = false
 vim.o.winbar = "%{%v:lua.require'nvim-navic'.get_location()%}"

@@ -15,6 +15,7 @@ return -- lazy.nvim
 	---@type snacks.Config
 	opts = {
 		notifier = { enabled = true },
+		scroll = { enabled = false },
 		input = { enabled = true },
 		terminal = {
 			win = {
