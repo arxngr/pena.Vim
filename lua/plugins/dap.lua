@@ -179,17 +179,14 @@ return {
 				},
 			}
 
-			local function pick_random_port()
-				math.randomseed(os.time())
-				return math.random(30000, 45000)
-			end
+			dap.adapters.go = function(callback, config)
+				-- Use config.port if specified (for fixed-port attach)
+				local port = config.port or math.random(30000, 45000)
 
-			dap.adapters.go = function(callback)
-				local port = pick_random_port()
-
-				print("Starting Delve on port: " .. port)
-
-				local dlv_cmd = string.format("dlv dap --listen=127.0.0.1:%d --log", port)
+				local dlv_cmd = string.format(
+					"dlv dap --listen=127.0.0.1:%d --log --log-output=dap --build-flags='-gcflags \"all=-N -l\"'",
+					port
+				)
 
 				local term = Terminal:new({
 					cmd = dlv_cmd,
