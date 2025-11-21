@@ -42,45 +42,64 @@ return {
 			local dap = require("dap")
 			local Terminal = require("toggleterm.terminal").Terminal
 
-			local terminal_defaults = {
-				close_on_exit = true,
-				hidden = false,
-				direction = "horizontal",
-			}
+			-- Single shared terminal for all debug adapters
+			local debug_term = nil
+			local debug_term_port = nil
 
-			-- Track active terminals by adapter type for cleanup
-			local active_terminals = {}
-
-			local function create_debug_terminal(adapter_type, cmd, opts)
+			local function get_or_create_debug_terminal(cmd, port, opts)
 				opts = opts or {}
-				local term_opts = vim.tbl_extend("force", terminal_defaults, {
+				local current_win = vim.api.nvim_get_current_win()
+
+				-- Reuse existing terminal if same port and still open
+				if debug_term and debug_term:is_open() and debug_term_port == port then
+					return debug_term, false -- false = didn't create new
+				end
+
+				-- Kill old terminal if exists
+				if debug_term then
+					debug_term:shutdown()
+					debug_term = nil
+					debug_term_port = nil
+				end
+
+				debug_term = Terminal:new({
 					cmd = cmd,
-					on_open = opts.on_open,
-					on_exit = function(term, job, exit_code, event)
-						active_terminals[adapter_type] = nil
-						if opts.on_exit then
-							opts.on_exit(term, job, exit_code, event)
+					close_on_exit = true,
+					hidden = true,
+					direction = "horizontal",
+					auto_scroll = false,
+					start_in_insert = false,
+					on_open = function(term)
+						vim.cmd("stopinsert")
+						-- Return to original window
+						vim.schedule(function()
+							if vim.api.nvim_win_is_valid(current_win) then
+								vim.api.nvim_set_current_win(current_win)
+							end
+						end)
+						if opts.on_open then
+							opts.on_open(term)
 						end
+					end,
+					on_exit = function()
+						debug_term = nil
+						debug_term_port = nil
 					end,
 				})
 
-				local term = Terminal:new(term_opts)
-				active_terminals[adapter_type] = term
-				return term
+				debug_term_port = port
+				return debug_term, true -- true = created new
 			end
 
-			-- Kill terminal for adapter (used in hot reload)
-			local function kill_adapter_terminal(adapter_type)
-				local term = active_terminals[adapter_type]
-				if term then
-					term:shutdown()
-					active_terminals[adapter_type] = nil
+			local function kill_debug_terminal()
+				if debug_term then
+					debug_term:shutdown()
+					debug_term = nil
+					debug_term_port = nil
 				end
 			end
 
-			-- Expose for autocmd
-			_G.dap_kill_adapter_terminal = kill_adapter_terminal
-			_G.dap_active_terminals = active_terminals
+			_G.dap_kill_debug_terminal = kill_debug_terminal
 
 			local function load_dotenv(filename)
 				local env_file = io.open(filename, "r")
@@ -104,30 +123,29 @@ return {
 				return root .. "/packages/" .. pkg .. "/" .. path
 			end
 
-			local function create_server_adapter(adapter_type, cmd_fn, opts)
+			local function create_server_adapter(cmd_fn, opts)
 				opts = opts or {}
 				local default_port = opts.port
 				local startup_delay = opts.delay or 300
 
 				return function(callback, config)
 					local port = config.port or default_port or math.random(30000, 45000)
-
-					-- Reuse existing terminal if open
-					local existing = active_terminals[adapter_type]
-					if existing and existing:is_open() then
-						callback({ type = "server", host = "127.0.0.1", port = port })
-						return
-					end
-
 					local cmd = cmd_fn(port, config)
-					local term = create_debug_terminal(adapter_type, cmd, {
+
+					local term, is_new = get_or_create_debug_terminal(cmd, port, {
 						on_open = function()
 							vim.defer_fn(function()
 								callback({ type = "server", host = "127.0.0.1", port = port })
 							end, startup_delay)
 						end,
 					})
-					term:toggle()
+
+					if is_new then
+						term:open()
+					else
+						-- Terminal already running, just callback
+						callback({ type = "server", host = "127.0.0.1", port = port })
+					end
 				end
 			end
 
@@ -161,7 +179,7 @@ return {
 			-- Adapters
 
 			-- JavaScript/TypeScript (pwa-node)
-			dap.adapters["pwa-node"] = create_server_adapter("pwa-node", function(port)
+			dap.adapters["pwa-node"] = create_server_adapter(function(port)
 				return string.format(
 					"node %s %d",
 					get_pkg_path("js-debug-adapter", "/js-debug/src/dapDebugServer.js"),
@@ -170,7 +188,7 @@ return {
 			end, { port = 8123, delay = 100 })
 
 			-- Go (delve)
-			dap.adapters.go = create_server_adapter("go", function(port)
+			dap.adapters.go = create_server_adapter(function(port)
 				return string.format(
 					"dlv dap --listen=127.0.0.1:%d --log --log-output=dap --build-flags='-gcflags \"all=-N -l\"'",
 					port
@@ -280,6 +298,38 @@ return {
 			dap.configurations.cpp = { launch_json_divider() }
 			dap.configurations.c = dap.configurations.cpp
 
+			local function cleanup_debug_binaries()
+				local patterns = {
+					"__debug_bin*", -- Go delve
+					"__debug_*", -- Generic
+				}
+
+				local cwd = vim.fn.getcwd()
+				for _, pattern in ipairs(patterns) do
+					local files = vim.fn.glob(cwd .. "/" .. pattern, false, true)
+					for _, file in ipairs(files) do
+						os.remove(file)
+					end
+				end
+			end
+
+			dap.listeners.before.event_terminated["cleanup"] = function()
+				kill_debug_terminal()
+				cleanup_debug_binaries()
+			end
+
+			dap.listeners.before.event_exited["cleanup"] = function()
+				kill_debug_terminal()
+				cleanup_debug_binaries()
+			end
+
+			dap.listeners.before.disconnect["cleanup"] = function()
+				kill_debug_terminal()
+				cleanup_debug_binaries()
+			end
+
+			_G.dap_cleanup_debug_binaries = cleanup_debug_binaries
+
 			-- Init
 			load_dotenv(".env")
 			vim.api.nvim_set_hl(0, "DapStoppedLine", { default = true, link = "Visual" })
@@ -348,9 +398,15 @@ return {
 				desc = "Debug Nearest (REPL in panel)",
 			},
 			{
-				"<leader>dx",
+				"<leader>dt",
 				function()
 					require("dap").terminate()
+					if _G.dap_kill_debug_terminal then
+						_G.dap_kill_debug_terminal()
+					end
+					if _G.dap_cleanup_debug_binaries then
+						_G.dap_cleanup_debug_binaries()
+					end
 				end,
 				desc = "Terminate DAP",
 			},
