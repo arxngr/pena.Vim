@@ -182,7 +182,6 @@ vim.api.nvim_create_autocmd({ "WinLeave" }, {
 vim.api.nvim_create_autocmd("BufWritePost", {
 	callback = function(args)
 		local dap = require("dap")
-
 		local session = dap.session()
 		if not session then
 			return
@@ -190,56 +189,33 @@ vim.api.nvim_create_autocmd("BufWritePost", {
 
 		local config = session.config or {}
 		local adapter_type = config.type
-		local port = config.port or 2345 -- fallback
-		local host = config.host or "127.0.0.1"
 
-		-- Patterns per adapter
-		local file_matches = {
+		local file_patterns = {
 			go = "%.go$",
-			rust = "%.rs$",
 			python = "%.py$",
-			javascript = "%.js$",
-			typescript = "%.ts$",
+			["pwa-node"] = "%.[tj]sx?$",
+			["pwa-chrome"] = "%.[tj]sx?$",
+			cppdbg = "%.[ch]pp?$",
 		}
 
 		local current_file = vim.api.nvim_buf_get_name(args.buf)
-		local match_pattern = file_matches[adapter_type]
+		local pattern = file_patterns[adapter_type]
 
-		if not match_pattern or not current_file:match(match_pattern) then
+		if not pattern or not current_file:match(pattern) then
 			return
 		end
 
-		-- Helper to wait for port
-		local function wait_for_port(host, port, callback, interval, max_tries)
-			local tries = 0
-			local timer = vim.loop.new_timer()
-			timer:start(0, interval or 500, function()
-				local socket = vim.loop.new_tcp()
-				socket:connect(host, port, function(err)
-					if not err then
-						timer:stop()
-						timer:close()
-						socket:close()
-						vim.schedule(callback)
-					else
-						tries = tries + 1
-						if tries >= (max_tries or 10) then
-							timer:stop()
-							timer:close()
-							socket:close()
-							vim.notify("Timeout waiting for debug adapter on port " .. port, vim.log.levels.WARN)
-						else
-							socket:close()
-						end
-					end
-				end)
-			end)
+		local saved_config = vim.deepcopy(config)
+
+		-- Kill the adapter terminal if it exists (for server-type adapters)
+		if _G.dap_kill_adapter_terminal then
+			_G.dap_kill_adapter_terminal(adapter_type)
 		end
 
-		-- Restart the debugger
-		dap.terminate()
-		wait_for_port(host, port, function()
-			dap.run(config)
+		dap.terminate(nil, nil, function()
+			vim.defer_fn(function()
+				dap.run(saved_config)
+			end, 500)
 		end)
 	end,
 })

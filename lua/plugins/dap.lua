@@ -42,6 +42,46 @@ return {
 			local dap = require("dap")
 			local Terminal = require("toggleterm.terminal").Terminal
 
+			local terminal_defaults = {
+				close_on_exit = true,
+				hidden = false,
+				direction = "horizontal",
+			}
+
+			-- Track active terminals by adapter type for cleanup
+			local active_terminals = {}
+
+			local function create_debug_terminal(adapter_type, cmd, opts)
+				opts = opts or {}
+				local term_opts = vim.tbl_extend("force", terminal_defaults, {
+					cmd = cmd,
+					on_open = opts.on_open,
+					on_exit = function(term, job, exit_code, event)
+						active_terminals[adapter_type] = nil
+						if opts.on_exit then
+							opts.on_exit(term, job, exit_code, event)
+						end
+					end,
+				})
+
+				local term = Terminal:new(term_opts)
+				active_terminals[adapter_type] = term
+				return term
+			end
+
+			-- Kill terminal for adapter (used in hot reload)
+			local function kill_adapter_terminal(adapter_type)
+				local term = active_terminals[adapter_type]
+				if term then
+					term:shutdown()
+					active_terminals[adapter_type] = nil
+				end
+			end
+
+			-- Expose for autocmd
+			_G.dap_kill_adapter_terminal = kill_adapter_terminal
+			_G.dap_active_terminals = active_terminals
+
 			local function load_dotenv(filename)
 				local env_file = io.open(filename, "r")
 				if not env_file then
@@ -50,7 +90,6 @@ return {
 				for line in env_file:lines() do
 					local key, val = line:match("^([%w_]+)%s*=%s*(.*)$")
 					if key and val then
-						-- Strip quotes if any
 						val = val:gsub([["(.*)"]], "%1"):gsub([[\'(.*)\']], "%1")
 						vim.fn.setenv(key, val)
 					end
@@ -58,7 +97,6 @@ return {
 				env_file:close()
 			end
 
-			-- Helper to get package path
 			local function get_pkg_path(pkg, path)
 				pcall(require, "mason")
 				local root = vim.env.MASON or (vim.fn.stdpath("data") .. "/mason")
@@ -66,44 +104,96 @@ return {
 				return root .. "/packages/" .. pkg .. "/" .. path
 			end
 
-			-- Prevent for toggle the term again and again
-			local js_debug_port = 8123
-			local js_debug_term = nil
-			dap.adapters["pwa-node"] = function(callback)
-				if js_debug_term and js_debug_term:is_open() then
-					callback({
-						type = "server",
-						host = "127.0.0.1",
-						port = js_debug_port,
-					})
-					return
-				end
+			local function create_server_adapter(adapter_type, cmd_fn, opts)
+				opts = opts or {}
+				local default_port = opts.port
+				local startup_delay = opts.delay or 300
 
-				js_debug_term = Terminal:new({
-					cmd = string.format(
-						"node %s %d",
-						get_pkg_path("js-debug-adapter", "/js-debug/src/dapDebugServer.js"),
-						js_debug_port
-					),
-					close_on_exit = false,
-					direction = "horizontal",
-					hidden = false,
-					on_open = function(term)
-						vim.defer_fn(function()
-							callback({
-								type = "server",
-								host = "127.0.0.1",
-								port = js_debug_port,
-							})
-						end, 100)
-					end,
-					on_exit = function(term, job, exit_code, event)
-						js_debug_term = nil
-					end,
-				})
-				js_debug_term:toggle()
+				return function(callback, config)
+					local port = config.port or default_port or math.random(30000, 45000)
+
+					-- Reuse existing terminal if open
+					local existing = active_terminals[adapter_type]
+					if existing and existing:is_open() then
+						callback({ type = "server", host = "127.0.0.1", port = port })
+						return
+					end
+
+					local cmd = cmd_fn(port, config)
+					local term = create_debug_terminal(adapter_type, cmd, {
+						on_open = function()
+							vim.defer_fn(function()
+								callback({ type = "server", host = "127.0.0.1", port = port })
+							end, startup_delay)
+						end,
+					})
+					term:toggle()
+				end
 			end
 
+			local function launch_json_divider()
+				return {
+					name = "----- ↓ launch.json configs ↓ -----",
+					type = "",
+					request = "launch",
+				}
+			end
+
+			local signs = {
+				Stopped = { "👉", "DiagnosticWarn", "DapStoppedLine" },
+				Breakpoint = { "🌀", "DiagnosticInfo", nil },
+				BreakpointCondition = { "⚡", "DiagnosticInfo", nil },
+				BreakpointRejected = { "❌", "DiagnosticError", nil },
+				LogPoint = { "📝", "DiagnosticInfo", nil },
+				BreakpointDisabled = { "⚪", "DiagnosticHint", nil },
+			}
+
+			for name, sign in pairs(signs) do
+				sign = type(sign) == "table" and sign or { sign }
+				vim.fn.sign_define("Dap" .. name, {
+					text = sign[1],
+					texthl = sign[2] or "DiagnosticInfo",
+					linehl = sign[3],
+					numhl = sign[3],
+				})
+			end
+
+			-- Adapters
+
+			-- JavaScript/TypeScript (pwa-node)
+			dap.adapters["pwa-node"] = create_server_adapter("pwa-node", function(port)
+				return string.format(
+					"node %s %d",
+					get_pkg_path("js-debug-adapter", "/js-debug/src/dapDebugServer.js"),
+					port
+				)
+			end, { port = 8123, delay = 100 })
+
+			-- Go (delve)
+			dap.adapters.go = create_server_adapter("go", function(port)
+				return string.format(
+					"dlv dap --listen=127.0.0.1:%d --log --log-output=dap --build-flags='-gcflags \"all=-N -l\"'",
+					port
+				)
+			end, { delay = 300 })
+
+			-- Python (executable adapter, no terminal needed)
+			dap.adapters.python = {
+				type = "executable",
+				command = "python",
+				args = { "-m", "debugpy.adapter" },
+			}
+
+			-- C/C++ (executable adapter)
+			dap.adapters.cppdbg = {
+				id = "cppdbg",
+				type = "executable",
+				command = vim.fn.stdpath("data") .. "/mason/bin/OpenDebugAD7",
+			}
+
+			-- Configurations
+
+			-- JavaScript/TypeScript
 			local js_configs = {
 				{
 					type = "pwa-node",
@@ -139,29 +229,14 @@ return {
 					protocol = "inspector",
 					userDataDir = false,
 				},
-				-- Divider for the launch.json derived configs
-				{
-					name = "----- ↓ launch.json configs ↓ -----",
-					type = "",
-					request = "launch",
-				},
+				launch_json_divider(),
 			}
 
-			-- Apply configurations to all JavaScript-based languages
-			local js_based_languages = { "javascript", "typescript", "javascriptreact", "typescriptreact" }
-			for _, language in ipairs(js_based_languages) do
-				dap.configurations[language] = js_configs
+			for _, lang in ipairs(js_based_languages) do
+				dap.configurations[lang] = js_configs
 			end
 
-			load_dotenv(".env")
-			vim.api.nvim_set_hl(0, "DapStoppedLine", { default = true, link = "Visual" })
-
 			-- Python
-			dap.adapters.python = {
-				type = "executable",
-				command = "python",
-				args = { "-m", "debugpy.adapter" },
-			}
 			dap.configurations.python = {
 				{
 					type = "python",
@@ -172,41 +247,10 @@ return {
 						return vim.fn.exepath("python") or "python"
 					end,
 				},
-				{
-					name = "----- ↓ launch.json configs ↓ -----",
-					type = "",
-					request = "launch",
-				},
+				launch_json_divider(),
 			}
 
-			dap.adapters.go = function(callback, config)
-				-- Use config.port if specified (for fixed-port attach)
-				local port = config.port or math.random(30000, 45000)
-
-				local dlv_cmd = string.format(
-					"dlv dap --listen=127.0.0.1:%d --log --log-output=dap --build-flags='-gcflags \"all=-N -l\"'",
-					port
-				)
-
-				local term = Terminal:new({
-					cmd = dlv_cmd,
-					close_on_exit = false,
-					hidden = false,
-					direction = "horizontal",
-					on_open = function()
-						vim.defer_fn(function()
-							callback({
-								type = "server",
-								host = "127.0.0.1",
-								port = port,
-							})
-						end, 300)
-					end,
-				})
-
-				term:toggle()
-			end
-
+			-- Go
 			dap.configurations.go = {
 				{
 					type = "go",
@@ -229,39 +273,21 @@ return {
 					mode = "test",
 					program = "${file}",
 				},
-				{
-					name = "----- ↓ launch.json configs ↓ -----",
-					type = "",
-					request = "launch",
-				},
+				launch_json_divider(),
 			}
 
-			dap.adapters.cppdbg = {
-				id = "cppdbg",
-				type = "executable",
-				command = vim.fn.stdpath("data") .. "/mason/bin/OpenDebugAD7",
-			}
-			dap.configurations.cpp = {
-				{
-					name = "----- ↓ launch.json configs ↓ -----",
-					type = "",
-					request = "launch",
-				},
-			}
+			-- C/C++
+			dap.configurations.cpp = { launch_json_divider() }
 			dap.configurations.c = dap.configurations.cpp
+
+			-- Init
+			load_dotenv(".env")
+			vim.api.nvim_set_hl(0, "DapStoppedLine", { default = true, link = "Visual" })
 		end,
 		keys = {
 			{
 				"<leader>da",
 				function()
-					if not vim.fn.filereadable(".vscode/launch.json") == 1 then
-						require("dap.ext.vscode").load_launchjs(nil, {
-							["pwa-node"] = js_based_languages,
-							["chrome"] = js_based_languages,
-							["pwa-chrome"] = js_based_languages,
-							["go"] = go,
-						})
-					end
 					require("dap").continue()
 				end,
 				desc = "Start debugging",
@@ -314,13 +340,9 @@ return {
 				function()
 					local dapui = require("dapui")
 					local dap = require("dap")
-
-					local listener_id = "open-panel-repl"
-
-					dap.listeners.after.event_initialized[listener_id] = function()
+					dap.listeners.after.event_initialized["open-panel-repl"] = function()
 						dapui.open()
 					end
-
 					require("neotest").run.run({ strategy = "dap" })
 				end,
 				desc = "Debug Nearest (REPL in panel)",
