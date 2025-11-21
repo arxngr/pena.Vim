@@ -195,6 +195,14 @@ return {
 				)
 			end, { delay = 300 })
 
+			dap.adapters.python = create_server_adapter(function(port, config)
+				return string.format(
+					"python -m debugpy --listen 127.0.0.1:%d --wait-for-client %s",
+					port,
+					config.program or "${file}"
+				)
+			end, { delay = 500 })
+
 			-- Python (executable adapter, no terminal needed)
 			dap.adapters.python = {
 				type = "executable",
@@ -203,6 +211,12 @@ return {
 			}
 
 			-- C/C++ (executable adapter)
+			dap.adapters.codelldb = create_server_adapter(function(port)
+				local exe = get_pkg_path("codelldb", "extension/adapter/codelldb")
+				return string.format("%s --port %d", exe, port)
+			end)
+
+			-- Fallback cppdbg (no terminal)
 			dap.adapters.cppdbg = {
 				id = "cppdbg",
 				type = "executable",
@@ -295,7 +309,36 @@ return {
 			}
 
 			-- C/C++
-			dap.configurations.cpp = { launch_json_divider() }
+			dap.configurations.cpp = {
+				{
+					type = "cppdbg",
+					request = "launch",
+					name = "Launch with GDB",
+					program = function()
+						return vim.fn.input("Path to executable: ", vim.fn.getcwd() .. "/", "file")
+					end,
+					cwd = "${workspaceFolder}",
+					stopAtEntry = true, -- stop at main
+					setupCommands = {
+						{
+							text = "-enable-pretty-printing",
+							description = "Enable pretty printing",
+							ignoreFailures = true,
+						},
+					},
+				},
+				{
+					type = "codelldb",
+					request = "launch",
+					name = "Launch file",
+					program = function()
+						return vim.fn.input("Path to executable: ", vim.fn.getcwd() .. "/", "file")
+					end,
+					cwd = "${workspaceFolder}",
+					stopOnEntry = false,
+				},
+				launch_json_divider(),
+			}
 			dap.configurations.c = dap.configurations.cpp
 
 			local function cleanup_debug_binaries()
