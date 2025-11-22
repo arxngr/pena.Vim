@@ -181,6 +181,10 @@ vim.api.nvim_create_autocmd({ "WinLeave" }, {
 
 vim.api.nvim_create_autocmd("BufWritePost", {
 	callback = function(args)
+		if not vim.g.dap_auto_reload_on_save then
+			return
+		end
+
 		local dap = require("dap")
 		local session = dap.session()
 		if not session then
@@ -207,7 +211,7 @@ vim.api.nvim_create_autocmd("BufWritePost", {
 
 		local saved_config = vim.deepcopy(config)
 
-		-- Kill the adapter terminal if it exists (for server-type adapters)
+		-- Kill adapter terminal (your global function)
 		if _G.dap_kill_adapter_terminal then
 			_G.dap_kill_adapter_terminal(adapter_type)
 		end
@@ -215,7 +219,7 @@ vim.api.nvim_create_autocmd("BufWritePost", {
 		dap.terminate(nil, nil, function()
 			vim.defer_fn(function()
 				dap.run(saved_config)
-			end, 500)
+			end, 300)
 		end)
 	end,
 })

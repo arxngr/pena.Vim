@@ -51,3 +51,4 @@ vim.opt.formatexpr = ""
 vim.g.snacks_animate = false
 vim.o.winbar = "%{%v:lua.require'nvim-navic'.get_location()%}"
 vim.opt.mouse = ""
+vim.g.dap_auto_reload_on_save = false
