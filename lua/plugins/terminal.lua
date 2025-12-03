@@ -46,7 +46,7 @@ return {
 				lazy_term:toggle()
 			end
 
-			vim.keymap.set("n", "<leader>dt", toggle_lazy_term, { desc = "Toggle Floating Terminal" })
+			vim.keymap.set("n", "<leader>te", toggle_lazy_term, { desc = "Toggle Floating Terminal" })
 		end,
 	},
 }

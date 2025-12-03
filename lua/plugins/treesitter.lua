@@ -1,7 +1,6 @@
 return { -- Highlight, edit, and navigate code
 	{
 		"nvim-treesitter/nvim-treesitter",
-		main = "nvim-treesitter.configs", -- Sets main module to use for opts
 		cmd = { "TSUpdateSync", "TSInstall" },
 		-- [[ Configure Treesitter ]] See `:help nvim-treesitter`
 		opts = {
