@@ -48,3 +48,19 @@ keymap("v", ">", ">gv")
 keymap("n", "<leader>bd", ":bd<CR>", { desc = "Close Buffer" })
 
 keymap("n", "<leader>cd", vim.diagnostic.open_float, { desc = "Open float diagnostic", remap = true })
+
+local diagnostic_goto = function(next, severity)
+	return function()
+		vim.diagnostic.jump({
+			count = (next and 1 or -1) * vim.v.count1,
+			severity = severity and vim.diagnostic.severity[severity] or nil,
+			float = true,
+		})
+	end
+end
+keymap("n", "]d", diagnostic_goto(true), { desc = "Next Diagnostic" })
+keymap("n", "[d", diagnostic_goto(false), { desc = "Prev Diagnostic" })
+keymap("n", "]e", diagnostic_goto(true, "ERROR"), { desc = "Next Error" })
+keymap("n", "[e", diagnostic_goto(false, "ERROR"), { desc = "Prev Error" })
+keymap("n", "]w", diagnostic_goto(true, "WARN"), { desc = "Next Warning" })
+keymap("n", "[w", diagnostic_goto(false, "WARN"), { desc = "Prev Warning" })

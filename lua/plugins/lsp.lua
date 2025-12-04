@@ -128,26 +128,4 @@ return {
 			end
 		end,
 	},
-
-	{
-		"ray-x/lsp_signature.nvim",
-		event = "LspAttach",
-		config = function()
-			require("lsp_signature").setup({
-				bind = true,
-				handler_opts = {
-					border = "rounded",
-				},
-				hint_enable = false,
-				floating_window = false,
-				doc_lines = 5,
-				max_height = 8,
-				max_width = 60,
-				wrap = false,
-				timer_interval = 300,
-				hi_parameter = "Search",
-				toggle_key = "<M-x>",
-			})
-		end,
-	},
 }
