@@ -30,7 +30,7 @@ require("lazy").setup({
 	require("plugins.overseer"),
 	require("plugins.rainbow-delimiter"),
 	require("plugins.conform"),
-	require("plugins.neotest"),
+	require("plugins.test"),
 	require("plugins.trouble"),
 	require("plugins.colorscheme"),
 	require("plugins.visual-multi"),

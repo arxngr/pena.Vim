@@ -61,10 +61,10 @@ return {
 
 				debug_term = Terminal:new({
 					cmd = cmd,
-					close_on_exit = true,
-					hidden = true,
+					close_on_exit = false,
+					hidden = false,
 					direction = "horizontal",
-					auto_scroll = false,
+					auto_scroll = true,
 					start_in_insert = false,
 					on_open = function(term)
 						vim.cmd("stopinsert")
@@ -77,10 +77,6 @@ return {
 						if opts.on_open then
 							opts.on_open(term)
 						end
-					end,
-					on_exit = function()
-						debug_term = nil
-						debug_term_port = nil
 					end,
 				})
 
@@ -186,10 +182,7 @@ return {
 
 			-- Go (delve)
 			dap.adapters.go = create_server_adapter(function(port)
-				return string.format(
-					"dlv dap --listen=127.0.0.1:%d --log --log-output=dap --build-flags='-gcflags \"all=-N -l\"'",
-					port
-				)
+				return string.format("dlv dap --listen=127.0.0.1:%d", port)
 			end, { delay = 300 })
 
 			dap.adapters.python = create_server_adapter(function(port, config)
@@ -354,7 +347,6 @@ return {
 			end
 
 			dap.listeners.before.event_terminated["cleanup"] = function()
-				kill_debug_terminal()
 				cleanup_debug_binaries()
 			end
 
