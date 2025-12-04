@@ -95,6 +95,9 @@ return { -- Highlight, edit, and navigate code
 		dependencies = {
 			"nvim-treesitter/nvim-treesitter-textobjects",
 		},
+		config = function(_, opts)
+			require("nvim-treesitter.configs").setup(opts)
+		end,
 	},
 	{
 		"nvim-treesitter/nvim-treesitter-context",

@@ -31,9 +31,6 @@ return {
 					})
 				end,
 			},
-			{
-				"leoluz/nvim-dap-go",
-			},
 		},
 		opts = function()
 			require("overseer").enable_dap()
@@ -383,28 +380,42 @@ return {
 				function()
 					require("dap").continue()
 				end,
-				desc = "Start debugging",
+				desc = "Debug Start",
 			},
 			{
 				"<leader>dc",
 				function()
 					require("dap").continue()
 				end,
-				desc = "Continue",
+				desc = "Debug Continue",
 			},
 			{
-				"<leader>dO",
+				"<leader>di",
 				function()
-					require("dap").step_out()
+					require("dap").step_into()
 				end,
-				desc = "Step Out",
+				desc = "Debug Step Into",
 			},
 			{
 				"<leader>do",
 				function()
 					require("dap").step_over()
 				end,
-				desc = "Step Over",
+				desc = "Debug Step Over",
+			},
+			{
+				"<leader>dO",
+				function()
+					require("dap").step_out()
+				end,
+				desc = "Debug Step Out",
+			},
+			{
+				"<leader>db",
+				function()
+					require("dap").toggle_breakpoint()
+				end,
+				desc = "Debug Toggle Breakpoint",
 			},
 			{
 				"<leader>dq",
@@ -412,33 +423,14 @@ return {
 					require("dap").clear_breakpoints()
 					vim.notify("Breakpoints cleared", vim.log.levels.INFO)
 				end,
-				desc = "Clear all breakpoints",
-			},
-			{
-				"<leader>db",
-				function()
-					require("dap").toggle_breakpoint()
-				end,
-				desc = "Toggle breakpoint",
+				desc = "Debug Clear Breakpoints",
 			},
 			{
 				"<leader>dw",
 				function()
 					require("dap.ui.widgets").hover()
 				end,
-				desc = "Hover Variable",
-			},
-			{
-				"<leader>td",
-				function()
-					local dapui = require("dapui")
-					local dap = require("dap")
-					dap.listeners.after.event_initialized["open-panel-repl"] = function()
-						dapui.open()
-					end
-					require("neotest").run.run({ strategy = "dap" })
-				end,
-				desc = "Debug Nearest (REPL in panel)",
+				desc = "Debug Hover Variable",
 			},
 			{
 				"<leader>dt",
@@ -451,16 +443,15 @@ return {
 						_G.dap_cleanup_debug_binaries()
 					end
 				end,
-				desc = "Terminate DAP",
+				desc = "Debug Terminate",
 			},
 			{
-				"<leader>dR",
+				"<leader>dr",
 				function()
 					vim.g.dap_auto_reload_on_save = not vim.g.dap_auto_reload_on_save
-
 					vim.notify("DAP Auto-Reload: " .. tostring(vim.g.dap_auto_reload_on_save), vim.log.levels.INFO)
 				end,
-				desc = "Toggle DAP Auto Reload",
+				desc = "Debug Toggle Auto Reload",
 			},
 		},
 	},
