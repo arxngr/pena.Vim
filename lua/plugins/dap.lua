@@ -438,7 +438,7 @@ return {
 				desc = "Debug Terminate",
 			},
 			{
-				"<leader>dr",
+				"<leader>dR",
 				function()
 					vim.g.dap_auto_reload_on_save = not vim.g.dap_auto_reload_on_save
 					vim.notify("DAP Auto-Reload: " .. tostring(vim.g.dap_auto_reload_on_save), vim.log.levels.INFO)

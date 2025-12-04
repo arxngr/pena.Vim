@@ -44,6 +44,41 @@ return {
 						return buftype == "terminal"
 					end,
 				},
+				{
+					title = "Terminal",
+					ft = "toggleterm",
+					size = { height = 0.23 },
+
+					filter = function(bufnr)
+						local ft = vim.api.nvim_get_option_value("filetype", { buf = bufnr })
+						if ft ~= "toggleterm" then
+							return false
+						end
+
+						-- Get all windows displaying this buffer
+						local wins = vim.fn.win_findbuf(bufnr)
+						if #wins == 0 then
+							return false
+						end
+
+						for _, win in ipairs(wins) do
+							local cfg = vim.api.nvim_win_get_config(win)
+
+							-- FLOAT terminal? Then skip.
+							if cfg.relative ~= "" then
+								return false
+							end
+
+							-- HORIZONTAL terminal must have a positive height
+							local height = vim.api.nvim_win_get_height(win)
+							if height > 3 then
+								return true
+							end
+						end
+
+						return false
+					end,
+				},
 			},
 		})
 	end,
