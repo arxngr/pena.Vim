@@ -450,13 +450,6 @@ return -- lazy.nvim
 			end,
 			desc = "Undo History",
 		},
-		{
-			"<leader>uC",
-			function()
-				Snacks.picker.colorschemes()
-			end,
-			desc = "Colorschemes",
-		},
 		-- LSP
 		{
 			"gd",
@@ -492,7 +485,7 @@ return -- lazy.nvim
 			function()
 				Snacks.picker.lsp_type_definitions()
 			end,
-			desc = "Goto T[y]pe Definition",
+			desc = "Goto Type Definition",
 		},
 		{
 			"<leader>ss",
