@@ -1,3 +1,5 @@
+local storage = require("core.storage")
+
 local js_based_languages = {
 	"typescript",
 	"javascript",
@@ -38,6 +40,8 @@ return {
 		config = function()
 			local dap = require("dap")
 			local Terminal = require("toggleterm.terminal").Terminal
+			local saved = storage.load("settings.json")
+			vim.g.dap_auto_reload_on_save = saved.dap and saved.dap.auto_reload_on_save or false
 
 			-- Single shared terminal for all debug adapters
 			local debug_term = nil
@@ -425,7 +429,7 @@ return {
 				desc = "Debug Hover Variable",
 			},
 			{
-				"<leader>dt",
+				"<leader>dT",
 				function()
 					require("dap").terminate()
 					if _G.dap_kill_debug_terminal then
@@ -441,6 +445,13 @@ return {
 				"<leader>dR",
 				function()
 					vim.g.dap_auto_reload_on_save = not vim.g.dap_auto_reload_on_save
+
+					storage.save("settings.json", {
+						dap = {
+							auto_reload_on_save = vim.g.dap_auto_reload_on_save,
+						},
+					})
+
 					vim.notify("DAP Auto-Reload: " .. tostring(vim.g.dap_auto_reload_on_save), vim.log.levels.INFO)
 				end,
 				desc = "Debug Toggle Auto Reload",

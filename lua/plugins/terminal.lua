@@ -8,7 +8,11 @@ return {
 
 			require("toggleterm").setup({
 				size = function(term)
-					return math.floor(vim.o.lines * 0.25)
+					if term.direction == "horizontal" then
+						return math.floor(vim.o.lines * 0.25)
+					elseif term.direction == "vertical" then
+						return math.floor(vim.o.columns * 0.3)
+					end
 				end,
 				direction = "float",
 				float_opts = {
@@ -19,34 +23,27 @@ return {
 				persist_mode = true,
 				close_on_exit = false,
 				shell = shell,
-				on_exit = function(term, job_exit_code, _)
-					if job_exit_code == 0 then
-						vim.schedule(function()
-							vim.cmd("bd! " .. term.bufnr)
-						end)
-					else
-						vim.notify("Terminal exited with code " .. job_exit_code, vim.log.levels.WARN)
-					end
-				end,
 			})
 
-			-- Reusable floating terminal with fixed ID
 			local Terminal = require("toggleterm.terminal").Terminal
-			local lazy_term = Terminal:new({
-				id = 1,
-				direction = "float",
-				float_opts = {
-					border = "rounded",
-				},
-				hidden = true,
-				close_on_exit = false,
-			})
 
-			function _G.toggle_lazy_term()
-				lazy_term:toggle()
+			local function create_terminal(opts)
+				opts = opts or {}
+				local term = Terminal:new(vim.tbl_extend("force", {
+					hidden = true,
+					close_on_exit = false,
+				}, opts))
+
+				return function()
+					term:toggle()
+				end
 			end
 
-			vim.keymap.set("n", "<leader>te", toggle_lazy_term, { desc = "Toggle Floating Terminal" })
+			-- Create terminals
+			local toggle_float_term = create_terminal({ id = 1, direction = "float" })
+
+			-- Keymaps
+			vim.keymap.set("n", "<leader>dt", toggle_float_term, { desc = "Toggle Floating Terminal" })
 		end,
 	},
 }

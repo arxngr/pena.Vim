@@ -206,18 +206,10 @@ vim.api.nvim_create_autocmd({ "WinLeave" }, {
 
 local function close_edgy_toggleterm()
 	local edgy = require("edgy")
-	local bottom = edgy.get("bottom")
-	if not bottom then
-		return
-	end
 
-	-- iterate through bottom windows and close only toggleterm
-	for _, win in ipairs(bottom.wins or {}) do
-		local buf = vim.api.nvim_win_get_buf(win.win)
-		local ft = vim.api.nvim_get_option_value("filetype", { buf = buf })
-		if ft == "toggleterm" then
-			edgy.close_win(win.win) -- closes only this one window
-		end
+	local win = edgy.get_win()
+	if win and win.pos == "bottom" and win.buf_name:match("toggleterm") then
+		win:close()
 	end
 end
 
@@ -263,7 +255,7 @@ vim.api.nvim_create_autocmd("BufWritePost", {
 		dap.terminate(nil, nil, function()
 			vim.defer_fn(function()
 				dap.run(saved_config)
-			end, 300)
+			end, 200)
 		end)
 	end,
 })
