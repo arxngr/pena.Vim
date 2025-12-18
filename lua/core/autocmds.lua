@@ -311,3 +311,33 @@ create_autocmd("BufEnter", {
 		end
 	end,
 })
+
+-- Auto-open diff for files from Git status buffer and close status
+create_autocmd("FileType", {
+	pattern = "fugitive",
+	callback = function(event)
+		local buf = event.buf
+		if vim.bo[buf].ft ~= "fugitive" then
+			return
+		end
+
+		vim.keymap.set("n", "<CR>", function()
+			local line = vim.api.nvim_get_current_line()
+			-- Match lines starting with M, A, D, ?? followed by space
+			local file = line:match("^[ MAD?]+%s+(.+)$")
+
+			if file then
+				-- Close the Git status buffer
+				vim.api.nvim_buf_delete(buf, { force = true })
+				-- Open the file
+				vim.cmd("edit " .. file)
+				-- Open vertical diff in that file
+				vim.cmd("Gvdiffsplit")
+			else
+				-- Fallback: just open normally if not a file line
+				vim.api.nvim_buf_delete(buf, { force = true })
+				vim.cmd("edit " .. vim.fn.expand("<cfile>"))
+			end
+		end, { buffer = buf, silent = true, desc = "Open file in diff mode from Git status" })
+	end,
+})
