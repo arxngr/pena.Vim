@@ -1,3 +1,5 @@
+-- Terminal/REPL Toggle Functions
+
 local function toggle_toggleterm(bufnr)
 	local Terminal = require("toggleterm.terminal")
 	if Terminal.get_terminal_by_bufnr then
@@ -36,7 +38,27 @@ local function quit_or_toggle(bufnr)
 	end
 end
 
-vim.api.nvim_create_autocmd({ "FocusGained", "TermClose", "TermLeave" }, {
+-- Autocmd Helper Functions
+
+local function create_autocmd(events, opts)
+	vim.api.nvim_create_autocmd(events, opts)
+end
+
+local function set_buffer_keymap(buf, mode, key, action, desc)
+	vim.keymap.set(mode, key, action, {
+		buffer = buf,
+		silent = true,
+		desc = desc,
+	})
+end
+
+local function set_buflisted_false(buf)
+	vim.bo[buf].buflisted = false
+end
+
+-- File Operations
+
+create_autocmd({ "FocusGained", "TermClose", "TermLeave" }, {
 	callback = function()
 		if vim.o.buftype ~= "nofile" then
 			vim.cmd("checktime")
@@ -44,13 +66,13 @@ vim.api.nvim_create_autocmd({ "FocusGained", "TermClose", "TermLeave" }, {
 	end,
 })
 
-vim.api.nvim_create_autocmd("TextYankPost", {
+create_autocmd("TextYankPost", {
 	callback = function()
 		(vim.hl or vim.highlight).on_yank()
 	end,
 })
 
-vim.api.nvim_create_autocmd({ "VimResized" }, {
+create_autocmd("VimResized", {
 	callback = function()
 		local current_tab = vim.fn.tabpagenr()
 		vim.cmd("tabdo wincmd =")
@@ -58,7 +80,7 @@ vim.api.nvim_create_autocmd({ "VimResized" }, {
 	end,
 })
 
-vim.api.nvim_create_autocmd("BufReadPost", {
+create_autocmd("BufReadPost", {
 	callback = function(event)
 		local exclude = { "gitcommit" }
 		local buf = event.buf
@@ -74,73 +96,81 @@ vim.api.nvim_create_autocmd("BufReadPost", {
 	end,
 })
 
-vim.api.nvim_create_autocmd("FileType", {
-	pattern = {
-		"PlenaryTestPopup",
-		"checkhealth",
-		"dbout",
-		"gitsigns-blame",
-		"grug-far",
-		"help",
-		"lspinfo",
-		"neotest-output",
-		"neotest-output-panel",
-		"neotest-summary",
-		"notify",
-		"qf",
-		"spectre_panel",
-		"startuptime",
-		"tsplayground",
-		"dap-float",
-		"toggleterm",
-		"dap-repl",
-		"vim",
-		"floaterm",
-		"oil",
-		"terminal",
-		"fugitive",
-		"fugitiveblame",
-		"fugitivecommit",
-		"fugitivepatch",
-		"fugitive_diff",
-	},
+-- FileType-specific Autocmds
+
+local special_filetypes = {
+	"PlenaryTestPopup",
+	"checkhealth",
+	"dbout",
+	"gitsigns-blame",
+	"grug-far",
+	"help",
+	"lspinfo",
+	"neotest-output",
+	"neotest-output-panel",
+	"neotest-summary",
+	"notify",
+	"qf",
+	"spectre_panel",
+	"startuptime",
+	"tsplayground",
+	"dap-float",
+	"toggleterm",
+	"dap-repl",
+	"vim",
+	"floaterm",
+	"oil",
+	"terminal",
+	"fugitive",
+	"fugitiveblame",
+	"fugitivecommit",
+	"fugitivepatch",
+	"fugitive_diff",
+	"git",
+	"M",
+}
+
+create_autocmd("FileType", {
+	pattern = special_filetypes,
 	callback = function(event)
-		vim.bo[event.buf].buflisted = false
+		set_buflisted_false(event.buf)
 		vim.schedule(function()
-			vim.keymap.set("n", "q", function()
+			set_buffer_keymap(event.buf, "n", "q", function()
 				quit_or_toggle(event.buf)
-			end, {
-				buffer = event.buf,
-				silent = true,
-				desc = "Quit buffer or toggle terminal/dap-repl",
-			})
+			end, "Quit buffer or toggle terminal/dap-repl")
 		end)
 	end,
 })
 
-vim.api.nvim_create_autocmd("FileType", {
+create_autocmd("FileType", {
 	pattern = { "man" },
 	callback = function(event)
-		vim.bo[event.buf].buflisted = false
+		set_buflisted_false(event.buf)
 	end,
 })
 
-vim.api.nvim_create_autocmd("FileType", {
-	pattern = { "text", "plaintex", "typst", "gitcommit", "markdown" },
+local text_filetypes = { "text", "plaintex", "typst", "gitcommit", "markdown" }
+
+create_autocmd("FileType", {
+	pattern = text_filetypes,
 	callback = function()
 		vim.opt_local.wrap = true
 		vim.opt_local.spell = true
 	end,
 })
 
-vim.api.nvim_create_autocmd({ "FileType" }, {
-	pattern = { "json", "jsonc", "json5" },
+local json_filetypes = { "json", "jsonc", "json5" }
+
+create_autocmd("FileType", {
+	pattern = json_filetypes,
 	callback = function()
 		vim.opt_local.conceallevel = 0
 	end,
 })
 
-vim.api.nvim_create_autocmd({ "BufWritePre" }, {
+-- Write Operations
+
+create_autocmd("BufWritePre", {
 	callback = function(event)
 		if event.match:match("^%w%w+:[\\/][\\/]") then
 			return
@@ -150,7 +180,7 @@ vim.api.nvim_create_autocmd({ "BufWritePre" }, {
 	end,
 })
 
-vim.api.nvim_create_autocmd("BufWritePre", {
+create_autocmd("BufWritePre", {
 	pattern = "*.go",
 	callback = function()
 		local clients = vim.lsp.get_active_clients({ bufnr = 0 })
@@ -158,7 +188,7 @@ vim.api.nvim_create_autocmd("BufWritePre", {
 			return
 		end
 
-		local client = clients[1] -- assume the first attached client is gopls
+		local client = clients[1]
 		local params = vim.lsp.util.make_range_params(nil, client.offset_encoding)
 		params.context = { only = { "source.organizeImports" } }
 
@@ -175,7 +205,9 @@ vim.api.nvim_create_autocmd("BufWritePre", {
 	end,
 })
 
-vim.api.nvim_create_autocmd("User", {
+-- Plugin-specific Events
+
+create_autocmd("User", {
 	pattern = "OilActionsPost",
 	callback = function(event)
 		if event.data.actions.type == "move" then
@@ -184,41 +216,53 @@ vim.api.nvim_create_autocmd("User", {
 	end,
 })
 
-vim.api.nvim_create_autocmd("FileType", {
-	pattern = { "alpha", "starter", "dashboard" }, -- Adjust to match your startup plugin
+local startup_filetypes = { "alpha", "starter", "dashboard" }
+
+create_autocmd("FileType", {
+	pattern = startup_filetypes,
 	callback = function()
-		vim.keymap.set("n", "c", require("utils").open_config, { desc = "Open config", buffer = true })
-		vim.keymap.set("n", "s", function()
+		set_buffer_keymap(vim.api.nvim_get_current_buf(), "n", "c", require("utils").open_config, "Open config")
+		set_buffer_keymap(vim.api.nvim_get_current_buf(), "n", "s", function()
 			require("persistence").load()
-		end, { desc = "Restore session for current dir", buffer = true })
+		end, "Restore session for current dir")
 	end,
 })
 
--- Enable cursorline only in the active window
-vim.api.nvim_create_autocmd({ "InsertLeave", "WinEnter" }, {
+-- Cursorline Management
+
+create_autocmd({ "InsertLeave", "WinEnter" }, {
 	pattern = "*",
 	callback = function()
 		vim.wo.cursorline = true
 	end,
 })
 
-vim.api.nvim_create_autocmd({ "WinLeave" }, {
+create_autocmd("WinLeave", {
 	pattern = "*",
 	callback = function()
 		vim.wo.cursorline = false
 	end,
 })
 
+-- DAP Auto-reload
+
 local function close_edgy_toggleterm()
 	local edgy = require("edgy")
-
 	local win = edgy.get_win()
 	if win and win.pos == "bottom" and win.buf_name:match("toggleterm") then
 		win:close()
 	end
 end
 
-vim.api.nvim_create_autocmd("BufWritePost", {
+local dap_file_patterns = {
+	go = "%.go$",
+	python = "%.py$",
+	["pwa-node"] = "%.[tj]sx?$",
+	["pwa-chrome"] = "%.[tj]sx?$",
+	cppdbg = "%.[ch]pp?$",
+}
+
+create_autocmd("BufWritePost", {
 	callback = function(args)
 		if not vim.g.dap_auto_reload_on_save then
 			return
@@ -232,17 +276,8 @@ vim.api.nvim_create_autocmd("BufWritePost", {
 
 		local config = session.config or {}
 		local adapter_type = config.type
-
-		local file_patterns = {
-			go = "%.go$",
-			python = "%.py$",
-			["pwa-node"] = "%.[tj]sx?$",
-			["pwa-chrome"] = "%.[tj]sx?$",
-			cppdbg = "%.[ch]pp?$",
-		}
-
 		local current_file = vim.api.nvim_buf_get_name(args.buf)
-		local pattern = file_patterns[adapter_type]
+		local pattern = dap_file_patterns[adapter_type]
 
 		if not pattern or not current_file:match(pattern) then
 			return
@@ -250,7 +285,6 @@ vim.api.nvim_create_autocmd("BufWritePost", {
 
 		local saved_config = vim.deepcopy(config)
 
-		-- Kill adapter terminal (your global function)
 		if _G.dap_kill_adapter_terminal then
 			_G.dap_kill_adapter_terminal(adapter_type)
 		end
@@ -262,5 +296,18 @@ vim.api.nvim_create_autocmd("BufWritePost", {
 				dap.run(saved_config)
 			end, 200)
 		end)
+	end,
+})
+
+-- Fugitive Buffer Handling
+create_autocmd("BufEnter", {
+	callback = function(event)
+		local bufname = vim.api.nvim_buf_get_name(event.buf)
+
+		if bufname:match("^fugitive:///") then
+			set_buffer_keymap(event.buf, "n", "q", function()
+				vim.api.nvim_buf_delete(event.buf, { force = true })
+			end, "Quit Fugitive buffer")
+		end
 	end,
 })
