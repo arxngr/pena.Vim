@@ -98,6 +98,11 @@ vim.api.nvim_create_autocmd("FileType", {
 		"floaterm",
 		"oil",
 		"terminal",
+		"fugitive",
+		"fugitiveblame",
+		"fugitivecommit",
+		"fugitivepatch",
+		"fugitive_diff",
 	},
 	callback = function(event)
 		vim.bo[event.buf].buflisted = false

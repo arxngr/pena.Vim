@@ -178,13 +178,6 @@ return -- lazy.nvim
 			end,
 			desc = "Notification History",
 		},
-		{
-			"<leader>e",
-			function()
-				Snacks.explorer()
-			end,
-			desc = "File Explorer",
-		},
 		-- Dashboard toggle
 		{
 			"<leader>dd",
@@ -238,13 +231,6 @@ return -- lazy.nvim
 		},
 		-- git
 		{
-			"<leader>gb",
-			function()
-				Snacks.picker.git_branches()
-			end,
-			desc = "Git Branches",
-		},
-		{
 			"<leader>gl",
 			function()
 				Snacks.picker.git_log()
@@ -257,27 +243,6 @@ return -- lazy.nvim
 				Snacks.picker.git_log_line()
 			end,
 			desc = "Git Log Line",
-		},
-		{
-			"<leader>gs",
-			function()
-				Snacks.picker.git_status()
-			end,
-			desc = "Git Status",
-		},
-		{
-			"<leader>gS",
-			function()
-				Snacks.picker.git_stash()
-			end,
-			desc = "Git Stash",
-		},
-		{
-			"<leader>gd",
-			function()
-				Snacks.picker.git_diff()
-			end,
-			desc = "Git Diff (Hunks)",
 		},
 		{
 			"<leader>gf",

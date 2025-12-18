@@ -22,7 +22,7 @@ return {
 						return trouble_data and trouble_data.mode == "symbols"
 					end,
 					open = "Trouble symbols position=left focus=false filter.buf=0",
-					size = { width = 0.15 },
+					size = { width = 0.35 },
 				},
 			},
 			bottom = {
