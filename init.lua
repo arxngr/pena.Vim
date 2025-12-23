@@ -28,6 +28,7 @@ require("lazy").setup({
 	require("plugins.git.git"),
 	require("plugins.debugging.dap"),
 	require("plugins.debugging.overseer"),
+	require("plugins.debugging.chainsaw"),
 	require("plugins.ui.rainbow-delimiter"),
 	require("plugins.formatting.conform"),
 	require("plugins.testing.test"),
