@@ -37,7 +37,7 @@ require("lazy").setup({
 	require("plugins.editing.visual-multi"),
 	require("plugins.search.grug-far"),
 	require("plugins.utilities.mini"),
-	require("plugins.lsp"),
+	require("plugins.completion.lsp"),
 	require("plugins.terminal.terminal"),
 	require("plugins.utilities.snacks"),
 	require("plugins.ui.which-key"),
