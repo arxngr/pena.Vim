@@ -36,9 +36,41 @@ return {
 
 				map("<leader>rn", vim.lsp.buf.rename, "Rename")
 				map("<leader>ca", vim.lsp.buf.code_action, "Code Action", { "n", "x" })
-				map("gD", vim.lsp.buf.declaration, "Goto Declaration")
-				map("gd", vim.lsp.buf.definition, "Goto Definition")
-				map("gr", vim.lsp.buf.references, "References")
+				map("gD", function()
+					local ok, snacks = pcall(require, "snacks")
+					if ok and snacks.picker then
+						snacks.picker.lsp_declarations()
+					else
+						vim.lsp.buf.declaration()
+					end
+				end, "Goto Declaration")
+
+				map("gd", function()
+					local ok, snacks = pcall(require, "snacks")
+					if ok and snacks.picker then
+						snacks.picker.lsp_definitions()
+					else
+						vim.lsp.buf.definition()
+					end
+				end, "Goto Definition")
+
+				map("gr", function()
+					local ok, snacks = pcall(require, "snacks")
+					if ok and snacks.picker then
+						snacks.picker.lsp_references()
+					else
+						vim.lsp.buf.references()
+					end
+				end, "References")
+
+				map("gi", function()
+					local ok, snacks = pcall(require, "snacks")
+					if ok and snacks.picker then
+						snacks.picker.lsp_implementations()
+					else
+						vim.lsp.buf.implementation()
+					end
+				end, "Goto Implementation")
 			end
 
 			-- LSP attach autocmd

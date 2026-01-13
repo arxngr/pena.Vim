@@ -83,9 +83,8 @@ return {
 					key = "<leader>xX",
 					toggle_opts = { buf = 0 },
 				}),
-				map_toggle_focus("symbols", "Symbols (Trouble)", { key = "<leader>cs" }),
 				map_toggle_focus("lsp", "LSP References (Trouble)", {
-					key = "<leader>cS",
+					key = "<leader>cs",
 				}),
 				map_toggle_focus("loclist", "Location List (Trouble)", { key = "<leader>xL" }),
 				map_toggle_focus("qflist", "Quickfix List (Trouble)", { key = "<leader>xQ" }),
