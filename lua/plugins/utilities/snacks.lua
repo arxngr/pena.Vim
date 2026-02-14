@@ -124,9 +124,9 @@ return -- lazy.nvim
 				default = {
 					layout = {
 						backdrop = false,
-						width = 0.85,
+						width = require("core.utils").get_floating_dimensions().width,
 						min_width = 80,
-						height = 0.85,
+						height = require("core.utils").get_floating_dimensions().height,
 						min_height = 3,
 						box = "vertical",
 						border = "rounded",

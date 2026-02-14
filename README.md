@@ -2,7 +2,7 @@
 
 # Pena.Vim
 
-Modular Neovim configuration tailored for developers seeking a streamlined and efficient coding environment. Built with Lua, it leverages the power of `lazy.nvim` for plugin management, offering a clean and extensible setup out of the box.([GitHub][1])
+Modular Neovim configuration tailored for developers seeking a streamlined and efficient coding environment. Built with Lua, it leverages the power of `lazy.nvim` for plugin management, offering a clean and extensible setup out of the box.
 <img width="2884" height="1920" alt="image" src="https://github.com/user-attachments/assets/910c83fd-d163-490e-8784-77a349a56e0e" />
 
 ---
@@ -14,38 +14,53 @@ Modular Neovim configuration tailored for developers seeking a streamlined and e
   * [🔧 Prerequisites](#prerequisites)
   * [📥 Steps](#steps)
 * [📦 Installing LuaRocks](#-installing-luarocks)
-
   * [💻 For Unix/Linux/macOS](#for-unixlinuxmacos)
   * [🪟 For Windows](#for-windows)
 * [🗝️ Keybindings](#-keybindings)
   * [🪄 General](#-general)
   * [🪟 Window & Terminal Navigation](#-window--terminal-navigation)
-  * [🔍 Picker](#-picker)
-  * [🧪 Neotest](#-neotest)
+  * [� Buffer Management](#-buffer-management)
+  * [�🔍 Picker (Snacks)](#-picker-snacks)
+  * [🔎 Search & Replace](#-search--replace)
+  * [🧪 Testing (vim-test)](#-testing-vim-test)
   * [🐞 Debugging (nvim-dap)](#-debugging-nvim-dap)
-  * [🔧 Code](#-code)
-  * [🧱 Misc Plugins](#-misc-plugins)
+  * [🔧 Code / LSP](#-code--lsp)
   * [📋 Trouble.nvim](#-troublenvim)
-* [📂 Project Tasks (Overseer)](#-project-tasks-overseer)
+  * [📂 Project Tasks (Overseer)](#-project-tasks-overseer)
+  * [🌿 Git](#-git)
+  * [🪵 Chainsaw (Logging)](#-chainsaw-logging)
+  * [✏️ Editing (mini.nvim)](#-editing-mininvim)
+  * [🧱 Misc Plugins](#-misc-plugins)
 * [📄 License](#-license)
 * [🙏 Acknowledgments](#-acknowledgments)
 
 ---
 
-
 ## 📦 Features
 
-* 🔧 LSP and autocompletion
-* 🧪 Testing with [Neotest](https://github.com/nvim-neotest/neotest)
-* 🐞 Debugging with [nvim-dap](https://github.com/mfussenegger/nvim-dap)
-* 🗂️ File navigation with [Picker](https://github.com/nvim-telescope/snacks.nvim)
-* 🧰 Terminal management with [ToggleTerm](https://github.com/akinsho/toggleterm.nvim)
-* 🛠️ Project tasks via [Overseer](https://github.com/stevearc/overseer.nvim)
-* 🌲 Floating file explorer using [Oil.nvim](https://github.com/stevearc/oil.nvim)
-* 🎨 Theme switching with [Themery](https://github.com/zaldih/themery.nvim)
-* 🔍 Search and Replace with [grug-far](https://github.com/jesseleite/grug-far.nvim)
-* 🚨 Diagnostics with [Trouble](https://github.com/folke/trouble.nvim)
-
+* 🔧 **LSP & Autocompletion** — powered by [nvim-lspconfig](https://github.com/neovim/nvim-lspconfig), [Mason](https://github.com/williamboman/mason.nvim), and [nvim-cmp](https://github.com/hrsh7th/nvim-cmp)
+* 🧪 **Testing** with [vim-test](https://github.com/vim-test/vim-test) (reusable terminal strategy)
+* 🐞 **Debugging** with [nvim-dap](https://github.com/mfussenegger/nvim-dap) & [nvim-dap-ui](https://github.com/rcarriga/nvim-dap-ui)
+* 🗂️ **Picker & Fuzzy Finder** with [Snacks.nvim](https://github.com/folke/snacks.nvim) (files, grep, buffers, LSP, git, diagnostics)
+* 🧰 **Terminal management** with [ToggleTerm](https://github.com/akinsho/toggleterm.nvim)
+* 🛠️ **Project tasks** via [Overseer](https://github.com/stevearc/overseer.nvim)
+* 🌲 **Floating file explorer** using [Oil.nvim](https://github.com/stevearc/oil.nvim)
+* 🎨 **Theme switching** with [Themery](https://github.com/zaldih/themery.nvim) (OneDark, Tinta)
+* 🔍 **Search and Replace** with [grug-far](https://github.com/MagicDuck/grug-far.nvim)
+* 🚨 **Diagnostics** with [Trouble](https://github.com/folke/trouble.nvim)
+* 🌿 **Git integration** with [vim-fugitive](https://github.com/tpope/vim-fugitive), [gitsigns.nvim](https://github.com/lewis6991/gitsigns.nvim) & [LazyGit](https://github.com/folke/snacks.nvim)
+* ✨ **Auto-formatting** with [conform.nvim](https://github.com/stevearc/conform.nvim) (format-on-save)
+* � **Tabline & Buffers** with [bufferline.nvim](https://github.com/akinsho/bufferline.nvim)
+* 🪵 **Smart logging** with [Chainsaw](https://github.com/chrisgrieser/nvim-chainsaw)
+* ✏️ **Editing enhancements** with [mini.nvim](https://github.com/echasnovski/mini.nvim) (surround, move, pairs, diff)
+* 🧭 **Breadcrumbs** with [nvim-navic](https://github.com/SmiteshP/nvim-navic)
+* 💬 **Command UI** with [Noice](https://github.com/folke/noice.nvim)
+* 🪗 **Code folding** with [nvim-ufo](https://github.com/kevinhwang91/nvim-ufo)
+* 💾 **Session persistence** with [persistence.nvim](https://github.com/folke/persistence.nvim)
+* ⏱️ **Coding metrics** with [WakaTime](https://github.com/wakatime/vim-wakatime)
+* 🖊️ **Multi-cursor editing** with [vim-visual-multi](https://github.com/mg979/vim-visual-multi)
+* 🌈 **Rainbow delimiters** with [rainbow-delimiters.nvim](https://github.com/HiPhish/rainbow-delimiters.nvim)
+* 💡 **Which-key** popup for keybinding discovery
 
 ---
 
@@ -58,7 +73,7 @@ Ensure you have the following installed:
 * [Neovim](https://neovim.io/) (version 0.9 or higher)
 * [Git](https://git-scm.com/)
 * [Lua 5.1](https://www.lua.org/) or [LuaJIT](https://luajit.org/)
-* [LuaRocks](https://luarocks.org/)([luarocks.org][4])
+* [LuaRocks](https://luarocks.org/)
 
 ### Steps
 
@@ -70,18 +85,16 @@ Ensure you have the following installed:
    mv ~/.config/nvim ~/.config/nvim.backup
    mv ~/.local/share/nvim ~/.local/share/nvim.backup
    mv ~/.local/state/nvim ~/.local/state/nvim.backup
-   mv ~/.cache/nvim ~/.cache/nvim.backup:contentReference[oaicite:39]{index=39}
+   mv ~/.cache/nvim ~/.cache/nvim.backup
    ```
 
 2. **Clone Repository**
 
-   Clone therepository into your Neovim configuration directory:
+   Clone the repository into your Neovim configuration directory:
 
    ```bash
    git clone https://github.com/arxngr/pena.Vim ~/.config/nvim
    ```
-
-
 
 3. **Launch Neovim**
 
@@ -91,9 +104,7 @@ Ensure you have the following installed:
    nvim
    ```
 
-
-
-Upon first launch, `lazy.nvim` will automatically install the necessary plugins. Wait for the process to complete.
+   Upon first launch, `lazy.nvim` will automatically install the necessary plugins. Wait for the process to complete.
 
 4. **Install LuaRocks (If Not Already Installed)**
 
@@ -139,15 +150,11 @@ Upon first launch, `lazy.nvim` will automatically install the necessary plugins.
    ./configure && make && sudo make install
    ```
 
-
-
 Verify the installation:
 
 ```bash
 luarocks --version
 ```
-
-
 
 ### For Windows
 
@@ -171,7 +178,7 @@ luarocks --version
 
    Download the LuaRocks Windows installer from the [official site](https://luarocks.org/releases/):
 
-   * Extract the contents and run the `install.bat` script. For example:([ESOUI Code Collection][5], [luarocks.org][4])
+   * Extract the contents and run the `install.bat` script. For example:
 
      ```cmd
      install.bat /P C:\LuaRocks /L
@@ -199,8 +206,6 @@ luarocks --version
    luarocks --version
    ```
 
-
-
 ---
 
 ## 🛠️ Usage
@@ -209,133 +214,282 @@ Once installed, pena.Vim provides a robust Neovim environment with sensible defa
 
 ---
 
-
 ## 🗝️ Keybindings
 
-Default & Custom Setting
-By default, Vim uses \ (backslash) as the "leader" key, but most users redefine it to something easier to reach—commonly the spacebar for faster access:
+**Leader key** is set to `<Space>`. **Local leader** is `,`.
 
 ### 🪄 General
 
-| Mode  | Key       | Description              |
-| ----- | --------- | ------------------------ |
-| `n`   | `c`       | Open config              |
-| `n`   | `<C-q>`   | Quit file                |
-| `n`   | `<Tab>`   | Next buffer              |
-| `n`   | `<S-Tab>` | Previous buffer          |
-| `v`   | `<` / `>` | Indent left/right        |
-| `n`   | `<C-c>`   | Copy to system clipboard |
-| `n/v` | `<C-v>`   | Paste from clipboard     |
+| Mode    | Key           | Description                      |
+| ------- | ------------- | -------------------------------- |
+| `n`     | `<C-q>`       | Quit file                        |
+| `n`/`x` | `d`          | Delete (black hole, no yank)     |
+| `x`     | `<leader>p`   | Paste without overwriting register |
+| `n`/`v` | `<C-c>`       | Copy to system clipboard         |
+| `n`/`v` | `<C-v>`       | Paste from system clipboard      |
+| `n`     | `<C-d>`       | Search word under cursor         |
+| `v`     | `<` / `>`     | Indent left/right (stays in visual) |
+| `n`     | `<leader>bd`  | Close current buffer             |
+| `n`     | `<leader>wv`  | Vertical split                   |
+| `n`     | `<leader>hv`  | Horizontal split                 |
+| `n`     | `<leader>?`   | Show buffer local keymaps (which-key) |
+| `n`     | `<leader>dd`  | Open dashboard                   |
+
+---
 
 ### 🪟 Window & Terminal Navigation
 
-| Mode | Key           | Action                          |
-| ---- | ------------- | ------------------------------- |
-| `n`  | `<C-h/j/k/l>` | Move between windows            |
-| `t`  | `<C-h/j/k/l>` | Move between windows (terminal) |
-| `t`  | `<C-x>`       | Exit terminal mode              |
+| Mode | Key             | Description                           |
+| ---- | --------------- | ------------------------------------- |
+| `n`  | `<C-h/j/k/l>`  | Move between windows                  |
+| `t`  | `<C-h/j/k/l>`  | Move between windows (terminal mode)  |
+| `t`  | `<C-x>`         | Escape terminal mode                  |
 
 ---
 
-### 🔍 Picker 
+### � Buffer Management
 
-| Key                | Description              |
-| ------------------ | ------------------------ |
-| `<leader>ff`       | Find files               |
-| `<leader>sb`       | Search in current buffer |
-| `<leader>sg`       | Live grep                |
-| `<leader>sd`       | Diagnostics              |
-| `<leader><leader>` | List open buffers        |
+| Key          | Description                   |
+| ------------ | ----------------------------- |
+| `<S-h>`      | Previous buffer               |
+| `<S-l>`      | Next buffer                   |
+| `<leader>bp` | Toggle pin                    |
+| `<leader>bP` | Delete non-pinned buffers     |
+| `<leader>br` | Delete buffers to the right   |
+| `<leader>bl` | Delete buffers to the left    |
+| `<leader>bd` | Close current buffer          |
 
 ---
 
-### 🧪 Neotest
+### 🔍 Picker (Snacks)
+
+#### Quick Access
+
+| Key                    | Description             |
+| ---------------------- | ----------------------- |
+| `<leader><space>`      | Smart find files        |
+| `<leader>,`            | Buffers                 |
+| `<leader>/`            | Grep                    |
+| `<leader>:`            | Command history         |
+| `<leader>n`            | Notification history    |
+
+#### Find
 
 | Key          | Description         |
 | ------------ | ------------------- |
-| `<leader>tt` | Run current file    |
-| `<leader>tr` | Run nearest test    |
-| `<leader>tl` | Run last test       |
-| `<leader>ts` | Toggle summary      |
-| `<leader>to` | Show output         |
-| `<leader>tO` | Toggle output panel |
-| `<leader>tS` | Stop tests          |
-| `<leader>tw` | Toggle watch mode   |
+| `<leader>ff` | Find files          |
+| `<leader>fb` | Find buffers        |
+| `<leader>fc` | Find config file    |
+| `<leader>fg` | Find git files      |
+| `<leader>fp` | Projects            |
+| `<leader>fr` | Recent files        |
+
+#### Grep / Search
+
+| Key            | Description              |
+| -------------- | ------------------------ |
+| `<leader>sb`   | Buffer lines             |
+| `<leader>sB`   | Grep open buffers        |
+| `<leader>sg`   | Grep                     |
+| `<leader>sw`   | Grep word (visual/normal) |
+| `<leader>s"`   | Registers                |
+| `<leader>s/`   | Search history           |
+| `<leader>sa`   | Autocmds                 |
+| `<leader>sc`   | Command history          |
+| `<leader>sC`   | Commands                 |
+| `<leader>sd`   | Diagnostics              |
+| `<leader>sD`   | Buffer diagnostics       |
+| `<leader>sh`   | Help pages               |
+| `<leader>sH`   | Highlights               |
+| `<leader>si`   | Icons                    |
+| `<leader>sj`   | Jumps                    |
+| `<leader>sk`   | Keymaps                  |
+| `<leader>sl`   | Location list            |
+| `<leader>sm`   | Marks                    |
+| `<leader>sM`   | Man pages                |
+| `<leader>sp`   | Plugin spec              |
+| `<leader>sq`   | Quickfix list            |
+| `<leader>sR`   | Resume last picker       |
+| `<leader>su`   | Undo history             |
+| `<leader>ss`   | LSP symbols              |
+| `<leader>sS`   | LSP workspace symbols    |
+| `<leader>sr`   | Search and replace (grug-far) |
+
+---
+
+### 🔎 Search & Replace
+
+| Key          | Mode    | Description         |
+| ------------ | ------- | ------------------- |
+| `<leader>sr` | `n`/`v` | Open grug-far (search & replace, scoped to current file type) |
+
+---
+
+### 🧪 Testing (vim-test)
+
+| Key          | Description          |
+| ------------ | -------------------- |
+| `<leader>tn` | Run nearest test     |
+| `<leader>tf` | Run current file     |
+| `<leader>ts` | Run test suite       |
+| `<leader>tl` | Run last test        |
+| `<leader>tv` | Visit last test file |
 
 ---
 
 ### 🐞 Debugging (nvim-dap)
 
-| Key           | Description             |
-| ------------- | ----------------------- |
-| `<leader>da`  | Start Debugging         |
-| `<leader>dc`  | Continue                |
-| `<leader>db`  | Toggle breakpoint       |
-| `<leader>dq`  | Clear breakpoints       |
-| `<leader>do`  | Step over               |
-| `<leader>dO`  | Step out                |
-| `<leader>dr`  | Toggle REPL             |
-| `<leader>dv`  | View scopes             |
-| `<leader>dw`  | Hover variable          |
-| `<leader>ds`  | View stacks             |
-| `<leader>dlb` | View breakpoints float  |
-| `<leader>dh`  | View watches            |
-| `<leader>td`  | Debug nearest (Neotest) |
+| Key           | Description                |
+| ------------- | -------------------------- |
+| `<leader>da`  | Start / Continue debugging |
+| `<leader>dc`  | Continue                   |
+| `<leader>di`  | Step into                  |
+| `<leader>do`  | Step over                  |
+| `<leader>dO`  | Step out                   |
+| `<leader>db`  | Toggle breakpoint          |
+| `<leader>dq`  | Clear all breakpoints      |
+| `<leader>dw`  | Hover variable             |
+| `<leader>de`  | Evaluate expression (`n`/`v`) |
+| `<leader>ds`  | View stacks (float)        |
+| `<leader>dr`  | Toggle REPL                |
+| `<leader>dlb` | View breakpoints (float)   |
+| `<leader>dh`  | View watches (float)       |
+| `<leader>dv`  | View scopes (float)        |
+| `<leader>dT`  | Terminate debug session    |
+| `<leader>dR`  | Toggle auto-reload on save |
 
 ---
 
-### 🔧 Code
+### 🔧 Code / LSP
 
-| Key          | Description      |
-| ------------ | ---------------- |
-| `gd`         | Goto definition  |
-| `gr`         | References       |
-| `gI`         | Implementations  |
-| `gt`         | Type definitions |
-| `<leader>rn` | Rename symbol    |
-| `<leader>ca` | Code actions     |
+| Key          | Description                   |
+| ------------ | ----------------------------- |
+| `gd`         | Goto definition               |
+| `gD`         | Goto declaration              |
+| `gr`         | References                    |
+| `gi`         | Goto implementation           |
+| `gy`         | Goto type definition          |
+| `<leader>rn` | LSP: Rename symbol            |
+| `<leader>ca` | LSP: Code action (`n`/`x`)   |
+| `<leader>cr` | Rename (core keymap)          |
+| `<leader>k`  | Toggle signature help         |
+| `<leader>cd` | Open float diagnostic         |
+| `<leader>uh` | Toggle inlay hints (global)   |
 
----
+#### Diagnostic Navigation
 
-### 🧱 Misc Plugins
-
-| Key          | Description              |
-| ------------ | ------------------------ |
-| `<leader>ft` | Toggle floating terminal |
-| `<leader>wv` | Vertical split           |
-| `<leader>hv` | Horizontal split         |
-| `<leader>e`  | Toggle Oil file explorer |
-| `<leader>ut` | Toggle transparency      |
-| `<leader>gg` | LazyGit                  |
+| Key   | Description        |
+| ----- | ------------------ |
+| `]d`  | Next diagnostic    |
+| `[d`  | Prev diagnostic    |
+| `]e`  | Next error         |
+| `[e`  | Prev error         |
+| `]w`  | Next warning       |
+| `[w`  | Prev warning       |
 
 ---
 
 ### 📋 Trouble.nvim
 
-| Key          | Description                   |
-| ------------ | ----------------------------- |
-| `<leader>xx` | Toggle diagnostics            |
-| `<leader>xX` | Buffer diagnostics            |
-| `<leader>cs` | Toggle symbols                |
-| `<leader>cS` | LSP references/defs           |
-| `<leader>xL` | Location list                 |
-| `<leader>xQ` | Quickfix list                 |
-| `[q` / `]q`  | Prev/next quickfix or Trouble |
+| Key          | Description                        |
+| ------------ | ---------------------------------- |
+| `<leader>xx` | Toggle diagnostics (Trouble)       |
+| `<leader>xX` | Buffer diagnostics (Trouble)       |
+| `<leader>cs` | LSP references (Trouble)           |
+| `<leader>xL` | Location list (Trouble)            |
+| `<leader>xQ` | Quickfix list (Trouble)            |
+| `[q` / `]q`  | Prev/Next Trouble or quickfix item |
 
 ---
 
-## 📂 Project Tasks (Overseer)
+### 📂 Project Tasks (Overseer)
 
 | Key          | Description                 |
 | ------------ | --------------------------- |
 | `<leader>ow` | Toggle task list            |
 | `<leader>oo` | Run task                    |
 | `<leader>oq` | Quick action on recent task |
-| `<leader>oi` | View task info              |
+| `<leader>oi` | Overseer info               |
 | `<leader>ob` | Open task builder           |
 | `<leader>ot` | Task action menu            |
 | `<leader>oc` | Clear task cache            |
 
+---
+
+### 🌿 Git
+
+#### Fugitive
+
+| Key          | Description      |
+| ------------ | ---------------- |
+| `<leader>gs` | Git status       |
+| `<leader>gc` | Git commit       |
+| `<leader>gp` | Git push         |
+| `<leader>gb` | Git blame        |
+| `<leader>gd` | Git diff split   |
+
+#### Snacks Git Picker
+
+| Key          | Description      |
+| ------------ | ---------------- |
+| `<leader>gl` | Git log          |
+| `<leader>gL` | Git log (line)   |
+| `<leader>gf` | Git log (file)   |
+
+#### Mini.diff
+
+| Key          | Description              |
+| ------------ | ------------------------ |
+| `<leader>go` | Toggle diff overlay      |
+
+---
+
+### 🪵 Chainsaw (Logging)
+
+| Key          | Description      |
+| ------------ | ---------------- |
+| `<leader>ll` | Log variable     |
+| `<leader>lt` | Log type         |
+| `<leader>lm` | Log message      |
+| `<leader>lr` | Remove all logs  |
+
+---
+
+### ✏️ Editing (mini.nvim)
+
+#### mini.surround
+
+| Key    | Description            |
+| ------ | ---------------------- |
+| `gsa`  | Add surrounding        |
+| `gsd`  | Delete surrounding     |
+| `gsf`  | Find surrounding right |
+| `gsF`  | Find surrounding left  |
+| `gsh`  | Highlight surrounding  |
+| `gsr`  | Replace surrounding    |
+| `gsn`  | Update `n_lines`       |
+
+#### mini.move
+
+| Key      | Description          |
+| -------- | -------------------- |
+| `<M-h>`  | Move selection left  |
+| `<M-l>`  | Move selection right |
+| `<M-j>`  | Move selection down  |
+| `<M-k>`  | Move selection up    |
+
+---
+
+### 🧱 Misc Plugins
+
+| Key          | Description                 |
+| ------------ | --------------------------- |
+| `<leader>dt` | Toggle floating terminal    |
+| `<leader>e`  | Toggle Oil file explorer    |
+| `<leader>ut` | Toggle transparency         |
+| `<leader>uc` | Toggle Themery (colorscheme) |
+
+---
 
 ## 📄 License
 
@@ -347,14 +501,7 @@ This project is licensed under the [MIT License](LICENSE).
 
 * [Neovim](https://neovim.io/)
 * [lazy.nvim](https://github.com/folke/lazy.nvim)
-* [LuaRocks](https://luarocks.org/)([GitHub][1], [luarocks.org][4])
+* [Snacks.nvim](https://github.com/folke/snacks.nvim)
+* [LuaRocks](https://luarocks.org/)
 
 ---
-
-[1]: https://github.com/vhyrro/luarocks.nvim?utm_source=chatgpt.com "Easily install luarocks with lazy.nvim - GitHub"
-[2]: https://www.reddit.com/r/neovim/comments/1bd499s/how_to_use_a_lua_module_from_luarocks_in_my/?utm_source=chatgpt.com "How to use a lua module from luarocks in my neovim plugin - Reddit"
-[3]: https://github.com/camspiers/luarocks?utm_source=chatgpt.com "Easily install luarocks with lazy.nvim - GitHub"
-[4]: https://luarocks.org/?utm_source=chatgpt.com "LuaRocks - The Lua package manager"
-[5]: https://esouimods.github.io/1-install_luarocks.html?utm_source=chatgpt.com "Installing LuaRocks | ESOUI Code Collection - GitHub Pages"
-
-

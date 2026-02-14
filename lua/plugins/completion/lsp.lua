@@ -145,6 +145,15 @@ return {
 				"cssls",
 				"phpactor",
 				"stylua",
+				"ts_ls",
+				"jsonls",
+				"yamlls",
+				"marksman",
+				"rust_analyzer",
+				"bashls",
+				"lua_ls",
+				"sqls",
+				"dockerls",
 			}
 			require("mason-tool-installer").setup({
 				ensure_installed = ensure_installed,
@@ -161,29 +170,34 @@ return {
 				return {}
 			end
 
-			-- setup each LSP server
-			for _, server_name in ipairs(ensure_installed) do
-				local server_config = load_server_config(server_name)
+			-- setup each LSP server using mason-lspconfig handlers
+			require("mason-lspconfig").setup({
+				automatic_installation = true,
+				handlers = {
+					function(server_name)
+						local server_config = load_server_config(server_name)
 
-				-- merge capabilities
-				server_config.capabilities =
-					vim.tbl_deep_extend("force", {}, capabilities, server_config.capabilities or {})
+						-- merge capabilities
+						server_config.capabilities =
+							vim.tbl_deep_extend("force", {}, capabilities, server_config.capabilities or {})
 
-				-- default flags
-				server_config.flags = server_config.flags or {}
-				server_config.flags.debounce_text_changes = server_config.flags.debounce_text_changes or 300
+						-- default flags
+						server_config.flags = server_config.flags or {}
+						server_config.flags.debounce_text_changes = server_config.flags.debounce_text_changes or 300
 
-				-- use on_attach if defined
-				if server_config.on_attach then
-					local user_on_attach = server_config.on_attach
-					server_config.on_attach = function(client, bufnr)
-						user_on_attach(client, bufnr)
-					end
-				end
+						-- use on_attach if defined
+						if server_config.on_attach then
+							local user_on_attach = server_config.on_attach
+							server_config.on_attach = function(client, bufnr)
+								user_on_attach(client, bufnr)
+							end
+						end
 
-				vim.lsp.config(server_name, server_config)
-				vim.lsp.enable({ server_name })
-			end
+						vim.lsp.config(server_name, server_config)
+						vim.lsp.enable({ server_name })
+					end,
+				},
+			})
 		end,
 	},
 }

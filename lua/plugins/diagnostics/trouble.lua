@@ -2,52 +2,60 @@ return {
 	{
 		"folke/trouble.nvim",
 		cmd = { "Trouble" },
-		opts = {
-			modes = {
-				symbols = {
-					filter = {
-						["not"] = { ft = "lua", kind = "Package" },
-						any = {
-							ft = { "help", "markdown" },
-							kind = {
-								"Class",
-								"Constructor",
-								"Enum",
-								"Field",
-								"Function",
-								"Interface",
-								"Method",
-								"Module",
-								"Namespace",
-								"Package",
-								"Struct",
-								"Trait",
-								"Variable",
+		opts = function()
+			local utils = require("core.utils")
+			local dims = utils.get_floating_dimensions()
+			return {
+				modes = {
+					symbols = {
+						filter = {
+							["not"] = { ft = "lua", kind = "Package" },
+							any = {
+								ft = { "help", "markdown" },
+								kind = {
+									"Class",
+									"Constructor",
+									"Enum",
+									"Field",
+									"Function",
+									"Interface",
+									"Method",
+									"Module",
+									"Namespace",
+									"Package",
+									"Struct",
+									"Trait",
+									"Variable",
+								},
 							},
 						},
 					},
-				},
-				diagnostics = {
-					update_in_insert = true,
-					win = {
-						type = "float",
-						relative = "editor",
-						border = "rounded",
-						width = 0.8,
-						height = 0.4,
+					diagnostics = {
+						update_in_insert = true,
+						win = {
+							type = "float",
+							relative = "editor",
+							border = "rounded",
+							width = dims.width,
+							height = dims.height,
+							row = dims.row,
+							col = dims.col,
+						},
+					},
+					lsp = {
+						win = {
+							type = "float",
+							relative = "editor",
+							border = "rounded",
+							width = dims.width,
+							height = dims.height,
+							row = dims.row,
+							col = dims.col,
+						},
 					},
 				},
-				lsp = {
-					win = {
-						type = "float",
-						relative = "editor",
-						border = "rounded",
-						width = 0.8,
-						height = 0.4,
-					},
-				},
-			},
-		},
+			}
+		end,
 		keys = function()
 			local function map_toggle_focus(mode_name, desc, opts)
 				opts = opts or {}

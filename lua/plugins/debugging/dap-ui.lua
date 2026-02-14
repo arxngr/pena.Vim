@@ -62,16 +62,20 @@ return {
 			desc = "Debug Scopes Float",
 		},
 	},
-	opts = {
-		layouts = {},
-		floating = {
-			max_height = 0.7,
-			max_width = 0.7,
-			mappings = {
-				close = { "q", "<Esc>" },
+	opts = function()
+		local utils = require("core.utils")
+		local dims = utils.get_floating_dimensions()
+		return {
+			layouts = {},
+			floating = {
+				max_height = 0.8, -- DAPUI uses relative ratio for these
+				max_width = 0.8,
+				mappings = {
+					close = { "q", "<Esc>" },
+				},
 			},
-		},
-	},
+		}
+	end,
 	config = function(_, opts)
 		local dap = require("dap")
 		local dapui = require("dapui")

@@ -6,6 +6,9 @@ return {
 			local is_windows = vim.loop.os_uname().sysname == "Windows_NT"
 			local shell = is_windows and (vim.fn.executable("pwsh") == 1 and "pwsh" or "powershell") or "zsh" or "bash"
 
+			local utils = require("core.utils")
+			local dims = utils.get_floating_dimensions()
+
 			require("toggleterm").setup({
 				size = function(term)
 					if term.direction == "horizontal" then
@@ -17,6 +20,10 @@ return {
 				direction = "float",
 				float_opts = {
 					border = "rounded",
+					width = dims.width,
+					height = dims.height,
+					row = dims.row,
+					col = dims.col,
 				},
 				start_in_insert = true,
 				persist_size = true,
