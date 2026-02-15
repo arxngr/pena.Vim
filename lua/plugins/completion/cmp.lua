@@ -1,13 +1,32 @@
 ---@diagnostic disable: undefined-field
 local fn = vim.fn
 
-local source_mapping = {
-	nvim_lsp = "[LSP]",
-	nvim_lua = "[LUA]",
-	luasnip = "[SNIP]",
-	buffer = "[BUF]",
-	path = "[PATH]",
-	treesitter = "[TREE]",
+local kind_icons = {
+	Text = "",
+	Method = "",
+	Function = "",
+	Constructor = "",
+	Field = "",
+	Variable = "",
+	Class = "",
+	Interface = "",
+	Module = "",
+	Property = "",
+	Unit = "",
+	Value = "",
+	Enum = "",
+	Keyword = "",
+	Snippet = "",
+	Color = "",
+	File = "",
+	Reference = "",
+	Folder = "",
+	EnumMember = "",
+	Constant = "",
+	Struct = "",
+	Event = "",
+	Operator = "",
+	TypeParameter = "",
 }
 
 -- Custom enable/disable logic
@@ -128,16 +147,21 @@ local config = function()
 			},
 		}),
 		formatting = {
+			fields = { "abbr", "menu", "kind" },
 			format = function(entry, item)
 				cmp_tailwind.format(entry, item)
-				item.menu = source_mapping[entry.source.name]
+				item.kind = string.format("%s %s", item.kind, kind_icons[item.kind])
+				item.menu = ({
+					nvim_lsp = "[LSP]",
+					nvim_lua = "[Lua]",
+					luasnip = "[Snip]",
+					buffer = "[Buf]",
+					path = "[Path]",
+					treesitter = "[Tree]",
+				})[entry.source.name]
 				local max_abbr = 40
-				local max_menu = 30
 				if vim.fn.strdisplaywidth(item.abbr) > max_abbr then
 					item.abbr = vim.fn.strcharpart(item.abbr, 0, max_abbr - 1) .. "…"
-				end
-				if vim.fn.strdisplaywidth(item.menu) > max_menu then
-					item.menu = vim.fn.strcharpart(item.menu, 0, max_menu - 1) .. "…"
 				end
 				return item
 			end,
