@@ -16,7 +16,7 @@ return {
 			lazy = false,
 			priority = 1000,
 			config = function()
-				require("tinta").setup({ palette = "tinta-darker-cool" })
+				require("tinta").setup({ palette = "tinta-darker" })
 			end,
 		},
 	},
