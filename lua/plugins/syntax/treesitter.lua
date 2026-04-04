@@ -1,7 +1,8 @@
 return { -- Highlight, edit, and navigate code
 	{
 		"nvim-treesitter/nvim-treesitter",
-		cmd = { "TSUpdateSync", "TSInstall" },
+		branch = "master",
+		event = { "BufReadPost", "BufNewFile" },
 		-- [[ Configure Treesitter ]] See `:help nvim-treesitter`
 		opts = {
 			ensure_installed = {
