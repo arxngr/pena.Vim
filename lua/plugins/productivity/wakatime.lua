@@ -19,8 +19,16 @@ local function has_wakatime_api_key()
 	return has_key
 end
 
+local function is_wakatime_executable()
+	local binary = vim.fn.has("win32") == 1 and "wakatime-cli.exe" or "wakatime-cli"
+	local cli_path = vim.fn.expand("~/.wakatime/" .. binary)
+	return vim.fn.executable(cli_path) == 1
+end
+
 return {
 	"wakatime/vim-wakatime",
 	lazy = false,
-	enabled = has_wakatime_api_key(),
+	enabled = function()
+		return has_wakatime_api_key() and is_wakatime_executable()
+	end,
 }
