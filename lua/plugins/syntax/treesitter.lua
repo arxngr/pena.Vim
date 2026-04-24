@@ -1,119 +1,104 @@
-return { -- Highlight, edit, and navigate code
+return {
 	{
 		"nvim-treesitter/nvim-treesitter",
-		branch = "master",
-		event = { "BufReadPost", "BufNewFile" },
-		-- [[ Configure Treesitter ]] See `:help nvim-treesitter`
-		opts = {
-			ensure_installed = {
-				"c",
-				"cpp",
-				"asm",
-				"lua",
-				"python",
-				"javascript",
-				"typescript",
-				"vimdoc",
-				"vim",
-				"regex",
-				"terraform",
-				"sql",
-				"dockerfile",
-				"toml",
-				"json",
-				"java",
-				"groovy",
-				"go",
-				"gitignore",
-				"graphql",
-				"yaml",
-				"make",
-				"cmake",
-				"markdown",
-				"markdown_inline",
-				"bash",
-				"tsx",
-				"css",
-				"html",
-			},
-			refactor = {
-				smart_rename = {
-					enable = true,
-					keymaps = {
-						smart_rename = "<leader>cr",
-					},
-				},
-			},
-			auto_install = true,
-			highlight = { enable = true },
-			indent = { enable = true },
-			incremental_selection = {
-				enable = true,
-				keymaps = {
-					init_selection = "<C-space>",
-					node_incremental = "<C-space>",
-					scope_incremental = false,
-					node_decremental = "<bs>",
-				},
-			},
-			textobjects = {
-				select = {
-					enable = true,
-					lookahead = true,
-					keymaps = {
-						["af"] = "@function.outer",
-						["if"] = "@function.inner",
-					},
-				},
-				move = {
-					enable = true,
-					goto_next_start = {
-						["]f"] = "@function.outer",
-						["]c"] = "@class.outer",
-						["]a"] = "@parameter.inner",
-					},
-					goto_next_end = {
-						["]F"] = "@function.outer",
-						["]C"] = "@class.outer",
-						["]A"] = "@parameter.inner",
-					},
-					goto_previous_start = {
-						["[f"] = "@function.outer",
-						["[c"] = "@class.outer",
-						["[a"] = "@parameter.inner",
-					},
-					goto_previous_end = {
-						["[F"] = "@function.outer",
-						["[C"] = "@class.outer",
-						["[A"] = "@parameter.inner",
-					},
-				},
-			},
-		},
-		keys = {
-			{ "<c-space>", desc = "Increment Selection" },
-			{ "<bs>", desc = "Decrement Selection", mode = "x" },
-		},
-		dependencies = {
-			"nvim-treesitter/nvim-treesitter-textobjects",
-		},
+		lazy = false,
 		build = ":TSUpdate",
-		config = function(_, opts)
-			-- v0.12.0+ removed the `setup()` call entirely.
-			-- Config is now applied via module-level calls instead.
-			local ok, ts = pcall(require, "nvim-treesitter")
-			if ok and ts.setup then
-				-- Older API (< 0.12.0): setup() still exists
-				ts.setup(opts)
-			else
-				-- New API (>= 0.12.0): configure each module directly
-				local configs = require("nvim-treesitter.configs")
-				configs.setup(opts)
-			end
+		dependencies = {
+			{ "nvim-treesitter/nvim-treesitter-textobjects", lazy = false },
+		},
+		config = function()
+			require("nvim-treesitter").setup({
+				ensure_installed = {
+					"c",
+					"cpp",
+					"asm",
+					"lua",
+					"python",
+					"javascript",
+					"typescript",
+					"vimdoc",
+					"vim",
+					"regex",
+					"terraform",
+					"sql",
+					"dockerfile",
+					"toml",
+					"json",
+					"java",
+					"groovy",
+					"go",
+					"gitignore",
+					"graphql",
+					"yaml",
+					"make",
+					"cmake",
+					"markdown",
+					"markdown_inline",
+					"bash",
+					"tsx",
+					"css",
+					"html",
+				},
+				auto_install = true,
+			})
+
+			-- textobjects: select
+			local select = require("nvim-treesitter-textobjects.select")
+			vim.keymap.set({ "x", "o" }, "af", function()
+				select.select_textobject("@function.outer", "textobjects")
+			end)
+			vim.keymap.set({ "x", "o" }, "if", function()
+				select.select_textobject("@function.inner", "textobjects")
+			end)
+
+			-- textobjects: move
+			local move = require("nvim-treesitter-textobjects.move")
+			vim.keymap.set("n", "]f", function()
+				move.goto_next_start("@function.outer", "textobjects")
+			end)
+			vim.keymap.set("n", "]c", function()
+				move.goto_next_start("@class.outer", "textobjects")
+			end)
+			vim.keymap.set("n", "]a", function()
+				move.goto_next_start("@parameter.inner", "textobjects")
+			end)
+			vim.keymap.set("n", "]F", function()
+				move.goto_next_end("@function.outer", "textobjects")
+			end)
+			vim.keymap.set("n", "]C", function()
+				move.goto_next_end("@class.outer", "textobjects")
+			end)
+			vim.keymap.set("n", "]A", function()
+				move.goto_next_end("@parameter.inner", "textobjects")
+			end)
+			vim.keymap.set("n", "[f", function()
+				move.goto_previous_start("@function.outer", "textobjects")
+			end)
+			vim.keymap.set("n", "[c", function()
+				move.goto_previous_start("@class.outer", "textobjects")
+			end)
+			vim.keymap.set("n", "[a", function()
+				move.goto_previous_start("@parameter.inner", "textobjects")
+			end)
+			vim.keymap.set("n", "[F", function()
+				move.goto_previous_end("@function.outer", "textobjects")
+			end)
+			vim.keymap.set("n", "[C", function()
+				move.goto_previous_end("@class.outer", "textobjects")
+			end)
+			vim.keymap.set("n", "[A", function()
+				move.goto_previous_end("@parameter.inner", "textobjects")
+			end)
+
+			-- incremental selection
+			vim.keymap.set("n", "<C-space>", function()
+				require("nvim-treesitter.incremental_selection").init_selection()
+			end)
 		end,
 	},
 	{
 		"nvim-treesitter/nvim-treesitter-context",
+		lazy = false,
 		config = function()
 			require("treesitter-context").setup({
 				enable = true,
