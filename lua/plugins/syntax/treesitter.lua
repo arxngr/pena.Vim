@@ -44,11 +44,8 @@ return { -- Highlight, edit, and navigate code
 					},
 				},
 			},
-			-- Autoinstall languages that are not installed
 			auto_install = true,
-			highlight = {
-				enable = true,
-			},
+			highlight = { enable = true },
 			indent = { enable = true },
 			incremental_selection = {
 				enable = true,
@@ -64,8 +61,8 @@ return { -- Highlight, edit, and navigate code
 					enable = true,
 					lookahead = true,
 					keymaps = {
-						["af"] = "@function.outer", -- around function
-						["if"] = "@function.inner", -- inner function
+						["af"] = "@function.outer",
+						["if"] = "@function.inner",
 					},
 				},
 				move = {
@@ -75,7 +72,11 @@ return { -- Highlight, edit, and navigate code
 						["]c"] = "@class.outer",
 						["]a"] = "@parameter.inner",
 					},
-					goto_next_end = { ["]F"] = "@function.outer", ["]C"] = "@class.outer", ["]A"] = "@parameter.inner" },
+					goto_next_end = {
+						["]F"] = "@function.outer",
+						["]C"] = "@class.outer",
+						["]A"] = "@parameter.inner",
+					},
 					goto_previous_start = {
 						["[f"] = "@function.outer",
 						["[c"] = "@class.outer",
@@ -88,28 +89,38 @@ return { -- Highlight, edit, and navigate code
 					},
 				},
 			},
-			keys = {
-				{ "<c-space>", desc = "Increment Selection" },
-				{ "<bs>", desc = "Decrement Selection", mode = "x" },
-			},
+		},
+		keys = {
+			{ "<c-space>", desc = "Increment Selection" },
+			{ "<bs>", desc = "Decrement Selection", mode = "x" },
 		},
 		dependencies = {
 			"nvim-treesitter/nvim-treesitter-textobjects",
 		},
+		build = ":TSUpdate",
 		config = function(_, opts)
-			require("nvim-treesitter.configs").setup(opts)
+			-- v0.12.0+ removed the `setup()` call entirely.
+			-- Config is now applied via module-level calls instead.
+			local ok, ts = pcall(require, "nvim-treesitter")
+			if ok and ts.setup then
+				-- Older API (< 0.12.0): setup() still exists
+				ts.setup(opts)
+			else
+				-- New API (>= 0.12.0): configure each module directly
+				local configs = require("nvim-treesitter.configs")
+				configs.setup(opts)
+			end
 		end,
 	},
 	{
 		"nvim-treesitter/nvim-treesitter-context",
-		event = "VeryLazy",
 		config = function()
 			require("treesitter-context").setup({
-				enable = true, -- Enable this plugin (Can be enabled/disabled later via commands)
-				max_lines = 0, -- How many lines the context window can span (0 = unlimited)
-				trim_scope = "outer", -- Which context lines to discard if `max_lines` is exceeded
-				mode = "cursor", -- 'cursor' or 'topline'
-				separator = nil, -- Add a line below the context (e.g. `separator = '-'`)
+				enable = true,
+				max_lines = 0,
+				trim_scope = "outer",
+				mode = "cursor",
+				separator = nil,
 			})
 		end,
 	},
