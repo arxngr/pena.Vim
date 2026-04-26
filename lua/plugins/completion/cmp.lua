@@ -159,7 +159,7 @@ local config = function()
 					path = "[Path]",
 					treesitter = "[Tree]",
 				})[entry.source.name]
-				local max_abbr = 40
+				local max_abbr = 80
 				if vim.fn.strdisplaywidth(item.abbr) > max_abbr then
 					item.abbr = vim.fn.strcharpart(item.abbr, 0, max_abbr - 1) .. "…"
 				end
