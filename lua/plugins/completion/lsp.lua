@@ -1,4 +1,3 @@
--- init.lua or your plugin manager setup
 return {
 	{
 		"neovim/nvim-lspconfig",
@@ -27,13 +26,17 @@ return {
 			local capabilities = vim.lsp.protocol.make_client_capabilities()
 			capabilities = vim.tbl_deep_extend("force", capabilities, require("cmp_nvim_lsp").default_capabilities())
 
-			-- rounded borders for hover and signature help
-			vim.lsp.handlers["textDocument/hover"] = vim.lsp.with(vim.lsp.handlers.hover, {
-				border = "rounded",
-			})
-			vim.lsp.handlers["textDocument/signatureHelp"] = vim.lsp.with(vim.lsp.handlers.signature_help, {
-				border = "rounded",
-			})
+			vim.lsp.handlers["textDocument/hover"] = function(err, result, ctx, config)
+				config = config or {}
+				config.border = "rounded"
+				return vim.lsp.handlers.hover(err, result, ctx, config)
+			end
+
+			vim.lsp.handlers["textDocument/signatureHelp"] = function(err, result, ctx, config)
+				config = config or {}
+				config.border = "rounded"
+				return vim.lsp.handlers.signature_help(err, result, ctx, config)
+			end
 
 			-- keymaps for LSP
 			local function setup_lsp_keymaps(bufnr)
@@ -144,8 +147,17 @@ return {
 				max_concurrent_installers = 2,
 			})
 
-			-- ensure Mason installs these
-			local ensure_installed = {
+			-- Mapping Mason tool names to the system command dependency required to compile/run them
+			local tool_dependencies = {
+				gopls = "go",
+				sqls = "go",
+				pyright = "python",
+				clangd = "clang",
+				stylua = "cargo", -- or skip if downloaded as raw binary, but stylua is safe to keep
+				bashls = "bash",
+			}
+
+			local tools_to_check = {
 				"gopls",
 				"pyright",
 				"clangd",
@@ -163,6 +175,26 @@ return {
 				"sqls",
 				"dockerls",
 			}
+
+			local ensure_installed = {}
+			for _, tool in ipairs(tools_to_check) do
+				local required_cmd = tool_dependencies[tool]
+				if required_cmd then
+					if vim.fn.executable(required_cmd) == 1 then
+						table.insert(ensure_installed, tool)
+					else
+						-- Optional: Silence this notify if it feels too spammy on startup
+						vim.notify(
+							string.format("Mason skipping '%s' because '%s' is not installed.", tool, required_cmd),
+							vim.log.levels.WARN
+						)
+					end
+				else
+					-- Tool doesn't have an explicit system binary dependency registered; pass it through
+					table.insert(ensure_installed, tool)
+				end
+			end
+
 			require("mason-tool-installer").setup({
 				ensure_installed = ensure_installed,
 				auto_update = false,
