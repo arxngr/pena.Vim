@@ -43,7 +43,7 @@ return {
 			})
 
 			-- textobjects: select
-			local select = require("nvim-treesitter-textobjects.select")
+			local select = require("nvim-treesitter.textobjects.select")
 			vim.keymap.set({ "x", "o" }, "af", function()
 				select.select_textobject("@function.outer", "textobjects")
 			end)
@@ -52,7 +52,7 @@ return {
 			end)
 
 			-- textobjects: move
-			local move = require("nvim-treesitter-textobjects.move")
+			local move = require("nvim-treesitter.textobjects.move")
 			vim.keymap.set("n", "]f", function()
 				move.goto_next_start("@function.outer", "textobjects")
 			end)
@@ -90,10 +90,6 @@ return {
 				move.goto_previous_end("@parameter.inner", "textobjects")
 			end)
 
-			-- incremental selection
-			vim.keymap.set("n", "<C-space>", function()
-				require("nvim-treesitter.incremental_selection").init_selection()
-			end)
 		end,
 	},
 	{
