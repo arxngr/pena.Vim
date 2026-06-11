@@ -151,7 +151,7 @@ return {
 			local tool_dependencies = {
 				gopls = "go",
 				sqls = "go",
-				pyright = "python",
+				pyright = "python3",
 				clangd = "clang",
 				stylua = "cargo", -- or skip if downloaded as raw binary, but stylua is safe to keep
 				bashls = "bash",
