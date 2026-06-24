@@ -14,6 +14,19 @@ return {
 			codelens = { enabled = false },
 		},
 		config = function()
+			vim.lsp.set_log_level("ERROR")
+
+			-- truncate lsp.log on startup if it exceeds 10 MB
+			vim.api.nvim_create_autocmd("VimEnter", {
+				once = true,
+				callback = function()
+					local log = vim.fn.stdpath("state") .. "/lsp.log"
+					if vim.fn.getfsize(log) > 10 * 1024 * 1024 then
+						vim.fn.writefile({}, log)
+					end
+				end,
+			})
+
 			-- diagnostic config
 			vim.diagnostic.config({
 				virtual_text = true,
