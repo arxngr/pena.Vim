@@ -7,89 +7,40 @@ return {
 			{ "nvim-treesitter/nvim-treesitter-textobjects", lazy = false },
 		},
 		config = function()
-			require("nvim-treesitter").setup({
-				ensure_installed = {
-					"c",
-					"cpp",
-					"asm",
-					"lua",
-					"python",
-					"javascript",
-					"typescript",
-					"vimdoc",
-					"vim",
-					"regex",
-					"terraform",
-					"sql",
-					"dockerfile",
-					"toml",
-					"json",
-					"java",
-					"groovy",
-					"go",
-					"gitignore",
-					"graphql",
-					"yaml",
-					"make",
-					"cmake",
-					"markdown",
-					"markdown_inline",
-					"bash",
-					"tsx",
-					"css",
-					"html",
-				},
-				auto_install = true,
-			})
+			local langs = {
+				"c", "cpp", "asm", "lua", "python", "javascript", "typescript",
+				"vimdoc", "vim", "regex", "terraform", "sql", "dockerfile",
+				"toml", "json", "java", "groovy", "go", "gitignore", "graphql",
+				"yaml", "make", "cmake", "markdown", "markdown_inline", "bash",
+				"tsx", "css", "html",
+			}
 
-			-- textobjects: select
-			local select = require("nvim-treesitter.textobjects.select")
-			vim.keymap.set({ "x", "o" }, "af", function()
-				select.select_textobject("@function.outer", "textobjects")
-			end)
-			vim.keymap.set({ "x", "o" }, "if", function()
-				select.select_textobject("@function.inner", "textobjects")
-			end)
+			local ts_ok, ts = pcall(require, "nvim-treesitter.configs")
+			if not ts_ok then ts = require("nvim-treesitter") end
+			ts.setup({ ensure_installed = langs, auto_install = true })
 
-			-- textobjects: move
-			local move = require("nvim-treesitter.textobjects.move")
-			vim.keymap.set("n", "]f", function()
-				move.goto_next_start("@function.outer", "textobjects")
-			end)
-			vim.keymap.set("n", "]c", function()
-				move.goto_next_start("@class.outer", "textobjects")
-			end)
-			vim.keymap.set("n", "]a", function()
-				move.goto_next_start("@parameter.inner", "textobjects")
-			end)
-			vim.keymap.set("n", "]F", function()
-				move.goto_next_end("@function.outer", "textobjects")
-			end)
-			vim.keymap.set("n", "]C", function()
-				move.goto_next_end("@class.outer", "textobjects")
-			end)
-			vim.keymap.set("n", "]A", function()
-				move.goto_next_end("@parameter.inner", "textobjects")
-			end)
-			vim.keymap.set("n", "[f", function()
-				move.goto_previous_start("@function.outer", "textobjects")
-			end)
-			vim.keymap.set("n", "[c", function()
-				move.goto_previous_start("@class.outer", "textobjects")
-			end)
-			vim.keymap.set("n", "[a", function()
-				move.goto_previous_start("@parameter.inner", "textobjects")
-			end)
-			vim.keymap.set("n", "[F", function()
-				move.goto_previous_end("@function.outer", "textobjects")
-			end)
-			vim.keymap.set("n", "[C", function()
-				move.goto_previous_end("@class.outer", "textobjects")
-			end)
-			vim.keymap.set("n", "[A", function()
-				move.goto_previous_end("@parameter.inner", "textobjects")
-			end)
+			-- af/if/ac/ic text objects are handled by mini.ai (see plugins/utilities/mini.lua)
 
+			-- movement keymaps via nvim-treesitter-textobjects (silently skip if broken)
+			local mov_ok, mov = pcall(require, "nvim-treesitter.textobjects.move")
+			if mov_ok then
+				local function mv(fn, ...)
+					local args = { ... }
+					return function() pcall(fn, table.unpack(args)) end
+				end
+				vim.keymap.set("n", "]f", mv(mov.goto_next_start,     "@function.outer",  "textobjects"))
+				vim.keymap.set("n", "]c", mv(mov.goto_next_start,     "@class.outer",     "textobjects"))
+				vim.keymap.set("n", "]a", mv(mov.goto_next_start,     "@parameter.inner", "textobjects"))
+				vim.keymap.set("n", "]F", mv(mov.goto_next_end,       "@function.outer",  "textobjects"))
+				vim.keymap.set("n", "]C", mv(mov.goto_next_end,       "@class.outer",     "textobjects"))
+				vim.keymap.set("n", "]A", mv(mov.goto_next_end,       "@parameter.inner", "textobjects"))
+				vim.keymap.set("n", "[f", mv(mov.goto_previous_start, "@function.outer",  "textobjects"))
+				vim.keymap.set("n", "[c", mv(mov.goto_previous_start, "@class.outer",     "textobjects"))
+				vim.keymap.set("n", "[a", mv(mov.goto_previous_start, "@parameter.inner", "textobjects"))
+				vim.keymap.set("n", "[F", mv(mov.goto_previous_end,   "@function.outer",  "textobjects"))
+				vim.keymap.set("n", "[C", mv(mov.goto_previous_end,   "@class.outer",     "textobjects"))
+				vim.keymap.set("n", "[A", mv(mov.goto_previous_end,   "@parameter.inner", "textobjects"))
+			end
 		end,
 	},
 	{

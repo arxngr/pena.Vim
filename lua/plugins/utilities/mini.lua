@@ -1,4 +1,65 @@
 return {
+	{
+		"echasnovski/mini.ai",
+		event = "VeryLazy",
+		opts = function()
+			-- walk up the AST to find the nearest node whose type matches any pattern
+			local function find_node(patterns)
+				local node = vim.treesitter.get_node()
+				while node do
+					local t = node:type()
+					for _, pat in ipairs(patterns) do
+						if t == pat or t:find(pat) then return node end
+					end
+					node = node:parent()
+				end
+			end
+
+			-- find the body/block child of a node (for inner selection)
+			local function find_body(node)
+				for i = 0, node:named_child_count() - 1 do
+					local child = node:named_child(i)
+					local t = child:type()
+					if t == "compound_statement" or t == "statement_block"
+						or t:find("body") or t:find("block")
+					then
+						return child
+					end
+				end
+			end
+
+			-- convert treesitter 0-indexed range to mini.ai 1-indexed region
+			local function to_region(node)
+				local sr, sc, er, ec = node:range()
+				if ec == 0 then
+					er = er - 1
+					ec = #vim.api.nvim_buf_get_lines(0, er, er + 1, false)[1]
+				end
+				return { from = { line = sr + 1, col = sc + 1 }, to = { line = er + 1, col = ec } }
+			end
+
+			local fn_types    = { "function", "method", "arrow_function", "lambda", "func_literal" }
+			local class_types = { "class" }
+
+			return {
+				n_lines = 500,
+				custom_textobjects = {
+					f = function(ai_type)
+						local node = find_node(fn_types)
+						if not node then return end
+						if ai_type == "i" then node = find_body(node) or node end
+						return to_region(node)
+					end,
+					c = function(ai_type)
+						local node = find_node(class_types)
+						if not node then return end
+						if ai_type == "i" then node = find_body(node) or node end
+						return to_region(node)
+					end,
+				},
+			}
+		end,
+	},
 	"echasnovski/mini.diff",
 	event = "VeryLazy",
 	keys = {

@@ -14,6 +14,19 @@ return {
 			codelens = { enabled = false },
 		},
 		config = function()
+			vim.lsp.log.set_level("ERROR")
+
+			-- truncate lsp.log on startup if it exceeds 10 MB
+			vim.api.nvim_create_autocmd("VimEnter", {
+				once = true,
+				callback = function()
+					local log = vim.fn.stdpath("state") .. "/lsp.log"
+					if vim.fn.getfsize(log) > 10 * 1024 * 1024 then
+						vim.fn.writefile({}, log)
+					end
+				end,
+			})
+
 			-- diagnostic config
 			vim.diagnostic.config({
 				virtual_text = true,
@@ -147,14 +160,26 @@ return {
 				max_concurrent_installers = 2,
 			})
 
-			-- Mapping Mason tool names to the system command dependency required to compile/run them
+			-- Required runtime per tool. Tools not listed have no check (Mason fetches a prebuilt binary).
+			-- clangd, lua_ls, marksman, stylua → prebuilt; no runtime needed to install.
 			local tool_dependencies = {
-				gopls = "go",
-				sqls = "go",
-				pyright = "python3",
-				clangd = "clang",
-				stylua = "cargo", -- or skip if downloaded as raw binary, but stylua is safe to keep
-				bashls = "bash",
+				-- Go
+				gopls         = "go",
+				sqls          = "go",
+				-- Python
+				pyright       = "python3",
+				-- PHP
+				phpactor      = "php",
+				-- Rust
+				rust_analyzer = "cargo",
+				-- Node (npm-based LSPs)
+				ts_ls         = "node",
+				jsonls        = "node",
+				yamlls        = "node",
+				cssls         = "node",
+				html          = "node",
+				bashls        = "node",
+				dockerls      = "node",
 			}
 
 			local tools_to_check = {
@@ -176,23 +201,37 @@ return {
 				"dockerls",
 			}
 
+			-- persist which warnings have already been shown so they don't repeat every startup
+			local warned_file = vim.fn.stdpath("state") .. "/mason_dep_warned.json"
+			local warned = {}
+			local rf_ok, rf_data = pcall(vim.fn.readfile, warned_file)
+			if rf_ok and rf_data[1] then
+				local jd_ok, decoded = pcall(vim.fn.json_decode, table.concat(rf_data, ""))
+				if jd_ok and type(decoded) == "table" then warned = decoded end
+			end
+
 			local ensure_installed = {}
+			local dirty = false
 			for _, tool in ipairs(tools_to_check) do
-				local required_cmd = tool_dependencies[tool]
-				if required_cmd then
-					if vim.fn.executable(required_cmd) == 1 then
+				local dep = tool_dependencies[tool]
+				if dep then
+					if vim.fn.executable(dep) == 1 then
 						table.insert(ensure_installed, tool)
-					else
-						-- Optional: Silence this notify if it feels too spammy on startup
+					elseif not warned[tool] then
 						vim.notify(
-							string.format("Mason skipping '%s' because '%s' is not installed.", tool, required_cmd),
+							string.format("Mason: skipping '%s' ('%s' not found in PATH)", tool, dep),
 							vim.log.levels.WARN
 						)
+						warned[tool] = true
+						dirty = true
 					end
 				else
-					-- Tool doesn't have an explicit system binary dependency registered; pass it through
 					table.insert(ensure_installed, tool)
 				end
+			end
+
+			if dirty then
+				pcall(vim.fn.writefile, { vim.fn.json_encode(warned) }, warned_file)
 			end
 
 			require("mason-tool-installer").setup({
