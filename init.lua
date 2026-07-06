@@ -51,4 +51,5 @@ require("lazy").setup({
 	require("plugins.ui.color-highlight"),
 	require("plugins.ui.navic"),
 	require("plugins.folding.ufo"),
+	require("plugins.ai.sidekick"),
 })
