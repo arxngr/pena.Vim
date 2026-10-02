@@ -66,7 +66,18 @@ return {
 		local utils = require("core.utils")
 		local dims = utils.get_floating_dimensions()
 		return {
-			layouts = {},
+			layouts = {
+				{
+					elements = { "scopes", "watches", "stacks", "breakpoints" },
+					size = 45,
+					position = "right",
+				},
+				{
+					elements = { "repl", "console" },
+					size = 12,
+					position = "bottom",
+				},
+			},
 			floating = {
 				max_height = 0.8, -- DAPUI uses relative ratio for these
 				max_width = 0.8,

@@ -5,67 +5,26 @@ return {
 			"williamboman/mason.nvim",
 		},
 		config = function()
-			require("mason").setup()
-			local registry = require("mason-registry")
-
-			local tools = {
-				-- Formatters
-				"stylua",
-				"black",
-				"prettier",
-				"shfmt",
-				"clang-format",
-				"rustfmt",
-				"gofumpt",
-
-				-- Debuggers / DAP
-				"codelldb",
-				"cpptools",
-				"delve",
-				"debugpy",
-				"js-debug-adapter",
-				"node-debug2-adapter",
-				"go-debug-adapter",
-
-				-- Linters (optional)
-				"eslint_d",
-				"shellcheck",
-			}
-
-			-- Ensure tools are installed
-			local function ensure_installed(tool_list)
-				for _, name in ipairs(tool_list) do
-					local ok, pkg = pcall(registry.get_package, name)
-					if ok and not pkg:is_installed() then
-						pkg:install()
-						vim.notify("Installing " .. name, vim.log.levels.INFO)
-					end
-				end
-			end
-
-			-- Refresh registry and install
-			if registry.refresh then
-				registry.refresh(function()
-					ensure_installed(tools)
-				end)
-			else
-				ensure_installed(tools)
-			end
-
 			-- Configure conform.nvim
 			require("conform").setup({
 				format_after_save = {
 					async = true,
 				},
 				formatters_by_ft = {
+					cs = { lsp_format = "prefer" },
 					lua = { "stylua" },
 					python = { "black" },
 					go = { "gofumpt" },
 					javascript = { "prettier" },
+					javascriptreact = { "prettier" },
 					typescript = { "prettier" },
+					typescriptreact = { "prettier" },
 					json = { "prettier" },
 					yaml = { "prettier" },
 					html = { "prettier" },
+					htmldjango = { "djlint" },
+					vue = { "prettier" },
+					svelte = { "prettier" },
 					css = { "prettier" },
 					sh = { "shfmt" },
 					rust = { "rustfmt" },

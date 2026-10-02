@@ -3,6 +3,7 @@ return {
 		"vim-test/vim-test",
 		config = function()
 			vim.g["test#go#runner"] = "gotest"
+			vim.g["test#csharp#runner"] = "dotnettest"
 
 			local reused_term_buf = nil
 			local reused_term_win = nil

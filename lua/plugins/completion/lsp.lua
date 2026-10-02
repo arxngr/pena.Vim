@@ -4,7 +4,6 @@ return {
 		dependencies = {
 			{ "williamboman/mason.nvim", version = "^1.0.0" },
 			{ "williamboman/mason-lspconfig.nvim", version = "^1.0.0" },
-			"WhoIsSethDaniel/mason-tool-installer.nvim",
 			{ "j-hui/fidget.nvim", opts = {} },
 			"hrsh7th/nvim-cmp",
 			"hrsh7th/cmp-nvim-lsp",
@@ -151,132 +150,7 @@ return {
 				end,
 			})
 
-			-- Mason setup
-			require("mason").setup({
-				ui = {
-					icons = { package_installed = "✓", package_pending = "➜", package_uninstalled = "✗" },
-				},
-				log_level = vim.log.levels.WARN,
-				max_concurrent_installers = 2,
-			})
-
-			-- Required runtime per tool. Tools not listed have no check (Mason fetches a prebuilt binary).
-			-- clangd, lua_ls, marksman, stylua → prebuilt; no runtime needed to install.
-			local tool_dependencies = {
-				-- Go
-				gopls         = "go",
-				sqls          = "go",
-				-- Python
-				pyright       = "python3",
-				-- PHP
-				phpactor      = "php",
-				-- Rust
-				rust_analyzer = "cargo",
-				-- Node (npm-based LSPs)
-				ts_ls         = "node",
-				jsonls        = "node",
-				yamlls        = "node",
-				cssls         = "node",
-				html          = "node",
-				bashls        = "node",
-				dockerls      = "node",
-			}
-
-			local tools_to_check = {
-				"gopls",
-				"pyright",
-				"clangd",
-				"html",
-				"cssls",
-				"phpactor",
-				"stylua",
-				"ts_ls",
-				"jsonls",
-				"yamlls",
-				"marksman",
-				"rust_analyzer",
-				"bashls",
-				"lua_ls",
-				"sqls",
-				"dockerls",
-			}
-
-			-- persist which warnings have already been shown so they don't repeat every startup
-			local warned_file = vim.fn.stdpath("state") .. "/mason_dep_warned.json"
-			local warned = {}
-			local rf_ok, rf_data = pcall(vim.fn.readfile, warned_file)
-			if rf_ok and rf_data[1] then
-				local jd_ok, decoded = pcall(vim.fn.json_decode, table.concat(rf_data, ""))
-				if jd_ok and type(decoded) == "table" then warned = decoded end
-			end
-
-			local ensure_installed = {}
-			local dirty = false
-			for _, tool in ipairs(tools_to_check) do
-				local dep = tool_dependencies[tool]
-				if dep then
-					if vim.fn.executable(dep) == 1 then
-						table.insert(ensure_installed, tool)
-					elseif not warned[tool] then
-						vim.notify(
-							string.format("Mason: skipping '%s' ('%s' not found in PATH)", tool, dep),
-							vim.log.levels.WARN
-						)
-						warned[tool] = true
-						dirty = true
-					end
-				else
-					table.insert(ensure_installed, tool)
-				end
-			end
-
-			if dirty then
-				pcall(vim.fn.writefile, { vim.fn.json_encode(warned) }, warned_file)
-			end
-
-			require("mason-tool-installer").setup({
-				ensure_installed = ensure_installed,
-				auto_update = false,
-				run_on_start = true,
-			})
-
-			-- load server configs from lsp/servers/*.lua
-			local function load_server_config(name)
-				local ok, config = pcall(require, "lsp.servers." .. name)
-				if ok and type(config) == "table" then
-					return config.opts or {}
-				end
-				return {}
-			end
-
-			-- setup each LSP server using mason-lspconfig handlers
-			require("mason-lspconfig").setup({
-				automatic_installation = true,
-				handlers = {
-					function(server_name)
-						local server_config = load_server_config(server_name)
-
-						-- merge capabilities
-						server_config.capabilities =
-							vim.tbl_deep_extend("force", {}, capabilities, server_config.capabilities or {})
-
-						-- default flags
-						server_config.flags = server_config.flags or {}
-						server_config.flags.debounce_text_changes = server_config.flags.debounce_text_changes or 300
-
-						-- use on_attach if defined
-						if server_config.on_attach then
-							local user_on_attach = server_config.on_attach
-							server_config.on_attach = function(client, bufnr)
-								user_on_attach(client, bufnr)
-							end
-						end
-
-						vim.lsp.config(server_name, server_config)
-						vim.lsp.enable({ server_name })
-					end,
-				},
-			})
+			require("core.project_tools").setup(capabilities)
 		end,
 	},
 }
