@@ -216,6 +216,31 @@ tools and missing runtimes, and `:ProjectToolsRefresh` to rescan and retry insta
 Mason installs editor tools; required system runtimes and compilers must already
 be available. Use `:MasonLog` for installation errors.
 
+For .NET, use `:DotnetProject` (`<leader>np`) to select a startup project, then
+`:DotnetRun` (`<leader>nr`), `:DotnetWatch` (`<leader>nw`), or `:DotnetDebug`.
+Run, watch, and debug offer the project's `Project` launch profiles. Once an
+ASP.NET Core server starts listening, Neovim checks for Swagger UI
+and opens it once in your default browser. This also works with debug output in
+the integrated terminal. Applications without Swagger leave the browser closed.
+
+Detection uses curl and checks the profile's `launchUrl`, `/swagger/index.html`,
+`/swagger`, and `/`. Custom paths can be set in `init.lua` with
+`vim.g.dotnet_swagger_paths = { "/api/docs", "/swagger/index.html", "/" }`.
+Set `vim.g.dotnet_auto_open_swagger = false` to disable automatic opening;
+`launchBrowser = false` in the chosen launch profile also disables it. Detection
+uses the `Now listening on:` startup log when available and falls back to the
+project's standard `appsettings.json`, environment-specific appsettings, Kestrel
+endpoints, launch profile, and URL/port environment variables when logs are silent.
+It waits up to two minutes for configured addresses to respond. For bindings set
+only in application code or custom configuration, set
+`vim.g.dotnet_swagger_urls = { "http://localhost:12345" }`; adjust the wait with
+`vim.g.dotnet_swagger_timeout_ms`. It never changes the application's ports.
+The same detection also applies to ordinary `coreclr` launch configurations:
+Neovim locates the project from the output DLL or launch working directory and
+uses that launch's environment. No service-specific names or ports are required.
+On Windows, the .NET adapter launches the native `netcoredbg.exe` directly,
+bypassing Mason's `.CMD` wrapper so DAP initialization can complete.
+
 ## Markdown and diagrams
 
 Markdown files render automatically inside Neovim with `render-markdown.nvim`.
