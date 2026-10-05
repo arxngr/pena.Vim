@@ -85,11 +85,23 @@ function M.configured_urls(project, profile, launch_env)
 	return urls
 end
 
+local function is_web_project(project)
+	if not project then
+		return false
+	end
+	local ok, lines = pcall(vim.fn.readfile, project)
+	return ok and table.concat(lines, "\n"):find("Microsoft.NET.Sdk.Web", 1, true) ~= nil
+end
+
 function M.new(profile, project, launch_env)
 	profile = profile or {}
 	local state = { active = true, opened = false, seen = {}, pending = "", processes = {} }
 	local curl = vim.fn.has("win32") == 1 and "curl.exe" or "curl"
+	local has_launch_url = type(profile.launchUrl) == "string" and profile.launchUrl ~= ""
+	local web_project = is_web_project(project)
 	local enabled = profile.launchBrowser ~= false and vim.g.dotnet_auto_open_swagger ~= false
+		and (web_project or profile.launchBrowser == true or has_launch_url)
+	local open_homepage = profile.launchBrowser == true or web_project
 	local warned = false
 	local deadline = vim.uv.now() + (vim.g.dotnet_swagger_timeout_ms or 120000)
 
@@ -100,7 +112,7 @@ function M.new(profile, project, launch_env)
 		end
 	end
 
-	local function probe(base, paths, index, attempt, responding)
+	local function probe(base, paths, index)
 		if not state.active or state.opened or vim.uv.now() >= deadline then
 			return
 		end
@@ -114,18 +126,20 @@ function M.new(profile, project, launch_env)
 					return
 				end
 				local html = (result.stdout or ""):lower()
-				responding = responding or result.code == 0 or result.code == 22
-				if result.code == 0 and (html:find("swaggeruibundle", 1, true) or html:find("swagger-ui", 1, true)) then
+				local swagger = html:find("swaggeruibundle", 1, true) or html:find("swagger-ui", 1, true)
+				local launch_page = has_launch_url and path == profile.launchUrl
+				local homepage = path == "/" and open_homepage
+				if result.code == 0 and (swagger or launch_page or homepage) then
 					state.opened = true
 					local _, err = vim.ui.open(url)
 					if err then
-						vim.notify("Could not open Swagger: " .. tostring(err), vim.log.levels.WARN, { title = ".NET" })
+						vim.notify("Could not open .NET launch page: " .. tostring(err), vim.log.levels.WARN, { title = ".NET" })
 					end
 				elseif index < #paths then
-					probe(base, paths, index + 1, attempt, responding)
-				elseif not responding then
+					probe(base, paths, index + 1)
+				else
 					vim.defer_fn(function()
-						probe(base, paths, 1, attempt + 1)
+						probe(base, paths, 1)
 					end, 2000)
 				end
 			end)
@@ -145,24 +159,33 @@ function M.new(profile, project, launch_env)
 		if vim.fn.executable(curl) ~= 1 then
 			if not warned then
 				warned = true
-				vim.notify("Install curl to open Swagger automatically.", vim.log.levels.WARN, { title = ".NET" })
+				vim.notify("Install curl to open .NET launch pages automatically.", vim.log.levels.WARN, { title = ".NET" })
 			end
 			return
 		end
 		local paths, added = {}, {}
 		local function add(path)
-			if type(path) == "string" and not added[path] then
+			if type(path) == "string" and path ~= "" and not added[path] then
 				added[path] = true
 				table.insert(paths, path)
 			end
 		end
-		add(profile.launchUrl)
-		for _, path in ipairs(vim.g.dotnet_swagger_paths or { "/swagger/index.html", "/swagger", "/" }) do
-			add(path)
+		if has_launch_url then
+			add(profile.launchUrl)
+		else
+			for _, path in ipairs(vim.g.dotnet_swagger_paths or { "/swagger/index.html", "/swagger" }) do
+				-- The homepage is the final fallback, after all documentation paths.
+				if path ~= "/" then
+					add(path)
+				end
+			end
+			if open_homepage then
+				add("/")
+			end
 		end
 		if #paths > 0 then
 			vim.defer_fn(function()
-				probe(base, paths, 1, 1)
+				probe(base, paths, 1)
 			end, 500)
 		end
 	end

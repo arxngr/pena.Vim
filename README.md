@@ -98,7 +98,7 @@ mv ~/.local/share/nvim ~/.local/share/nvim.bak
 # Clone the repo
 git clone https://github.com/arxngr/pena.Vim ~/.config/nvim
 
-# Launch Neovim — lazy.nvim will install all plugins on first run
+# Launch Neovim â€” lazy.nvim will install all plugins on first run
 nvim
 ```
 
@@ -219,19 +219,21 @@ be available. Use `:MasonLog` for installation errors.
 For .NET, use `:DotnetProject` (`<leader>np`) to select a startup project, then
 `:DotnetRun` (`<leader>nr`), `:DotnetWatch` (`<leader>nw`), or `:DotnetDebug`.
 Run, watch, and debug offer the project's `Project` launch profiles. Once an
-ASP.NET Core server starts listening, Neovim checks for Swagger UI
-and opens it once in your default browser. This also works with debug output in
-the integrated terminal. Applications without Swagger leave the browser closed.
+ASP.NET Core server starts listening, Neovim opens the profile's `launchUrl`
+once it responds successfully. Without a launch URL, it checks for Swagger UI,
+then opens the homepage for a web project (including MVC, Razor Pages, and Blazor).
+This also works with debug output in the integrated terminal. Console projects
+run and debug without opening a browser unless their profile requests it.
 
 Detection uses curl and checks the profile's `launchUrl`, `/swagger/index.html`,
-`/swagger`, and `/`. Custom paths can be set in `init.lua` with
+and `/swagger`, with `/` as the final web-page fallback. Custom documentation paths can be set in `init.lua` with
 `vim.g.dotnet_swagger_paths = { "/api/docs", "/swagger/index.html", "/" }`.
-Set `vim.g.dotnet_auto_open_swagger = false` to disable automatic opening;
+Set `vim.g.dotnet_auto_open_swagger = false` to disable all automatic browser opening;
 `launchBrowser = false` in the chosen launch profile also disables it. Detection
 uses the `Now listening on:` startup log when available and falls back to the
 project's standard `appsettings.json`, environment-specific appsettings, Kestrel
 endpoints, launch profile, and URL/port environment variables when logs are silent.
-It waits up to two minutes for configured addresses to respond. For bindings set
+It waits up to two minutes for a launch page, Swagger UI, or homepage to respond successfully. For bindings set
 only in application code or custom configuration, set
 `vim.g.dotnet_swagger_urls = { "http://localhost:12345" }`; adjust the wait with
 `vim.g.dotnet_swagger_timeout_ms`. It never changes the application's ports.
@@ -586,4 +588,4 @@ Inserts language-aware log statements for the variable or expression under the c
 
 ## License
 
-MIT — see [LICENSE](LICENSE).
+MIT â€” see [LICENSE](LICENSE).
