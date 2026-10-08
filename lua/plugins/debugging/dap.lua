@@ -11,29 +11,6 @@ local js_based_languages = {
 return {
 	{
 		"mfussenegger/nvim-dap",
-		dependencies = {
-			{
-				"microsoft/vscode-js-debug",
-				build = "npm install --legacy-peer-deps --no-save --ignore-scripts && npx gulp vsDebugServerBundle && rm -rf out && mv dist out",
-				version = "1.*",
-			},
-			{
-				"mxsdev/nvim-dap-vscode-js",
-				config = function()
-					require("dap-vscode-js").setup({
-						debugger_path = vim.fn.stdpath("data") .. "/lazy/vscode-js-debug",
-						adapters = {
-							"chrome",
-							"pwa-node",
-							"pwa-chrome",
-							"pwa-msedge",
-							"pwa-extensionHost",
-							"node-terminal",
-						},
-					})
-				end,
-			},
-		},
 		opts = function()
 			require("overseer").enable_dap()
 		end,
@@ -183,26 +160,20 @@ return {
 					port
 				)
 			end, { port = 8123, delay = 100 })
+			dap.adapters["pwa-chrome"] = dap.adapters["pwa-node"]
+			dap.adapters["pwa-msedge"] = dap.adapters["pwa-node"]
 
 			-- Go (delve)
 			dap.adapters.go = create_server_adapter(function(port)
 				return string.format("dlv dap --listen=127.0.0.1:%d", port)
 			end, { delay = 300 })
 
-			dap.adapters.python = create_server_adapter(function(port, config)
-				return string.format(
-					"python -m debugpy --listen 127.0.0.1:%d --wait-for-client %s",
-					port,
-					config.program or "${file}"
-				)
-			end, { delay = 500 })
-
-			-- Python (executable adapter, no terminal needed)
-			dap.adapters.python = {
-				type = "executable",
-				command = "python",
-				args = { "-m", "debugpy.adapter" },
-			}
+			-- The adapter runs in Mason's environment; the target uses its project's interpreter.
+			dap.adapters.python = function(callback)
+				local python =
+					get_pkg_path("debugpy", vim.fn.has("win32") == 1 and "venv/Scripts/python.exe" or "venv/bin/python")
+				callback({ type = "executable", command = python, args = { "-m", "debugpy.adapter" } })
+			end
 
 			-- C/C++ (executable adapter)
 			dap.adapters.codelldb = create_server_adapter(function(port)
@@ -218,6 +189,7 @@ return {
 			}
 
 			-- Configurations
+			require("core.dotnet").setup_dap(dap)
 
 			-- JavaScript/TypeScript
 			local js_configs = {
@@ -270,7 +242,13 @@ return {
 					name = "Launch file",
 					program = "${file}",
 					pythonPath = function()
-						return vim.fn.exepath("python") or "python"
+						local root = require("core.project_languages").root(vim.api.nvim_buf_get_name(0))
+						local venv = vim.fs.joinpath(
+							root,
+							".venv",
+							vim.fn.has("win32") == 1 and "Scripts/python.exe" or "bin/python"
+						)
+						return vim.fn.executable(venv) == 1 and venv or require("core.project_tools").runtime("python")
 					end,
 				},
 				launch_json_divider(),

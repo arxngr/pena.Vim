@@ -15,6 +15,8 @@ Modular Neovim configuration written in Lua, managed by [lazy.nvim](https://gith
   - [Linux](#linux)
   - [Windows](#windows)
 - [Keeping versions in sync](#keeping-versions-in-sync)
+- [Project tools](#project-tools)
+- [Markdown and diagrams](#markdown-and-diagrams)
 - [Keybindings](#keybindings)
   - [General](#general)
   - [Window and terminal navigation](#window-and-terminal-navigation)
@@ -39,7 +41,7 @@ Modular Neovim configuration written in Lua, managed by [lazy.nvim](https://gith
 ## Features
 
 - **LSP and autocompletion** via nvim-lspconfig, Mason, and nvim-cmp
-- **Debugging** via nvim-dap with adapters for JavaScript/TypeScript, Go, Python, and C/C++
+- **Debugging** via nvim-dap with project-selected adapters
 - **Testing** via vim-test with a reusable terminal strategy
 - **Fuzzy finding and picking** via Snacks.nvim (files, grep, buffers, LSP, git, diagnostics, and more)
 - **Search and replace** via grug-far.nvim
@@ -57,19 +59,21 @@ Modular Neovim configuration written in Lua, managed by [lazy.nvim](https://gith
 - **Colorscheme switcher** via Themery (OneDark, Tinta)
 - **Coding metrics** via WakaTime
 - **Smart logging** via nvim-chainsaw
+- **Project detection** selects language servers, formatters, debuggers, and syntax parsers automatically
 
 ---
 
 ## Prerequisites
 
-The following must be installed before setting up pena.Vim:
+Install Neovim and Git first. Other tools support search, display, parser
+compilation, or the editor tools selected for your projects.
 
 | Dependency | Purpose |
 |---|---|
-| [Neovim](https://neovim.io/) >= 0.10 | Runtime |
+| [Neovim](https://neovim.io/) >= 0.12 | Runtime |
 | [Git](https://git-scm.com/) | Plugin management and version control |
 | C compiler (`gcc` or `clang`) | Compiling treesitter parsers |
-| [Node.js](https://nodejs.org/) and npm | JavaScript/TypeScript debug adapter |
+| [Node.js](https://nodejs.org/) and npm | Required by some project-selected editor tools |
 | [ripgrep](https://github.com/BurntSushi/ripgrep) | Grep-based search (Snacks, grug-far) |
 | [fd](https://github.com/sharkdp/fd) | Fast file finding (optional but recommended) |
 | A [Nerd Font](https://www.nerdfonts.com/) | Icons in the UI |
@@ -94,7 +98,7 @@ mv ~/.local/share/nvim ~/.local/share/nvim.bak
 # Clone the repo
 git clone https://github.com/arxngr/pena.Vim ~/.config/nvim
 
-# Launch Neovim — lazy.nvim will install all plugins on first run
+# Launch Neovim â€” lazy.nvim will install all plugins on first run
 nvim
 ```
 
@@ -199,6 +203,67 @@ On another machine, after pulling the latest changes:
 When you want to update plugins, run `:Lazy update` on one machine, commit the updated lock file, then pull and `:Lazy restore` on the others.
 
 ---
+
+## Project tools
+
+Language tools are selected automatically from the source files and manifests in
+open projects. Mixed projects receive the tools they need. Dependency folders and
+build outputs are excluded from detection. Servers activate only for matching
+projects; installed tools stay cached for reuse.
+
+Use `:ProjectLanguages` to inspect detection, `:ProjectTools` to inspect selected
+tools and missing runtimes, and `:ProjectToolsRefresh` to rescan and retry installs.
+Mason installs editor tools; required system runtimes and compilers must already
+be available. Use `:MasonLog` for installation errors.
+
+For .NET, use `:DotnetProject` (`<leader>np`) to select a startup project, then
+`:DotnetRun` (`<leader>nr`), `:DotnetWatch` (`<leader>nw`), or `:DotnetDebug`.
+Run, watch, and debug offer the project's `Project` launch profiles. Once an
+ASP.NET Core server starts listening, Neovim opens the profile's `launchUrl`
+once it responds successfully. Without a launch URL, it checks for Swagger UI,
+then opens the homepage for a web project (including MVC, Razor Pages, and Blazor).
+This also works with debug output in the integrated terminal. Console projects
+run and debug without opening a browser unless their profile requests it.
+
+Detection uses curl and checks the profile's `launchUrl`, `/swagger/index.html`,
+and `/swagger`, with `/` as the final web-page fallback. Custom documentation paths can be set in `init.lua` with
+`vim.g.dotnet_swagger_paths = { "/api/docs", "/swagger/index.html", "/" }`.
+Set `vim.g.dotnet_auto_open_swagger = false` to disable all automatic browser opening;
+`launchBrowser = false` in the chosen launch profile also disables it. Detection
+uses the `Now listening on:` startup log when available and falls back to the
+project's standard `appsettings.json`, environment-specific appsettings, Kestrel
+endpoints, launch profile, and URL/port environment variables when logs are silent.
+It waits up to two minutes for a launch page, Swagger UI, or homepage to respond successfully. For bindings set
+only in application code or custom configuration, set
+`vim.g.dotnet_swagger_urls = { "http://localhost:12345" }`; adjust the wait with
+`vim.g.dotnet_swagger_timeout_ms`. It never changes the application's ports.
+The same detection also applies to ordinary `coreclr` launch configurations:
+Neovim locates the project from the output DLL or launch working directory and
+uses that launch's environment. No service-specific names or ports are required.
+On Windows, the .NET adapter launches the native `netcoredbg.exe` directly,
+bypassing Mason's `.CMD` wrapper so DAP initialization can complete.
+
+## Markdown and diagrams
+
+Markdown files render automatically inside Neovim with `render-markdown.nvim`.
+Headings, tables, lists, checkboxes, and code blocks are easier to read; source
+text remains editable. Mermaid fences remain code inside the terminal preview.
+Use the browser preview to draw Mermaid diagrams and display images and math.
+The browser view updates as you edit and uses a locally running bundled server.
+
+| Key (in a Markdown buffer) | Action |
+|---|---|
+| `<leader>mr` | Toggle in-editor rendering for the current buffer |
+| `<leader>ms` | Open a rendered Markdown split inside Neovim |
+| `<leader>mp` | Toggle live browser preview, including Mermaid diagrams |
+| `<leader>mP` | Stop the browser preview |
+
+Try [the Markdown example](examples/markdown-preview.md). `:MarkdownPreview`
+also opens the browser preview directly. If the preview server needs reinstalling,
+run `:Lazy build markdown-preview.nvim`. If in-editor rendering is missing, check
+`:checkhealth render-markdown` and install the `markdown` and `markdown_inline`
+Treesitter parsers. The browser preview uses its bundled Mermaid version, so some
+syntax from newer Mermaid releases may not work.
 
 ## Keybindings
 
@@ -363,7 +428,7 @@ When you want to update plugins, run `:Lazy update` on one machine, commit the u
 
 ### Debugging (nvim-dap)
 
-Adapters are included for: JavaScript, TypeScript, Go (delve), Python (debugpy), and C/C++ (codelldb / cppdbg).
+Debug adapters are installed for the languages detected in your open projects.
 
 | Key | Description |
 |---|---|
@@ -388,7 +453,7 @@ Adapters are included for: JavaScript, TypeScript, Go (delve), Python (debugpy),
 
 ### Testing (vim-test)
 
-Tests run in a reusable split terminal. Go projects use `gotest` as the runner.
+Tests run in a reusable split terminal.
 
 | Key | Description |
 |---|---|
@@ -523,4 +588,4 @@ Inserts language-aware log statements for the variable or expression under the c
 
 ## License
 
-MIT — see [LICENSE](LICENSE).
+MIT â€” see [LICENSE](LICENSE).

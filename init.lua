@@ -38,6 +38,8 @@ require("lazy").setup({
 	require("plugins.search.grug-far"),
 	require("plugins.utilities.mini"),
 	require("plugins.completion.lsp"),
+	require("plugins.development.dotnet"),
+	require("plugins.editing.markdown"),
 	require("plugins.terminal.terminal"),
 	require("plugins.utilities.snacks"),
 	require("plugins.ui.which-key"),
