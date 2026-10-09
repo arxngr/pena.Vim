@@ -380,6 +380,26 @@ end
 
 function M.setup_dap(dap)
 	local browsers = {}
+	dap.listeners.before.event_initialized["dotnet_windows_source_paths"] = function(session)
+		if vim.fn.has("win32") ~= 1 or session.config.type ~= "coreclr" or session._dotnet_windows_source_paths then
+			return
+		end
+		session._dotnet_windows_source_paths = true
+		local request = session.request
+		-- netcoredbg matches absolute source paths exactly; Windows PDBs use backslashes.
+		session.request = function(self, command, arguments, ...)
+			if
+				command == "setBreakpoints"
+				and arguments
+				and arguments.source
+				and type(arguments.source.path) == "string"
+			then
+				arguments = vim.deepcopy(arguments)
+				arguments.source.path = arguments.source.path:gsub("/", "\\")
+			end
+			return request(self, command, arguments, ...)
+		end
+	end
 	dap.listeners.after.event_initialized["dotnet_swagger"] = function(session)
 		if session.config.type ~= "coreclr" or session.config.request ~= "launch" then
 			return
