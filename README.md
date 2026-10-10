@@ -242,6 +242,18 @@ Neovim locates the project from the output DLL or launch working directory and
 uses that launch's environment. No service-specific names or ports are required.
 On Windows, the .NET adapter launches the native `netcoredbg.exe` directly,
 bypassing Mason's `.CMD` wrapper so DAP initialization can complete.
+Windows `coreclr` sessions also normalize outgoing breakpoint source paths to
+backslashes before the initial breakpoints are sent. Neovim can provide forward
+slashes while Windows PDBs record backslashes; netcoredbg versions with exact
+absolute-path matching otherwise reject breakpoints even when symbols are loaded.
+This applies to both launch and attach, without changing buffers or other adapters.
+Restart Neovim after updating this configuration.
+
+If a breakpoint remains unverified, place it on executable code, check the selected
+startup project/profile, and rebuild matching Debug DLL/PDB files after stopping
+existing debug sessions. A briefly pending breakpoint before its module loads is
+normal. Enable `:lua require("dap").set_log_level("TRACE")` and use `:DapShowLog`
+to inspect the breakpoint response and module symbol status.
 
 ## Markdown and diagrams
 
