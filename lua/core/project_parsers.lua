@@ -39,7 +39,8 @@ function M.update()
 		end
 	end
 	if not compiler then
-		M.blocked.compiler = "C compiler unavailable"
+		M.blocked.compiler =
+			"Parser installation skipped: install a C compiler (gcc, clang, cl, or zig) in PATH, then run :ProjectToolsRefresh"
 		return
 	end
 	M.blocked.compiler = nil

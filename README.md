@@ -56,7 +56,7 @@ Modular Neovim configuration written in Lua, managed by [lazy.nvim](https://gith
 - **Project task runner** via Overseer.nvim
 - **Multi-cursor** via vim-visual-multi
 - **Surround, move, pairs, diff** via mini.nvim
-- **Colorscheme switcher** via Themery (OneDark, Tinta)
+- **Colorscheme switcher** via Themery (OneDark, Tinta, [Bluloco dark/light](https://github.com/uloco/bluloco.nvim)); open with `<leader>uc`
 - **Coding metrics** via WakaTime
 - **Smart logging** via nvim-chainsaw
 - **Project detection** selects language servers, formatters, debuggers, and syntax parsers automatically
@@ -72,7 +72,7 @@ compilation, or the editor tools selected for your projects.
 |---|---|
 | [Neovim](https://neovim.io/) >= 0.12 | Runtime |
 | [Git](https://git-scm.com/) | Plugin management and version control |
-| C compiler (`gcc` or `clang`) | Compiling treesitter parsers |
+| C compiler (`gcc`, `clang`, MSVC `cl`, or `zig`) | Optional for startup; required to compile missing treesitter parsers |
 | [Node.js](https://nodejs.org/) and npm | Required by some project-selected editor tools |
 | [ripgrep](https://github.com/BurntSushi/ripgrep) | Grep-based search (Snacks, grug-far) |
 | [fd](https://github.com/sharkdp/fd) | Fast file finding (optional but recommended) |
@@ -221,6 +221,15 @@ tools. Closing the last buffer for an extra language removes that selection
 unless a manifest still requires it. Installed packages remain cached, not
 uninstalled. Tree-sitter may additionally request its shared CLI and selected
 parsers when a C compiler is available.
+
+Without a supported C compiler in `PATH`, automatic parser installation is
+skipped rather than attempted. Already installed parsers remain usable; missing
+parsers have no Tree-sitter highlighting until compiled. Check
+`:ProjectTools` → `parser_dependencies.compiler` for the status, install a compiler,
+then run `:ProjectToolsRefresh`. Mason does not install a system C compiler.
+Language servers and formatters remain independent of this parser check, but
+individual Mason packages can still fail if their own required runtimes or
+build tools are missing; inspect `:MasonLog` for those failures.
 
 Manifest scanning yields after at most 200 entries or approximately 4 ms of work
 per batch (a single filesystem operation can take longer). Diagnostics refresh
@@ -555,6 +564,9 @@ Gitsigns is also active and shows inline blame at end of line.
 The task list docks in Edgy's bottom **Tasks** panel. `<leader>ow` toggles it;
 `:OverseerOpen bottom` opens it explicitly. Task output continues to use the
 configured terminal strategy.
+Press `<C-k>` in the task list to return directly to an editing window, even
+when Overseer's output preview is between it and the editor. The other
+`<C-h/j/l>` keys use the normal directional window mappings.
 
 | Key | Description |
 |---|---|

@@ -19,6 +19,11 @@ return {
 				require("tinta").setup({ palette = "tinta-darker-cool" })
 			end,
 		},
+		{
+			"uloco/bluloco.nvim",
+			dependencies = { "rktjmp/lush.nvim" },
+			opts = {},
+		},
 	},
 	keys = {
 		{ "<leader>uc", "<cmd>Themery<CR>", desc = "Toggle Themery" },
@@ -26,7 +31,7 @@ return {
 	lazy = false,
 	config = function()
 		require("themery").setup({
-			themes = { "onedark", "tinta" },
+			themes = { "onedark", "tinta", "bluloco-dark", "bluloco-light" },
 		})
 	end,
 }
