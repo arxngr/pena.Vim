@@ -27,6 +27,12 @@ return {
 			},
 			bottom = {
 				{
+					title = "Tasks",
+					ft = "OverseerList",
+					size = { height = 0.23 },
+					open = "OverseerOpen bottom",
+				},
+				{
 					title = "DAP REPL",
 					ft = "dap-repl",
 					size = { height = 0.23 }, -- 23% of total height

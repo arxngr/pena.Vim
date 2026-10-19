@@ -19,10 +19,16 @@ return {
 		dap = true,
 		strategy = "toggleterm",
 		task_list = {
-			bindings = {
+			direction = "bottom",
+			keymaps = {
 				["<C-h>"] = false,
 				["<C-j>"] = false,
-				["<C-k>"] = false,
+				["<C-k>"] = {
+					function()
+						require("edgy").goto_main()
+					end,
+					desc = "Go to editing window",
+				},
 				["<C-l>"] = false,
 			},
 		},

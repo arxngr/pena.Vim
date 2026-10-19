@@ -32,6 +32,8 @@ local function quit_or_toggle(bufnr)
 		if not toggle_dap_repl() then
 			vim.cmd("close")
 		end
+	elseif ft == "OverseerOutput" then
+		vim.cmd("close")
 	else
 		vim.cmd("close")
 		pcall(vim.api.nvim_buf_delete, bufnr, { force = true })
@@ -108,6 +110,7 @@ local special_filetypes = {
 	"lspinfo",
 	"neotest-output",
 	"neotest-output-panel",
+	"OverseerOutput",
 	"neotest-summary",
 	"notify",
 	"qf",

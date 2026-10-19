@@ -164,6 +164,14 @@ local ignored = {
 	[".tox"] = true,
 	[".mypy_cache"] = true,
 	[".pytest_cache"] = true,
+	[".vs"] = true,
+	[".idea"] = true,
+	[".cache"] = true,
+	[".angular"] = true,
+	[".svelte-kit"] = true,
+	[".output"] = true,
+	packages = true,
+	TestResults = true,
 }
 
 local function normalize(path)
@@ -190,9 +198,14 @@ local function read(path)
 	return ok and table.concat(lines, "\n") or ""
 end
 
-local function detect(project, path)
+local function detect(project, path, manifests_only)
 	local name = vim.fs.basename(path)
-	local language = manifests[name] or extensions[name:match("%.([^%.]+)$") or ""]
+	local language = manifests[name]
+	if name:match("%.csproj$") then
+		language = "cs"
+	elseif not manifests_only then
+		language = language or extensions[name:match("%.([^%.]+)$") or ""]
+	end
 	if name:match("^Dockerfile[%.]?") then
 		language = "dockerfile"
 	end
@@ -246,18 +259,25 @@ local function scan(project)
 	})
 	local count = 0
 	local function step()
+		local started = vim.uv.hrtime()
 		for _ = 1, 200 do
 			local name, kind = iterator()
 			if not name or count >= 50000 then
 				project.scanning = false
 				project.scanned = true
 				project.truncated = name ~= nil
+				for language in pairs(project.detected) do
+					project.languages[language] = true
+				end
 				emit()
 				return
 			end
 			count = count + 1
 			if kind == "file" then
-				detect(project, vim.fs.joinpath(project.root, name))
+				detect({ languages = project.detected }, vim.fs.joinpath(project.root, name), true)
+			end
+			if vim.uv.hrtime() - started >= 4000000 then
+				break
 			end
 		end
 		vim.schedule(step)
@@ -286,14 +306,19 @@ end
 function M.refresh(force)
 	local active = {}
 	local reset = {}
+	local rebuilt = {}
 	local function add(path, bufnr)
 		local root = M.root(path)
-		local project = active[root] or M.projects[root] or { root = root, languages = {} }
+		local project = active[root] or M.projects[root] or { root = root, languages = {}, detected = {} }
 		active[root] = project
 		if force and not reset[root] and not project.scanning then
-			project.languages = {}
+			project.detected = {}
 			project.scanned = false
 			reset[root] = true
+		end
+		if not rebuilt[root] then
+			project.languages = vim.deepcopy(project.detected)
+			rebuilt[root] = true
 		end
 		if path and path ~= "" then
 			detect(project, path)
