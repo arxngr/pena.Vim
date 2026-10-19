@@ -19,6 +19,7 @@ return {
 		dap = true,
 		strategy = "toggleterm",
 		task_list = {
+			direction = "bottom",
 			bindings = {
 				["<C-h>"] = false,
 				["<C-j>"] = false,

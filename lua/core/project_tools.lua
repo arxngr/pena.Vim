@@ -1,6 +1,28 @@
 local M = { wanted = {}, servers = {}, configured_servers = {}, enabled = {}, attempts = {}, blocked = {} }
 local languages = require("core.project_languages")
 
+local function configure(server)
+	if server == "roslyn" or M.configured_servers[server] then
+		return
+	end
+	local ok, config = pcall(require, "lsp.servers." .. server)
+	local opts = ok and vim.deepcopy(config.opts or {}) or {}
+	opts.capabilities = vim.tbl_deep_extend("force", {}, M.capabilities, opts.capabilities or {})
+	if server == "html" then
+		opts.filetypes = { "html", "htmldjango" }
+	elseif server == "vue_ls" then
+		opts.init_options = {
+			typescript = {
+				tsdk = vim.fs.joinpath(
+					vim.fn.stdpath("data"), "mason", "packages",
+					"typescript-language-server", "node_modules", "typescript", "lib"
+				),
+			},
+		}
+	end
+	M.register(server, opts)
+end
+
 local runtimes = {
 	pyright = "node",
 	["typescript-language-server"] = "node",
@@ -85,7 +107,6 @@ function M.register(server, opts)
 		end,
 	})
 	M.configured_servers[server] = true
-	M.sync()
 end
 
 function M.sync(retry)
@@ -215,6 +236,7 @@ local function update(projects)
 			local profile = languages.profiles[language]
 			if profile then
 				for server, package in pairs(profile.servers) do
+					configure(server)
 					M.servers[server] = package
 					M.wanted[package] = true
 				end
@@ -244,37 +266,8 @@ function M.setup(capabilities)
 		return
 	end
 	M.configured = true
+	M.capabilities = capabilities
 	require("core.mason").setup()
-	-- Keep Mason's UI and mappings, but never enable every previously installed server.
-	require("mason-lspconfig").setup({ automatic_installation = false })
-	for _, profile in pairs(languages.profiles) do
-		for server in pairs(profile.servers) do
-			if server ~= "roslyn" and not M.configured_servers[server] then
-				local ok, config = pcall(require, "lsp.servers." .. server)
-				local opts = ok and vim.deepcopy(config.opts or {}) or {}
-				opts.capabilities = vim.tbl_deep_extend("force", {}, capabilities, opts.capabilities or {})
-				if server == "html" then
-					opts.filetypes = { "html", "htmldjango" }
-				end
-				if server == "vue_ls" then
-					opts.init_options = {
-						typescript = {
-							tsdk = vim.fs.joinpath(
-								vim.fn.stdpath("data"),
-								"mason",
-								"packages",
-								"typescript-language-server",
-								"node_modules",
-								"typescript",
-								"lib"
-							),
-						},
-					}
-				end
-				M.register(server, opts)
-			end
-		end
-	end
 	languages.subscribe(update)
 	vim.api.nvim_create_user_command("ProjectTools", function()
 		local parsers = package.loaded["core.project_parsers"]

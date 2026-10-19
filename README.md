@@ -206,10 +206,25 @@ When you want to update plugins, run `:Lazy update` on one machine, commit the u
 
 ## Project tools
 
-Language tools are selected automatically from the source files and manifests in
-open projects. Mixed projects receive the tools they need. Dependency folders and
-build outputs are excluded from detection. Servers activate only for matching
-projects; installed tools stay cached for reuse.
+Language tools are selected from project manifests (including `.csproj`/`.sln`,
+`package.json`, `go.mod`, and `Cargo.toml`) and files you actually open.
+Unopened source files, bundled scripts, and incidental JSON/YAML files do not
+request tools just because they exist in the repository. Mixed projects still
+receive tooling for each detected manifest or open language. Dependency folders,
+IDE caches, and build outputs are excluded from manifest discovery.
+
+Only selected servers are configured and enabled through Neovim's native LSP API;
+Mason installs only their packages and the matching formatters/debuggers.
+For example, a C# project requests Roslyn and netcoredbg, not PHP or TypeScript
+servers. Opening a TypeScript file or finding a frontend `package.json` adds its
+tools. Closing the last buffer for an extra language removes that selection
+unless a manifest still requires it. Installed packages remain cached, not
+uninstalled. Tree-sitter may additionally request its shared CLI and selected
+parsers when a C compiler is available.
+
+Manifest scanning yields after at most 200 entries or approximately 4 ms of work
+per batch (a single filesystem operation can take longer). Diagnostics refresh
+after leaving Insert mode rather than on every edit.
 
 Use `:ProjectLanguages` to inspect detection, `:ProjectTools` to inspect selected
 tools and missing runtimes, and `:ProjectToolsRefresh` to rescan and retry installs.
@@ -524,6 +539,10 @@ Gitsigns is also active and shows inline blame at end of line.
 ---
 
 ### Project tasks (Overseer)
+
+The task list docks in Edgy's bottom **Tasks** panel. `<leader>ow` toggles it;
+`:OverseerOpen bottom` opens it explicitly. Task output continues to use the
+configured terminal strategy.
 
 | Key | Description |
 |---|---|
