@@ -21,6 +21,7 @@ Modular Neovim configuration written in Lua, managed by [lazy.nvim](https://gith
   - [General](#general)
   - [Window and terminal navigation](#window-and-terminal-navigation)
   - [Buffer management](#buffer-management)
+  - [Native text search](#native-text-search)
   - [Picker (Snacks)](#picker-snacks)
   - [Search and replace](#search-and-replace)
   - [LSP](#lsp)
@@ -43,7 +44,9 @@ Modular Neovim configuration written in Lua, managed by [lazy.nvim](https://gith
 - **LSP and autocompletion** via nvim-lspconfig, Mason, and nvim-cmp
 - **Debugging** via nvim-dap with project-selected adapters
 - **Testing** via vim-test with a reusable terminal strategy
-- **Fuzzy finding and picking** via Snacks.nvim (files, grep, buffers, LSP, git, diagnostics, and more)
+- **Fuzzy finding and picking** via Snacks.nvim (files, buffers, git, diagnostics, and more)
+- **Text search** via native result splits and ripgrep, including unsaved buffer contents
+- **LSP navigation** via native jumps and searchable quickfix splits with reversible source-window previews
 - **Search and replace** via grug-far.nvim
 - **File explorer** via Oil.nvim (floating)
 - **Git** via vim-fugitive, gitsigns.nvim, and LazyGit (Snacks)
@@ -74,7 +77,7 @@ compilation, or the editor tools selected for your projects.
 | [Git](https://git-scm.com/) | Plugin management and version control |
 | C compiler (`gcc` or `clang`) | Compiling treesitter parsers |
 | [Node.js](https://nodejs.org/) and npm | Required by some project-selected editor tools |
-| [ripgrep](https://github.com/BurntSushi/ripgrep) | Grep-based search (Snacks, grug-far) |
+| [ripgrep](https://github.com/BurntSushi/ripgrep) | Native project text search and grug-far |
 | [fd](https://github.com/sharkdp/fd) | Fast file finding (optional but recommended) |
 | A [Nerd Font](https://www.nerdfonts.com/) | Icons in the UI |
 
@@ -283,7 +286,7 @@ syntax from newer Mermaid releases may not work.
 | `v` | `<` / `>` | Indent left / right (stays in visual mode) |
 | `n` | `<leader>wv` | Vertical split |
 | `n` | `<leader>hv` | Horizontal split |
-| `n` | `<leader>bd` | Close current buffer |
+| `n` | `<leader>bd` | Close current buffer; confirm save/discard/cancel for unsaved changes |
 | `n` | `<leader>dd` | Open dashboard |
 
 > Note: `d` is remapped to delete into the black hole register (`"_d`), so deleted text is never placed in the yank register. Use `"dd` or `"dw` if you need the default behaviour.
@@ -310,7 +313,33 @@ syntax from newer Mermaid releases may not work.
 | `<leader>bP` | Delete all non-pinned buffers |
 | `<leader>br` | Delete buffers to the right |
 | `<leader>bl` | Delete buffers to the left |
-| `<leader>bd` | Close current buffer |
+| `<leader>bd` | Close current buffer; confirm save/discard/cancel for unsaved changes |
+
+Hidden, unmodified file buffers are closed after five minutes of inactivity,
+checked once per minute. Visible buffers in any tab, unsaved changes, pinned
+buffers, unnamed/special/terminal buffers, and active preview/diff source
+buffers are protected. Cleanup never force-deletes a buffer or removes a file
+from disk.
+
+---
+
+### Native text search
+
+| Key in a code buffer | Description |
+|---|---|
+| `/` | Search the current buffer, including unsaved edits |
+| `?` (Shift+/) | Global Search: search project files on disk with ripgrep |
+
+Queries use a command-line prompt, not a floating picker. They are literal and
+case-sensitive; Enter submits and Ctrl-C cancels. Project search uses the same
+project-root detection as the project tools and honors ripgrep's ignore rules.
+Text search and LSP results share the preview controls documented below.
+Successful text searches preserve their literal query in native search state,
+so `n` / `N` continue forward/backward after opening a result. Redundant leader
+text-search shortcuts (`<leader>/`, `<leader>sb`, `<leader>sB`, `<leader>sw`,
+`<leader>sg`, and `<leader>sG`) are no longer configured.
+In quickfix, help, terminals, and other special buffers, `/` and `?` retain
+their native forward/backward search behavior.
 
 ---
 
@@ -322,7 +351,6 @@ syntax from newer Mermaid releases may not work.
 |---|---|
 | `<leader><space>` | Smart find files |
 | `<leader>,` | Buffers |
-| `<leader>/` | Grep |
 | `<leader>:` | Command history |
 | `<leader>n` | Notification history |
 
@@ -336,15 +364,6 @@ syntax from newer Mermaid releases may not work.
 | `<leader>fg` | Find git files |
 | `<leader>fp` | Projects |
 | `<leader>fr` | Recent files |
-
-#### Grep
-
-| Key | Description |
-|---|---|
-| `<leader>sb` | Buffer lines |
-| `<leader>sB` | Grep open buffers |
-| `<leader>sg` | Grep |
-| `<leader>sw` | Grep word under cursor or selection (`n` / `x`) |
 
 #### Search
 
@@ -369,8 +388,6 @@ syntax from newer Mermaid releases may not work.
 | `<leader>sq` | Quickfix list |
 | `<leader>sR` | Resume last picker |
 | `<leader>su` | Undo history |
-| `<leader>ss` | LSP symbols |
-| `<leader>sS` | LSP workspace symbols |
 
 ---
 
@@ -388,14 +405,64 @@ syntax from newer Mermaid releases may not work.
 |---|---|---|
 | `n` | `gd` | Go to definition |
 | `n` | `gD` | Go to declaration |
-| `n` | `gr` | References |
-| `n` | `gI` | Go to implementation |
+| `n` | `gr` | References in a bottom quickfix split |
+| `n` | `gi` / `gI` | Go to implementation |
 | `n` | `gy` | Go to type definition |
+| `n` | `<leader>ss` | Document symbols in a bottom quickfix split |
+| `n` | `<leader>sS` | Prompt for a workspace symbol query, then open quickfix |
 | `n` | `<leader>rn` | Rename symbol |
 | `n` / `x` | `<leader>ca` | Code action |
 | `n` | `<leader>cr` | Rename (core keymap) |
 | `n` | `<leader>k` | Toggle signature help |
 | `n` | `<leader>uh` | Toggle inlay hints (all buffers) |
+
+LSP navigation does not use Snacks. Definitions, declarations, implementations,
+and type definitions jump directly when there is one result; multiple results
+open a quickfix split. References, symbols, and text searches use a bottom
+quickfix split sized to 35% of the editor height, with the total result count in
+its header. Each result shows its path and location on a separate, muted display
+line above the searchable code, including the first result, with a horizontal
+separator between them. Code rows use theme-linked language syntax,
+not quickfix filename coloring. Only the exact searched text uses the active
+theme's `Search` colors, alongside a `>` gutter sign; surrounding code keeps its
+syntax colors. Full-row quickfix and cursor-line coloring is disabled in result
+windows. Opening a result clears the preview's word highlight and gutter sign.
+Installed Treesitter parsers are reused; native syntax handles previews without
+an available parser. Workspace symbols first use a command-line query
+(Enter to submit, Ctrl-C to cancel).
+
+Result rendering resolves filetypes and formats paths once per buffer in each
+list, rather than once per reference, and reuses its separator text. This reduces
+UI work for large reference lists without loading every target file. The first
+reference request can still wait for the language server to index the project;
+renderer optimizations do not remove that server-side delay.
+
+In a fresh reference, symbol, or text-search list:
+
+| Key | Action |
+|---|---|
+| `j` / `k`, arrow keys | Select a result and preview it in the source window without leaving the list |
+| `/` / `?` | Native forward/backward search within the displayed code rows; results are not filtered |
+| `n` / `N` | Move between native search matches |
+| Enter / double-click in the result list | Commit the selected location and close the list |
+| Click the source preview | Commit that preview and clear its search markers |
+| `q` / Escape | Cancel, close the list, and restore the original buffer and cursor |
+
+Switching windows with the keyboard without committing restores the main buffer and view, but keeps
+the result session alive. Returning to the result window resumes the selected
+preview and subsequent movement. Unsaved edits are preserved. `:cclose` cancels
+the session; `:copen` reopens the results as a normal quickfix list. Native
+`:cnext` / `:cprevious` remain available after committing.
+
+Run the isolated navigation and text-search regressions without plugins:
+
+```sh
+nvim --headless -u NONE -l tests/lsp_results.lua
+nvim --headless -u NONE -l tests/search.lua
+nvim --headless -u NONE -l tests/search_render.lua
+nvim --headless -u NONE -l tests/git_status.lua
+nvim --headless -u NONE -l tests/buffer_cleanup.lua
+```
 
 ---
 
@@ -467,15 +534,51 @@ Tests run in a reusable split terminal.
 
 ### Git
 
+#### Native Git status
+
+`<leader>gs` opens a native 35%-height status split without loading Fugitive.
+Move among files to preview them in the original source window. Keyboard window
+switching restores the source; returning to status resumes previews.
+
+| Control | Action |
+|---|---|
+| Enter / double-click a status entry | Open its native side-by-side diff |
+| Click the source preview | Open the selected file's diff |
+| `q` / Escape in status | Cancel and restore the original buffer/view |
+| Ctrl-O in either diff pane | Close the session's diff panes and restore the original buffer, focus, and layout |
+
+Staged entries compare HEAD with the index; unstaged entries compare the index
+with the working file. Untracked files compare against an empty baseline.
+Deleted files and renamed paths are supported. Ctrl-O removes only clean,
+hidden buffers created by that session: pre-existing buffers/windows and
+unsaved working-file edits are preserved. Starting with one file window returns
+to that one window, without temporary diff buffers left open.
+
+Use `:Git` for Fugitive's full staging interface.
+
 #### vim-fugitive
 
 | Key | Description |
 |---|---|
-| `<leader>gs` | Git status |
 | `<leader>gc` | Git commit |
 | `<leader>gp` | Git push |
 | `<leader>gb` | Git blame |
-| `<leader>gd` | Git diff split |
+| `<leader>gd` | Git diff split; Ctrl-O in either pane closes the diff and restores the source |
+
+The `<leader>gd` session preserves the original buffer, cursor, window layout,
+and unsaved edits. Its temporary Ctrl-O mappings are removed on return, and clean,
+hidden buffers created for the diff are deleted. Pre-existing windows and buffers
+are retained. Direct `:Gvdiffsplit` commands keep Fugitive's native behavior;
+use `<leader>gd` for the return shortcut.
+
+Exercise this path with the installed Fugitive plugin (not a mock):
+
+```sh
+nvim --headless -u NONE -n -l tests/fugitive_diff.lua
+```
+
+The fixture uses `stdpath("data")/lazy/vim-fugitive`; set `FUGITIVE_PATH` if the
+plugin is installed elsewhere.
 
 #### Snacks git log
 

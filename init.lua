@@ -1,6 +1,7 @@
 require("core.autocmds")
 require("core.keymaps")
 require("core.options")
+require("core.buffer_cleanup").setup()
 
 vim.g.loaded_netrw = 1
 vim.g.loaded_netrwPlugin = 1
