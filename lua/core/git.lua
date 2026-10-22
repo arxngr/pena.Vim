@@ -1,5 +1,6 @@
 local M = {}
-local active
+local status_active
+local diff_active
 
 local function hold(buf, delta)
 	if vim.api.nvim_buf_is_valid(buf) then
@@ -47,8 +48,8 @@ local function entries(output)
 	return groups
 end
 
-function M.open()
-	if active then active() end
+function M.status()
+	if status_active then status_active() end
 	local source = vim.api.nvim_get_current_win()
 	local original = vim.api.nvim_get_current_buf()
 	local name = vim.api.nvim_buf_get_name(original)
@@ -69,7 +70,7 @@ function M.open()
 	end
 	hold(original, 1)
 	local canceled = false
-	active = function()
+	status_active = function()
 		if not canceled then
 			canceled = true
 			hold(original, -1)
@@ -80,7 +81,7 @@ function M.open()
 			if canceled then return end
 			if not vim.api.nvim_win_is_valid(source) or result.code ~= 0 then
 				hold(original, -1)
-				active = nil
+				status_active = nil
 				if result.code ~= 0 then vim.notify("Git status: " .. result.stderr, vim.log.levels.ERROR) end
 				return
 			end
@@ -98,7 +99,7 @@ function M.open()
 			end
 			if #lines == 2 then
 				hold(original, -1)
-				active = nil
+				status_active = nil
 				vim.notify("Working tree clean", vim.log.levels.INFO)
 				return
 			end
@@ -181,7 +182,7 @@ function M.open()
 			local function finish(closing_status)
 				if phase == "closed" then return end
 				phase = "closed"
-				active = nil
+				status_active = nil
 				vim.api.nvim_del_augroup_by_id(group)
 				for buf, previous in pairs(mappings) do
 					if vim.api.nvim_buf_is_valid(buf) then
@@ -211,7 +212,7 @@ function M.open()
 					vim.cmd(layout)
 				end
 			end
-			active = finish
+			status_active = finish
 			local function open_diff()
 				local entry = selected()
 				if not entry or phase ~= "status" then return end
@@ -277,6 +278,66 @@ function M.open()
 			end, { buffer = status, expr = true, desc = "Select a Git file or open its source-preview diff" })
 		end)
 	end)
+end
+
+function M.diff()
+	if diff_active then diff_active() end
+	local source = vim.api.nvim_get_current_win()
+	local original = vim.api.nvim_get_current_buf()
+	local view, layout = vim.fn.winsaveview(), vim.fn.winrestcmd()
+	local windows, buffers, options = {}, {}, {}
+	for _, win in ipairs(vim.api.nvim_list_wins()) do windows[win] = true end
+	for _, buf in ipairs(vim.api.nvim_list_bufs()) do buffers[buf] = true end
+	for _, key in ipairs({ "diff", "foldmethod", "foldenable", "foldlevel", "foldcolumn", "scrollbind", "cursorbind", "wrap" }) do
+		options[key] = vim.wo[source][key]
+	end
+	vim.cmd("Gvdiffsplit")
+	local created, mappings = {}, {}
+	for _, win in ipairs(vim.api.nvim_list_wins()) do
+		if not windows[win] then created[win] = true end
+	end
+	local done = false
+	local function restore()
+		if done then return end
+		done, diff_active = true, nil
+		for buf, previous in pairs(mappings) do
+			if vim.api.nvim_buf_is_valid(buf) then
+				pcall(vim.keymap.del, "n", "<C-o>", { buffer = buf })
+				if previous.buffer == 1 then
+					vim.api.nvim_buf_call(buf, function() vim.fn.mapset("n", false, previous) end)
+				end
+			end
+		end
+		for win in pairs(created) do
+			if vim.api.nvim_win_is_valid(win) then vim.api.nvim_win_close(win, false) end
+		end
+		if vim.api.nvim_win_is_valid(source) then
+			vim.api.nvim_set_current_win(source)
+			vim.cmd("diffoff")
+			for key, value in pairs(options) do vim.wo[source][key] = value end
+			if vim.api.nvim_buf_is_valid(original) then
+				vim.cmd("hide buffer " .. original)
+				vim.fn.winrestview(view)
+			end
+			vim.cmd(layout)
+		end
+		for buf in pairs(mappings) do
+			if not buffers[buf] and vim.api.nvim_buf_is_valid(buf) and not vim.bo[buf].modified
+				and #vim.fn.win_findbuf(buf) == 0 then
+				vim.api.nvim_buf_delete(buf, { force = false })
+			end
+		end
+	end
+	for _, win in ipairs(vim.api.nvim_list_wins()) do
+		if win == source or created[win] then
+			local buf = vim.api.nvim_win_get_buf(win)
+			if not mappings[buf] then
+				vim.api.nvim_buf_call(buf, function() mappings[buf] = vim.fn.maparg("<C-o>", "n", false, true) end)
+				vim.keymap.set("n", "<C-o>", restore, { buffer = buf, desc = "Close Git diff and restore original buffer" })
+			end
+		end
+	end
+	diff_active = restore
 end
 
 return M

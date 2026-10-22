@@ -22,7 +22,7 @@ return {
 			{ "<leader>gc", ":Git commit<CR>", desc = "Git commit" },
 			{ "<leader>gp", ":Git push<CR>", desc = "Git push" },
 			{ "<leader>gb", ":Git blame<CR>", desc = "Git blame" },
-			{ "<leader>gd", function() require("core.fugitive_diff").open() end, desc = "Git diff split" },
+			{ "<leader>gd", function() require("core.git").diff() end, desc = "Git diff split" },
 		},
 	},
 }

@@ -1,5 +1,9 @@
 local M = {}
 
+function M.close()
+	vim.cmd("confirm bdelete")
+end
+
 local AGE_SECONDS = 300
 local SWEEP_INTERVAL_MS = 60 * 1000
 local clock = os.time

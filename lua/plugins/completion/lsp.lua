@@ -50,7 +50,7 @@ return {
 				return vim.lsp.handlers.signature_help(err, result, ctx, config)
 			end
 
-			local results = require("core.lsp_results")
+			local results = require("core.search")
 
 			-- keymaps for LSP
 			local function setup_lsp_keymaps(bufnr)

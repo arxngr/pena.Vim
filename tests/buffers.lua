@@ -1,6 +1,6 @@
 vim.opt.rtp:prepend(vim.fn.getcwd())
 local now = 1000
-local cleanup = require("core.buffer_cleanup")
+local cleanup = require("core.buffers")
 cleanup.setup({ clock = function() return now end })
 cleanup.setup()
 

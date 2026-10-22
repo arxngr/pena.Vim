@@ -14,7 +14,7 @@ local function search_mapping(method, native)
 end
 keymap("n", "/", search_mapping("current_buffer", "/"), { expr = true, desc = "Search current buffer" })
 keymap("n", "?", search_mapping("project", "?"), { expr = true, desc = "Global Search" })
-keymap("n", "<leader>gs", function() require("core.git_status").open() end, { desc = "Git status" })
+keymap("n", "<leader>gs", function() require("core.git").status() end, { desc = "Git status" })
 
 -- General
 keymap("n", "d", '"_d', opts)
@@ -54,7 +54,7 @@ end, { silent = true, noremap = true, desc = "Toggle signature" })
 keymap("n", "<leader>cr", vim.lsp.buf.rename, { desc = "Rename code", remap = true })
 keymap("v", "<", "<gv")
 keymap("v", ">", ">gv")
-keymap("n", "<leader>bd", ":confirm bdelete<CR>", { desc = "Close Buffer" })
+keymap("n", "<leader>bd", function() require("core.buffers").close() end, { desc = "Close Buffer" })
 
 keymap("n", "<leader>cd", vim.diagnostic.open_float, { desc = "Open float diagnostic", remap = true })
 

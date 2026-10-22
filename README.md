@@ -64,6 +64,19 @@ Modular Neovim configuration written in Lua, managed by [lazy.nvim](https://gith
 - **Smart logging** via nvim-chainsaw
 - **Project detection** selects language servers, formatters, debuggers, and syntax parsers automatically
 
+Feature behavior lives in domain modules; keymaps and plugin specifications only
+wire entry points:
+
+| Module | Responsibility |
+|---|---|
+| `lua/core/git.lua` | Native Git status, file previews, and native/Fugitive diff sessions (`status`, `diff`) |
+| `lua/core/search.lua` | Buffer/project search and shared LSP reference/symbol result sessions (`current_buffer`, `project`, `handler`) |
+| `lua/core/buffers.lua` | Safe closing and idle-buffer lifecycle (`close`, `setup`, `sweep`) |
+
+Git status and Fugitive retain independent session state. Text search and LSP
+navigation share the same result session implementation. Buffer cleanup remains
+independent of both features.
+
 ---
 
 ## Prerequisites
@@ -454,14 +467,14 @@ preview and subsequent movement. Unsaved edits are preserved. `:cclose` cancels
 the session; `:copen` reopens the results as a normal quickfix list. Native
 `:cnext` / `:cprevious` remain available after committing.
 
-Run the isolated navigation and text-search regressions without plugins:
+Run the feature regressions below. Search includes navigation and actual UI-grid
+rendering; Git covers native status and the installed Fugitive plugin. Search and
+buffer checks run without plugins.
 
 ```sh
-nvim --headless -u NONE -l tests/lsp_results.lua
-nvim --headless -u NONE -l tests/search.lua
-nvim --headless -u NONE -l tests/search_render.lua
-nvim --headless -u NONE -l tests/git_status.lua
-nvim --headless -u NONE -l tests/buffer_cleanup.lua
+nvim --headless -u NONE -n -l tests/search.lua
+nvim --headless -u NONE -n -l tests/git.lua
+nvim --headless -u NONE -n -l tests/buffers.lua
 ```
 
 ---
@@ -571,11 +584,8 @@ hidden buffers created for the diff are deleted. Pre-existing windows and buffer
 are retained. Direct `:Gvdiffsplit` commands keep Fugitive's native behavior;
 use `<leader>gd` for the return shortcut.
 
-Exercise this path with the installed Fugitive plugin (not a mock):
-
-```sh
-nvim --headless -u NONE -n -l tests/fugitive_diff.lua
-```
+The `tests/git.lua` command above exercises both native status and this path with
+the installed Fugitive plugin (not a mock).
 
 The fixture uses `stdpath("data")/lazy/vim-fugitive`; set `FUGITIVE_PATH` if the
 plugin is installed elsewhere.
