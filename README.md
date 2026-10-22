@@ -70,7 +70,7 @@ wire entry points:
 | Module | Responsibility |
 |---|---|
 | `lua/core/git.lua` | Native Git status, file previews, and native/Fugitive diff sessions (`status`, `diff`) |
-| `lua/core/search.lua` | Buffer/project search and shared LSP reference/symbol result sessions (`current_buffer`, `project`, `handler`) |
+| `lua/core/search.lua` | Buffer/project search, asynchronous LSP references, and shared result sessions (`current_buffer`, `project`, `references`, `handler`) |
 | `lua/core/buffers.lua` | Safe closing and idle-buffer lifecycle (`close`, `setup`, `sweep`) |
 
 Git status and Fugitive retain independent session state. Text search and LSP
@@ -441,14 +441,28 @@ theme's `Search` colors, alongside a `>` gutter sign; surrounding code keeps its
 syntax colors. Full-row quickfix and cursor-line coloring is disabled in result
 windows. Opening a result clears the preview's word highlight and gutter sign.
 Installed Treesitter parsers are reused; native syntax handles previews without
-an available parser. Workspace symbols first use a command-line query
-(Enter to submit, Ctrl-C to cancel).
+an available parser. Previews over 1 MiB do not explicitly start a cold Treesitter
+parser. Workspace symbols first use a command-line query (Enter to submit,
+Ctrl-C to cancel).
 
-Result rendering resolves filetypes and formats paths once per buffer in each
-list, rather than once per reference, and reuses its separator text. This reduces
-UI work for large reference lists without loading every target file. The first
-reference request can still wait for the language server to index the project;
-renderer optimizations do not remove that server-side delay.
+`gr` sends the LSP request asynchronously, then converts locations cooperatively.
+Unloaded file targets are read asynchronously in 64 KiB chunks, retaining only
+the referenced lines; loaded targets use current unsaved text. UTF-8/16/32 offsets
+and multi-line ranges are preserved. Sorting and conversion yield between work
+slices instead of processing an entire response in one UI callback.
+
+Result rows are published in batches of 256 within time-sliced callbacks; the
+header shows loading progress.
+Only visible rows receive path headers, separators, matched-word marks, and
+language syntax definitions. Scrolling decorates the new viewport. Source previews
+wait 40 ms after selection settles, avoiding loads for intermediate cursor moves;
+Enter still opens the selected result immediately. A newer search cancels stale
+reference work. Cancel stops pending rendering/previews; committing early lets
+the remaining quickfix entries finish in the background without stealing focus.
+
+This reduces UI-thread work; it does not remove language-server indexing time.
+LSP transport/JSON handling, loading a selected source buffer, and custom URI
+providers still use Neovim's main thread and may introduce pauses.
 
 In a fresh reference, symbol, or text-search list:
 
@@ -467,9 +481,10 @@ preview and subsequent movement. Unsaved edits are preserved. `:cclose` cancels
 the session; `:copen` reopens the results as a normal quickfix list. Native
 `:cnext` / `:cprevious` remain available after committing.
 
-Run the feature regressions below. Search includes navigation and actual UI-grid
-rendering; Git covers native status and the installed Fugitive plugin. Search and
-buffer checks run without plugins.
+Run the feature regressions below. Search includes actual UI-grid rendering,
+real local stdio LSP servers, Unicode/multi-line locations, large unloaded files,
+and cancellation/early-commit transitions. Git covers native status and the
+installed Fugitive plugin. Search and buffer checks run without plugins.
 
 ```sh
 nvim --headless -u NONE -n -l tests/search.lua

@@ -27,6 +27,11 @@ local function test_navigation()
 	local function move(line)
 		vim.api.nvim_win_set_cursor(0, { line, 0 })
 		vim.api.nvim_exec_autocmds("CursorMoved", { buffer = 0 })
+		local item = vim.fn.getqflist()[line]
+		assert(vim.wait(1000, function()
+			return vim.api.nvim_win_get_buf(source) == item.bufnr
+				and vim.api.nvim_win_get_cursor(source)[1] == item.lnum
+		end), "selected result did not finish its asynchronous preview")
 	end
 	local qf = open()
 	assert(vim.api.nvim_win_get_height(qf) == 14, "expected 35-percent height")
@@ -75,7 +80,7 @@ local function test_navigation()
 	assert(#vim.api.nvim_buf_get_extmarks(b, ns, 0, -1, {}) == 0, "suspended preview retained target sign")
 	vim.api.nvim_win_set_cursor(source, { 3, 2 })
 	vim.api.nvim_set_current_win(qf)
-	assert(vim.api.nvim_win_get_buf(source) == b, "returning to results did not resume preview")
+	assert(vim.wait(1000, function() return vim.api.nvim_win_get_buf(source) == b end), "returning to results did not resume preview")
 	move(1)
 	assert(vim.api.nvim_win_get_buf(source) == a, "resumed cursor movement did not preview")
 	key("<Esc>")
@@ -84,6 +89,7 @@ local function test_navigation()
 	open()
 	vim.api.nvim_feedkeys("/public" .. vim.keycode("<CR>"), "xt", false)
 	vim.api.nvim_exec_autocmds("CursorMoved", { buffer = 0 })
+	assert(vim.wait(1000, function() return vim.api.nvim_win_get_buf(source) == b end), "native slash did not preview the selected match")
 	assert(vim.api.nvim_win_get_cursor(0)[1] == 2 and vim.api.nvim_win_get_buf(source) == b, "native slash search should select and preview matching code")
 	assert(#vim.fn.getqflist() == 2, "native slash must not filter results")
 	key("<CR>")
@@ -273,9 +279,182 @@ local function test_rendering()
 	print("PASS: actual UI grid colors only matched text; selected rows retain syntax colors; theme Search changes propagate")
 end
 
+local function test_async_references()
+	vim.cmd("enew!")
+	vim.o.hidden = true
+	local search = require("core.search")
+	local root = vim.fn.tempname()
+	vim.fn.mkdir(root, "p")
+	local loaded_path, disk_path = root .. "/loaded.cs", root .. "/large.cs"
+	vim.fn.writefile({ "old disk contents", "second" }, loaded_path)
+	local lines = {}
+	for row = 1, 200000 do lines[row] = "λ😀 UpdateRange();" .. (row < 200000 and "\r" or "") end
+	vim.fn.writefile(lines, disk_path, "b")
+	lines = nil
+	vim.cmd("edit " .. vim.fn.fnameescape(loaded_path))
+	local source, original = vim.api.nvim_get_current_win(), vim.api.nvim_get_current_buf()
+	vim.api.nvim_buf_set_lines(original, 0, -1, false, { "α😀 UpdateRange();", "終x;" })
+	vim.api.nvim_win_set_cursor(source, { 1, 7 })
+	local clients = {}
+	local ok, err = pcall(function()
+		for _, encoding in ipairs({ "utf-16", "utf-8", "utf-32" }) do
+			local start = ({ ["utf-16"] = 4, ["utf-8"] = 7, ["utf-32"] = 3 })[encoding]
+			local locations = { { uri = vim.uri_from_fname(loaded_path), range = {
+				start = { line = 0, character = start }, ["end"] = { line = 1, character = encoding == "utf-8" and 5 or 3 },
+			}, encoding = encoding } }
+			-- Reverse server order to exercise URI and position sorting, including the last disk row.
+			for index = 1500, 1, -1 do
+				locations[#locations + 1] = { uri = vim.uri_from_fname(disk_path), range = {
+					start = { line = 198499 + index, character = start }, ["end"] = { line = 198499 + index, character = start + 11 },
+				}, encoding = encoding }
+			end
+			local config = vim.json.encode({ encoding = encoding, locations = locations })
+			local server = root .. "/server-" .. encoding .. ".lua"
+			local code = "local config = vim.json.decode(" .. string.format("%q", config) .. ")\n" .. [=[
+local function send(id, result)
+	local body = vim.json.encode({ jsonrpc = "2.0", id = id, result = result })
+	assert(vim.uv.fs_write(1, ("Content-Length: %d\r\n\r\n%s"):format(#body, body), -1))
+end
+while true do
+	local length
+	while true do
+		local line = io.stdin:read("*l")
+		if not line then return end
+		if line == "" or line == "\r" then break end
+		length = tonumber(line:match("^Content%-Length:%s*(%d+)")) or length
+	end
+	local message = vim.json.decode(io.stdin:read(assert(length)))
+	if message.method == "initialize" then
+		send(message.id, { capabilities = { referencesProvider = true, textDocumentSync = 1, positionEncoding = config.encoding } })
+	elseif message.method == "textDocument/references" then send(message.id, config.locations)
+	elseif message.method == "shutdown" then send(message.id, vim.NIL)
+	elseif message.method == "exit" then return end
+end
+]=]
+			vim.fn.writefile(vim.split(code, "\n", { plain = true }), server)
+			clients[#clients + 1] = assert(vim.lsp.start({ name = "reference-fixture-" .. encoding,
+				cmd = { vim.v.progpath, "--headless", "-u", "NONE", "-n", "-l", server }, root_dir = root,
+				capabilities = { general = { positionEncodings = { encoding } } },
+			}, { bufnr = original }))
+		end
+		assert(vim.wait(5000, function()
+			for _, id in ipairs(clients) do if not vim.lsp.get_client_by_id(id).initialized then return false end end
+			return true
+		end), "fixture language servers did not initialize")
+		search.references()
+		assert(vim.wait(10000, function() return vim.bo.buftype == "quickfix" and #vim.fn.getqflist() == #clients * 1501 end),
+			"asynchronous references did not publish all clients' results")
+		local items, disk_rows, loaded_count = vim.fn.getqflist(), {}, 0
+		for _, item in ipairs(items) do
+			local location = item.user_data
+			assert(item.col == 8, "LSP character offset was not converted to the UTF-8 byte column")
+			if location.uri == vim.uri_from_fname(loaded_path) then
+				loaded_count = loaded_count + 1
+				assert(item.text == "α😀 UpdateRange();" and item.end_lnum == 2 and item.end_col == 6,
+					"unsaved loaded text or multi-line end position was lost")
+			else
+				assert(item.text == "λ😀 UpdateRange();" and item.end_col == 19, "async disk text or end offset is incorrect")
+				local previous = disk_rows[location.encoding] or 0
+				assert(item.lnum >= previous, "async disk conversion reordered references")
+				disk_rows[location.encoding] = item.lnum
+			end
+		end
+		assert(loaded_count == 3 and disk_rows["utf-8"] == 200000 and disk_rows["utf-16"] == 200000 and disk_rows["utf-32"] == 200000,
+			"multiple-client results or final disk row were lost")
+		assert(not vim.api.nvim_buf_is_loaded(vim.fn.bufnr(disk_path)), "finding references loaded the large target buffer")
+		vim.fn.maparg("q", "n", false, true).callback()
+		search.references()
+		search.current_buffer("UpdateRange")
+		vim.wait(250)
+		assert(vim.fn.getqflist({ title = 0 }).title:find("Buffer search", 1, true), "stale references replaced a newer search")
+		vim.fn.maparg("q", "n", false, true).callback()
+		assert(vim.api.nvim_get_current_buf() == original and vim.bo[original].modified, "cancelling references lost source edits")
+	end)
+	for _, id in ipairs(clients) do
+		local client = vim.lsp.get_client_by_id(id)
+		if client then client:stop() end
+	end
+	assert(vim.wait(2000, function()
+		for _, id in ipairs(clients) do
+			local client = vim.lsp.get_client_by_id(id)
+			if client and not client:is_stopped() then return false end
+		end
+		return true
+	end), "fixture language servers did not stop")
+	vim.fn.delete(root, "rf")
+	assert(ok, err)
+	print("PASS: real LSP multi-client UTF offsets, unsaved text, async large-file reads, stable order and cancellation")
+end
+
+local function test_incremental_sessions()
+	vim.cmd("enew!")
+	vim.o.hidden = true
+	local search = require("core.search")
+	local function settle_ui()
+		local ready = false
+		vim.schedule(function() ready = true end)
+		assert(vim.wait(1000, function() return ready end), "UI setup did not complete")
+	end
+	local original, source = vim.api.nvim_get_current_buf(), vim.api.nvim_get_current_win()
+	local lines, items = {}, {}
+	local count = 40000
+	for row = 1, count do
+		lines[row] = "local UpdateRange = " .. row
+		items[row] = { bufnr = original, lnum = row, col = 7, text = lines[row] }
+	end
+	vim.api.nvim_buf_set_lines(original, 0, -1, false, lines)
+	search.handler({ word = "UpdateRange" })({ title = "Large reference list", items = items })
+	local win = vim.api.nvim_get_current_win()
+	settle_ui()
+	-- A newer result session must supersede all pending publication/drawing callbacks.
+	local newest = search.handler({ word = "UpdateRange" })
+	newest({ title = "Newest results", items = { items[1], items[2] } })
+	vim.wait(150)
+	assert(#vim.fn.getqflist() == 2 and vim.fn.getqflist({ title = 0 }).title:find("Newest results", 1, true),
+		"obsolete list publication corrupted the newer result session")
+	vim.fn.maparg("q", "n", false, true).callback()
+	search.handler({ word = "UpdateRange" })({ title = "Complete references", items = items })
+	assert(vim.wait(5000, function() return vim.api.nvim_buf_line_count(0) == count end), "incremental publication truncated results")
+	win = vim.api.nvim_get_current_win()
+	vim.api.nvim_win_set_cursor(win, { count, 0 })
+	vim.api.nvim_exec_autocmds("CursorMoved", { buffer = 0 })
+	assert(vim.wait(1000, function() return vim.api.nvim_win_get_cursor(source)[1] == count end), "last reference did not preview")
+	local ns = vim.api.nvim_get_namespaces()["pena-search-rows"]
+	local tail_visible = false
+	for _, mark in ipairs(vim.api.nvim_buf_get_extmarks(0, ns, 0, -1, { details = true })) do
+		if mark[2] == count - 1 and mark[4].virt_lines then tail_visible = true end
+	end
+	assert(tail_visible, "scrolling to the final result did not render its path")
+	vim.fn.maparg("q", "n", false, true).callback()
+	search.handler({ word = "UpdateRange" })({ title = "Early commit", items = items })
+	settle_ui()
+	assert(vim.api.nvim_buf_line_count(0) < count, "fixture missed the loading-to-commit transition")
+	vim.api.nvim_feedkeys(vim.keycode("<CR>"), "mx", false)
+	assert(vim.wait(5000, function() return vim.fn.getqflist({ size = 0 }).size == count end),
+		"early commit lost unpublished references: " .. #vim.fn.getqflist())
+	assert(vim.api.nvim_get_current_win() == source and #vim.api.nvim_list_wins() == 1
+		and vim.fn.getqflist({ idx = 0 }).idx == 1, "background publication changed committed focus or position")
+	local path = vim.fn.tempname() .. ".lua"
+	vim.fn.writefile({ "local UpdateRange = 1" }, path)
+	local target = vim.fn.bufadd(path)
+	search.handler({ word = "UpdateRange" })({ title = "Cancelled preview", items = {
+		{ bufnr = target, lnum = 1, col = 7, text = "local UpdateRange = 1" },
+	} })
+	settle_ui()
+	vim.api.nvim_exec_autocmds("CursorMoved", { buffer = 0 })
+	vim.api.nvim_feedkeys("q", "mx", false)
+	vim.wait(100)
+	assert(not vim.api.nvim_buf_is_loaded(target) and vim.api.nvim_get_current_buf() == original,
+		"a cancelled pending preview loaded its target or changed the source")
+	vim.fn.delete(path)
+	print("PASS: latest result session wins, all results remain navigable, viewport rendering and pending preview cancellation")
+end
+
 test_navigation()
 vim.cmd("enew!")
 vim.o.hidden = true
 test_text_search()
 test_rendering()
+test_async_references()
+test_incremental_sessions()
 vim.cmd("qa!")
