@@ -124,11 +124,16 @@ local function format_code(item, picker)
 	if not name or name == "" then name = buf and vim.api.nvim_buf_get_name(buf) or "" end
 	local pos = item.pos or { item.lnum or 1, (item.col or 1) - 1 }
 	local path = name ~= "" and vim.fn.fnamemodify(item.cwd and vim.fs.joinpath(item.cwd, name) or name, ":~:.") or "[Current buffer]"
+	local header = { { ("%s:%d:%d"):format(path, pos[1], pos[2] + 1), "PenaSearchPath" } }
+	if picker.opts.icons.files.enabled ~= false then
+		local icon, hl = Snacks.util.icon(name, "file", { fallback = picker.opts.icons.files })
+		table.insert(header, 1, { icon .. " ", hl })
+	end
 	local width = vim.api.nvim_win_get_width(picker.list.win.win)
 	local line = {
 		{ code },
 		{ col = 0, virt_lines_above = true, virt_lines = {
-			{ { ("%s:%d:%d"):format(path, pos[1], pos[2] + 1), "PenaSearchPath" } },
+			header,
 			{ { string.rep("─", math.max(1, width)), "WinSeparator" } },
 		} },
 		{ col = 0, sign_text = ">", sign_hl_group = "Special" },

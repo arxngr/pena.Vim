@@ -458,6 +458,9 @@ the header. Every code row has a separate muted path:line:column header and
 horizontal separator. Metadata is decoration, not searchable code. Syntax keeps
 its theme colors; only matched text uses `Search`, with a `>` gutter marker.
 The selected row does not receive a competing full-row color.
+Path headers include file-type icons in the configured Snacks icon provider's
+colors. They respect the file-icon setting and use its generic fallback for
+unknown extensions.
 
 Definitions, declarations, implementations, and type definitions retain direct
 jumps for a single target; multiple targets use the shared result list.
