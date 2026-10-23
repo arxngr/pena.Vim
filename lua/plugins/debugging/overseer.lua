@@ -17,9 +17,12 @@ return {
 	},
 	opts = {
 		dap = true,
-		strategy = "toggleterm",
+		output = { use_terminal = true },
 		task_list = {
-			bindings = {
+			direction = "bottom",
+			min_height = 0.30,
+			max_height = 0.30,
+			keymaps = {
 				["<C-h>"] = false,
 				["<C-j>"] = false,
 				["<C-k>"] = false,

@@ -61,19 +61,16 @@ return {
 
 				map("<leader>rn", vim.lsp.buf.rename, "Rename")
 				map("<leader>ca", vim.lsp.buf.code_action, "Code Action", { "n", "x" })
-				map("gD", vim.lsp.buf.declaration, "Goto Declaration")
-				map("gd", vim.lsp.buf.definition, "Goto Definition")
+				map("gD", function() Snacks.picker.lsp_declarations() end, "Goto Declaration")
+				map("gd", function() Snacks.picker.lsp_definitions() end, "Goto Definition")
 				map("gr", results.references, "References")
-				map("gi", vim.lsp.buf.implementation, "Goto Implementation")
-				map("gI", vim.lsp.buf.implementation, "Goto Implementation")
-				map("gy", vim.lsp.buf.type_definition, "Goto Type Definition")
+				map("gi", function() Snacks.picker.lsp_implementations() end, "Goto Implementation")
+				map("gI", function() Snacks.picker.lsp_implementations() end, "Goto Implementation")
+				map("gy", function() Snacks.picker.lsp_type_definitions() end, "Goto Type Definition")
 				map("<leader>ss", function()
 					vim.lsp.buf.document_symbol({ on_list = results.handler() })
 				end, "Document Symbols")
-				map("<leader>sS", function()
-					local on_list = results.handler()
-					vim.lsp.buf.workspace_symbol(nil, { on_list = on_list })
-				end, "Workspace Symbols")
+				map("<leader>sS", results.workspace_symbols, "Workspace Symbols")
 			end
 
 			-- LSP attach autocmd

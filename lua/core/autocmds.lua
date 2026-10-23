@@ -221,7 +221,7 @@ local startup_filetypes = { "alpha", "starter", "dashboard" }
 create_autocmd("FileType", {
 	pattern = startup_filetypes,
 	callback = function()
-		set_buffer_keymap(vim.api.nvim_get_current_buf(), "n", "c", require("utils").open_config, "Open config")
+		set_buffer_keymap(vim.api.nvim_get_current_buf(), "n", "c", require("core.utils").open_config, "Open config")
 		set_buffer_keymap(vim.api.nvim_get_current_buf(), "n", "s", function()
 			require("persistence").load()
 		end, "Restore session for current dir")

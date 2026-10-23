@@ -21,7 +21,7 @@ Modular Neovim configuration written in Lua, managed by [lazy.nvim](https://gith
   - [General](#general)
   - [Window and terminal navigation](#window-and-terminal-navigation)
   - [Buffer management](#buffer-management)
-  - [Native text search](#native-text-search)
+  - [Text search (Snacks)](#text-search-snacks)
   - [Picker (Snacks)](#picker-snacks)
   - [Search and replace](#search-and-replace)
   - [LSP](#lsp)
@@ -45,8 +45,8 @@ Modular Neovim configuration written in Lua, managed by [lazy.nvim](https://gith
 - **Debugging** via nvim-dap with project-selected adapters
 - **Testing** via vim-test with a reusable terminal strategy
 - **Fuzzy finding and picking** via Snacks.nvim (files, buffers, git, diagnostics, and more)
-- **Text search** via native result splits and ripgrep, including unsaved buffer contents
-- **LSP navigation** via native jumps and searchable quickfix splits with reversible source-window previews
+- **Text search** via Snacks-backed grep, unsaved buffer lines, and word/selection search
+- **LSP navigation** via direct single-target jumps and shared Snacks code-result splits with reversible previews
 - **Search and replace** via grug-far.nvim
 - **File explorer** via Oil.nvim (floating)
 - **Git** via vim-fugitive, gitsigns.nvim, and LazyGit (Snacks)
@@ -70,12 +70,13 @@ wire entry points:
 | Module | Responsibility |
 |---|---|
 | `lua/core/git.lua` | Native Git status, file previews, and native/Fugitive diff sessions (`status`, `diff`) |
-| `lua/core/search.lua` | Buffer/project search, asynchronous LSP references, and shared result sessions (`current_buffer`, `project`, `references`, `handler`) |
+| `lua/core/search.lua` | Shared Snacks code-result UI/UX, text-search entry points, and asynchronous LSP references |
 | `lua/core/buffers.lua` | Safe closing and idle-buffer lifecycle (`close`, `setup`, `sweep`) |
 
 Git status and Fugitive retain independent session state. Text search and LSP
-navigation share the same result session implementation. Buffer cleanup remains
-independent of both features.
+navigation share the same Snacks code-result presentation and lifecycle. File,
+buffer, and command pickers keep their existing layouts. Buffer cleanup remains
+independent of these features.
 
 ---
 
@@ -90,7 +91,7 @@ compilation, or the editor tools selected for your projects.
 | [Git](https://git-scm.com/) | Plugin management and version control |
 | C compiler (`gcc` or `clang`) | Compiling treesitter parsers |
 | [Node.js](https://nodejs.org/) and npm | Required by some project-selected editor tools |
-| [ripgrep](https://github.com/BurntSushi/ripgrep) | Native project text search and grug-far |
+| [ripgrep](https://github.com/BurntSushi/ripgrep) | Snacks live grep and grug-far |
 | [fd](https://github.com/sharkdp/fd) | Fast file finding (optional but recommended) |
 | A [Nerd Font](https://www.nerdfonts.com/) | Icons in the UI |
 
@@ -197,7 +198,12 @@ git clone https://github.com/arxngr/pena.Vim $env:LOCALAPPDATA\nvim
 nvim
 ```
 
-On Windows you also need a C compiler for treesitter. Install [LLVM](https://github.com/llvm/llvm-project/releases) and ensure `clang` is on your `PATH`, or install the [Visual Studio Build Tools](https://visualstudio.microsoft.com/visual-cpp-build-tools/) and select the C++ workload.
+On Windows, Treesitter needs a working C compiler. An existing `CC` is respected;
+otherwise the config selects the first executable among `cc`, `gcc`, `clang`,
+`cl`, and `zig` (using `zig cc`). For example, install
+[LLVM](https://github.com/llvm/llvm-project/releases) and put `clang` on `PATH`,
+or launch Neovim with the Visual Studio C++ Build Tools environment initialized.
+Installing Build Tools alone does not make `cl.exe` available to every shell.
 
 ---
 
@@ -231,6 +237,18 @@ Use `:ProjectLanguages` to inspect detection, `:ProjectTools` to inspect selecte
 tools and missing runtimes, and `:ProjectToolsRefresh` to rescan and retry installs.
 Mason installs editor tools; required system runtimes and compilers must already
 be available. Use `:MasonLog` for installation errors.
+
+Opening only the dashboard does not provision project parsers. Automatic parser
+installation starts after a named, listed, normal file buffer in the project is
+loaded; unloaded search targets alone do not trigger it. Missing runtimes and
+compilers remain visible in `:ProjectTools` rather than triggering repeated builds.
+
+Roslyn requires `5.13.0-1.26521.14` or newer, which includes the
+[diagnostic-source aggregation fix](https://github.com/dotnet/roslyn/pull/85953)
+for unqualified pull requests. Older Mason installations are upgraded before the
+server is enabled; compiler diagnostics are not suppressed. If Windows prevents
+replacement of a DLL held by another Neovim instance, close that instance and
+retry with `:DotnetTools!` or `:ProjectToolsRefresh`.
 
 For .NET, use `:DotnetProject` (`<leader>np`) to select a startup project, then
 `:DotnetRun` (`<leader>nr`), `:DotnetWatch` (`<leader>nw`), or `:DotnetDebug`.
@@ -334,25 +352,30 @@ buffers, unnamed/special/terminal buffers, and active preview/diff source
 buffers are protected. Cleanup never force-deletes a buffer or removes a file
 from disk.
 
+Persistence initializes at startup and saves sessions by working directory and
+Git branch. Use the dashboard's `s` action to restore that session. Committing a
+code-search result marks its normal file buffer as listed so it is included in
+later session saves; transient previews remain unlisted.
+
 ---
 
-### Native text search
+### Text search (Snacks)
 
-| Key in a code buffer | Description |
+| Key | Description |
 |---|---|
-| `/` | Search the current buffer, including unsaved edits |
-| `?` (Shift+/) | Global Search: search project files on disk with ripgrep |
+| `<leader>sg` | Submit a project grep query, then browse Snacks results |
+| `<leader>sb` | Search current-buffer lines, including unsaved edits |
+| `<leader>sw` | Search the word under the cursor or visual selection |
+| `<leader>sG` | Submit a grep query explicitly in the current working directory |
 
-Queries use a command-line prompt, not a floating picker. They are literal and
-case-sensitive; Enter submits and Ctrl-C cancels. Project search uses the same
-project-root detection as the project tools and honors ripgrep's ignore rules.
-Text search and LSP results share the preview controls documented below.
-Successful text searches preserve their literal query in native search state,
-so `n` / `N` continue forward/backward after opening a result. Redundant leader
-text-search shortcuts (`<leader>/`, `<leader>sb`, `<leader>sB`, `<leader>sw`,
-`<leader>sg`, and `<leader>sG`) are no longer configured.
-In quickfix, help, terminals, and other special buffers, `/` and `?` retain
-their native forward/backward search behavior.
+The dashboard's `g` (Find Text) uses the same workflow without creating an empty
+buffer. Enter submits the query; Ctrl-C cancels before opening results.
+`<leader>sw` submits the current word or visual selection directly. Project grep
+uses Snacks' asynchronous ripgrep finder and ignore rules. Buffer search reads
+unsaved text in cooperative chunks rather than parsing the entire buffer first.
+
+All code-search results use the shared layout and controls below. `/` and `?`
+outside result lists remain Neovim's native forward/backward buffer search.
 
 ---
 
@@ -418,32 +441,28 @@ their native forward/backward search behavior.
 |---|---|---|
 | `n` | `gd` | Go to definition |
 | `n` | `gD` | Go to declaration |
-| `n` | `gr` | References in a bottom quickfix split |
+| `n` | `gr` | References in the shared Snacks code-result split |
 | `n` | `gi` / `gI` | Go to implementation |
 | `n` | `gy` | Go to type definition |
-| `n` | `<leader>ss` | Document symbols in a bottom quickfix split |
-| `n` | `<leader>sS` | Prompt for a workspace symbol query, then open quickfix |
+| `n` | `<leader>ss` | Document symbols in the shared Snacks code-result split |
+| `n` | `<leader>sS` | Submit a workspace symbol query, then browse results |
 | `n` | `<leader>rn` | Rename symbol |
 | `n` / `x` | `<leader>ca` | Code action |
 | `n` | `<leader>cr` | Rename (core keymap) |
 | `n` | `<leader>k` | Toggle signature help |
 | `n` | `<leader>uh` | Toggle inlay hints (all buffers) |
 
-LSP navigation does not use Snacks. Definitions, declarations, implementations,
-and type definitions jump directly when there is one result; multiple results
-open a quickfix split. References, symbols, and text searches use a bottom
-quickfix split sized to 35% of the editor height, with the total result count in
-its header. Each result shows its path and location on a separate, muted display
-line above the searchable code, including the first result, with a horizontal
-separator between them. Code rows use theme-linked language syntax,
-not quickfix filename coloring. Only the exact searched text uses the active
-theme's `Search` colors, alongside a `>` gutter sign; surrounding code keeps its
-syntax colors. Full-row quickfix and cursor-line coloring is disabled in result
-windows. Opening a result clears the preview's word highlight and gutter sign.
-Installed Treesitter parsers are reused; native syntax handles previews without
-an available parser. Previews over 1 MiB do not explicitly start a cold Treesitter
-parser. Workspace symbols first use a command-line query (Enter to submit,
-Ctrl-C to cancel).
+Text searches and LSP results use Snacks with one code-result layout: a bottom
+split sized to 35% of the editor, no separate preview pane, and a result count in
+the header. Every code row has a separate muted path:line:column header and
+horizontal separator. Metadata is decoration, not searchable code. Syntax keeps
+its theme colors; only matched text uses `Search`, with a `>` gutter marker.
+The selected row does not receive a competing full-row color.
+
+Definitions, declarations, implementations, and type definitions retain direct
+jumps for a single target; multiple targets use the shared result list.
+References and symbols use the same list. Workspace symbols first request a
+query. No changes are made to file/command picker layouts.
 
 `gr` sends the LSP request asynchronously, then converts locations cooperatively.
 Unloaded file targets are read asynchronously in 64 KiB chunks, retaining only
@@ -451,40 +470,41 @@ the referenced lines; loaded targets use current unsaved text. UTF-8/16/32 offse
 and multi-line ranges are preserved. Sorting and conversion yield between work
 slices instead of processing an entire response in one UI callback.
 
-Result rows are published in batches of 256 within time-sliced callbacks; the
-header shows loading progress.
-Only visible rows receive path headers, separators, matched-word marks, and
-language syntax definitions. Scrolling decorates the new viewport. Source previews
-wait 40 ms after selection settles, avoiding loads for intermediate cursor moves;
-Enter still opens the selected result immediately. A newer search cancels stale
-reference work. Cancel stops pending rendering/previews; committing early lets
-the remaining quickfix entries finish in the background without stealing focus.
+Snacks finders publish results cooperatively. Code rows longer than 512 bytes
+display a UTF-8-safe excerpt around the match; original source positions and
+complete source text remain in result metadata. Excerpts never remove results.
+Only the visible viewport receives path headers, separators, syntax, and match
+marks. Preview waits 40 ms after selection settles, avoiding loads for
+intermediate cursor moves; Enter commits the selected location immediately.
+Newer navigation cancels stale reference work. Closing the list cancels its
+finder and pending previews.
 
 This reduces UI-thread work; it does not remove language-server indexing time.
 LSP transport/JSON handling, loading a selected source buffer, and custom URI
 providers still use Neovim's main thread and may introduce pauses.
 
-In a fresh reference, symbol, or text-search list:
+In any text-search, reference, or symbol result list:
 
 | Key | Action |
 |---|---|
 | `j` / `k`, arrow keys | Select a result and preview it in the source window without leaving the list |
-| `/` / `?` | Native forward/backward search within the displayed code rows; results are not filtered |
-| `n` / `N` | Move between native search matches |
+| `/` / `?` | Search displayed code forward/backward across all results, including offscreen items, without filtering |
+| `n` / `N` | Repeat that result search in the same/opposite direction, with wraparound |
 | Enter / double-click in the result list | Commit the selected location and close the list |
-| Click the source preview | Commit that preview and clear its search markers |
 | `q` / Escape | Cancel, close the list, and restore the original buffer and cursor |
 
-Switching windows with the keyboard without committing restores the main buffer and view, but keeps
-the result session alive. Returning to the result window resumes the selected
-preview and subsequent movement. Unsaved edits are preserved. `:cclose` cancels
-the session; `:copen` reopens the results as a normal quickfix list. Native
-`:cnext` / `:cprevious` remain available after committing.
+Switching windows without committing restores the source buffer and view while
+keeping the result session open. Returning to the result window resumes previews.
+Unsaved edits are preserved, including with `nohidden`. Confirmed files are
+listed for session saving, and source-buffer cleanup protection is released when
+the list closes. These lists are Snacks pickers, not quickfix lists; `:copen`,
+`:cnext`, and `:cprevious` refer only to independently created quickfix results.
 
-Run the feature regressions below. Search includes actual UI-grid rendering,
-real local stdio LSP servers, Unicode/multi-line locations, large unloaded files,
-and cancellation/early-commit transitions. Git covers native status and the
-installed Fugitive plugin. Search and buffer checks run without plugins.
+Run the feature regressions below. Search requires the installed Snacks plugin
+at `stdpath("data")/lazy/snacks.nvim` and exercises its actual UI grid, real stdio
+LSP servers, Unicode/multi-line locations, unloaded files, and offscreen result
+navigation. Git requires the installed Fugitive plugin. Buffer checks need no
+plugins.
 
 ```sh
 nvim --headless -u NONE -n -l tests/search.lua
@@ -663,6 +683,12 @@ Gitsigns is also active and shows inline blame at end of line.
 | `<leader>ot` | Task action menu |
 | `<leader>oc` | Clear task cache |
 
+The task list and task-output consoles dock side by side in Edgy's bottom area,
+sharing 30% of the screen height. The area resizes with the editor, including on
+compact screens. `<leader>ow` toggles the task list; use its output-opening actions
+(for example `<C-s>` for a split) to show a console. Explicit floating output stays
+floating. Other bottom views keep their own configured height percentages.
+
 ---
 
 ### Logging (Chainsaw)
@@ -711,6 +737,11 @@ Inserts language-aware log statements for the variable or expression under the c
 | `<leader>e` | Toggle Oil file explorer (float) |
 | `<leader>ut` | Toggle background transparency |
 | `<leader>uc` | Switch colorscheme (Themery) |
+
+The Themery setup applies a narrow compatibility fix for
+[upstream issue #48](https://github.com/zaldih/themery.nvim/issues/48): an absent
+`themeConfigFile` must be checked before Windows path normalization. The deprecated
+option is not configured, and genuine deprecation warnings are not filtered.
 
 ---
 

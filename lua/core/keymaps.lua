@@ -2,18 +2,6 @@ local keymap = vim.keymap.set
 local opts = { noremap = true, silent = true }
 vim.g.mapleader = " "
 
--- Keep native search in quickfix, help, terminals, and other special buffers.
-local function search_mapping(method, native)
-	return function()
-		if vim.bo.buftype ~= "" or vim.bo.filetype == "help" then
-			return native
-		end
-		-- Execute outside expression-map textlock, before consuming the query keys.
-		return "<Cmd>lua require('core.search')." .. method .. "()<CR>"
-	end
-end
-keymap("n", "/", search_mapping("current_buffer", "/"), { expr = true, desc = "Search current buffer" })
-keymap("n", "?", search_mapping("project", "?"), { expr = true, desc = "Global Search" })
 keymap("n", "<leader>gs", function() require("core.git").status() end, { desc = "Git status" })
 
 -- General
