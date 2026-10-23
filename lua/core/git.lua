@@ -8,6 +8,29 @@ local function hold(buf, delta)
 	end
 end
 
+local diff_close_keys = { "q", "<C-o>" }
+
+local function map_diff_close(buf, close)
+	local previous = {}
+	vim.api.nvim_buf_call(buf, function()
+		for _, key in ipairs(diff_close_keys) do previous[key] = vim.fn.maparg(key, "n", false, true) end
+	end)
+	for _, key in ipairs(diff_close_keys) do
+		vim.keymap.set("n", key, close, { buffer = buf, desc = "Close Git diff and restore original buffer" })
+	end
+	return previous
+end
+
+local function restore_diff_mappings(buf, mappings)
+	if not vim.api.nvim_buf_is_valid(buf) then return end
+	for key, previous in pairs(mappings) do
+		pcall(vim.keymap.del, "n", key, { buffer = buf })
+		if previous.buffer == 1 then
+			vim.api.nvim_buf_call(buf, function() vim.fn.mapset("n", false, previous) end)
+		end
+	end
+end
+
 local function git(root, args)
 	return vim.system(vim.list_extend({ "git", "-C", root }, args), { text = true }):wait()
 end
@@ -185,12 +208,7 @@ function M.status()
 				status_active = nil
 				vim.api.nvim_del_augroup_by_id(group)
 				for buf, previous in pairs(mappings) do
-					if vim.api.nvim_buf_is_valid(buf) then
-						pcall(vim.keymap.del, "n", "<C-o>", { buffer = buf })
-						if previous.buffer == 1 then
-							vim.api.nvim_buf_call(buf, function() vim.fn.mapset("n", false, previous) end)
-						end
-					end
+					restore_diff_mappings(buf, previous)
 				end
 				for _, win in ipairs({ left or -1, closing_status and -1 or status_win }) do
 					if vim.api.nvim_win_is_valid(win) then vim.api.nvim_win_close(win, false) end
@@ -231,12 +249,7 @@ function M.status()
 				vim.cmd("diffthis")
 				vim.api.nvim_win_call(source, function() vim.cmd("diffthis") end)
 				for _, buf in ipairs({ lhs, rhs }) do
-					vim.api.nvim_buf_call(buf, function()
-						mappings[buf] = vim.fn.maparg("<C-o>", "n", false, true)
-					end)
-					vim.keymap.set("n", "<C-o>", function()
-						finish()
-					end, { buffer = buf, desc = "Close Git diff and restore original buffer" })
+					mappings[buf] = map_diff_close(buf, finish)
 				end
 				vim.api.nvim_set_current_win(source)
 			end
@@ -301,12 +314,7 @@ function M.diff()
 		if done then return end
 		done, diff_active = true, nil
 		for buf, previous in pairs(mappings) do
-			if vim.api.nvim_buf_is_valid(buf) then
-				pcall(vim.keymap.del, "n", "<C-o>", { buffer = buf })
-				if previous.buffer == 1 then
-					vim.api.nvim_buf_call(buf, function() vim.fn.mapset("n", false, previous) end)
-				end
-			end
+			restore_diff_mappings(buf, previous)
 		end
 		for win in pairs(created) do
 			if vim.api.nvim_win_is_valid(win) then vim.api.nvim_win_close(win, false) end
@@ -332,8 +340,7 @@ function M.diff()
 		if win == source or created[win] then
 			local buf = vim.api.nvim_win_get_buf(win)
 			if not mappings[buf] then
-				vim.api.nvim_buf_call(buf, function() mappings[buf] = vim.fn.maparg("<C-o>", "n", false, true) end)
-				vim.keymap.set("n", "<C-o>", restore, { buffer = buf, desc = "Close Git diff and restore original buffer" })
+				mappings[buf] = map_diff_close(buf, restore)
 			end
 		end
 	end
