@@ -33,10 +33,10 @@ vim.o.fileencoding = "utf-8"
 vim.o.cmdheight = 1
 vim.o.breakindent = true
 vim.o.updatetime = 1000
-vim.o.foldmethod = "expr"
-vim.o.foldexpr = "nvim_treesitter#foldexpr()"
+vim.o.foldmethod = "manual"
 vim.o.foldenable = true
 vim.o.foldlevel = 99
+vim.o.foldlevelstart = 99
 vim.o.timeoutlen = 300
 vim.o.backup = false
 vim.o.writebackup = false
@@ -48,7 +48,6 @@ vim.opt.formatoptions:remove({ "c", "r", "o" })
 vim.opt.runtimepath:remove("/usr/share/vim/vimfiles")
 vim.opt.laststatus = 3
 vim.g.autoformat = true
-vim.o.mouse = ""
 vim.opt.sessionoptions = { "buffers", "curdir", "tabpages", "winsize", "help", "globals", "skiprtp", "folds" }
 vim.opt.formatexpr = ""
 vim.o.winbar = "%{%v:lua.require'nvim-navic'.get_location()%}"

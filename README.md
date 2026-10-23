@@ -20,6 +20,7 @@ Modular Neovim configuration written in Lua, managed by [lazy.nvim](https://gith
 - [Keybindings](#keybindings)
   - [General](#general)
   - [Window and terminal navigation](#window-and-terminal-navigation)
+  - [Folding](#folding)
   - [Buffer management](#buffer-management)
   - [Text search (Snacks)](#text-search-snacks)
   - [Picker (Snacks)](#picker-snacks)
@@ -332,6 +333,26 @@ syntax from newer Mermaid releases may not work.
 | `t` | `<C-h/j/k/l>` | Move between windows from terminal mode |
 | `t` | `<C-x>` | Exit terminal mode |
 
+Mouse support is enabled in every mode. Touchpad/mouse-wheel events scroll the
+hovered code window or search-result list; horizontal wheel events work when
+wrapping is off. The terminal must forward those events rather than intercepting
+the gesture for its own scrollback.
+
+---
+
+### Folding
+
+UFO owns manual fold ranges, using Treesitter with an indentation fallback when a
+parser or fold query is unavailable. Folding does not wait for LSP initialization.
+Buffers start expanded; the all-fold mappings preserve the high fold level UFO
+needs so editing does not unexpectedly reclose individually opened folds.
+
+| Key | Description |
+|---|---|
+| `za` | Toggle the fold under the cursor |
+| `zc` / `zo` | Close / open the current fold |
+| `zM` / `zR` | Close / open all folds through UFO |
+
 ---
 
 ### Buffer management
@@ -506,12 +527,15 @@ the list closes. These lists are Snacks pickers, not quickfix lists; `:copen`,
 Run the feature regressions below. Search requires the installed Snacks plugin
 at `stdpath("data")/lazy/snacks.nvim` and exercises its actual UI grid, real stdio
 LSP servers, Unicode/multi-line locations, unloaded files, and offscreen result
-navigation. Git requires the installed Fugitive plugin. Buffer checks need no
-plugins.
+navigation. Folding requires the installed `nvim-ufo`, `promise-async`, and
+`nvim-treesitter` plugins plus the Lua parser; its regression checks syntax folds,
+fallback folds, and open/closed state after structural edits. Git requires the
+installed Fugitive plugin. Buffer checks need no plugins.
 
 ```sh
 nvim --headless -u NONE -n -l tests/search.lua
 nvim --headless -u NONE -n -l tests/git.lua
+nvim --headless -u NONE -n -l tests/folding.lua
 nvim --headless -u NONE -n -l tests/buffers.lua
 ```
 
