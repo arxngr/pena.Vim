@@ -303,3 +303,5 @@ Browser preview displays diagrams and math. See the [Markdown example](examples/
 | `<leader>lt` | Log its type |
 | `<leader>lm` | Insert a log message |
 | `<leader>lr` | Remove log statements |
+
+Choose OneDark, Tinta, Bluloco Dark, or Bluloco Light with `<leader>uc`.

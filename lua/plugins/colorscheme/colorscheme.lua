@@ -34,6 +34,13 @@ return {
 				require("tinta").setup({ palette = "tinta-darker-cool" })
 			end,
 		},
+		{
+			"uloco/bluloco.nvim",
+			lazy = false,
+			priority = 1000,
+			dependencies = { "rktjmp/lush.nvim" },
+			opts = {},
+		},
 	},
 	keys = {
 		{ "<leader>uc", "<cmd>Themery<CR>", desc = "Toggle Themery" },
@@ -43,7 +50,38 @@ return {
 	config = function(plugin)
 		fix_nil_theme_path(plugin)
 		require("themery").setup({
-			themes = { "onedark", "tinta" },
+			themes = {
+				{
+					name = "OneDark",
+					colorscheme = "onedark",
+					before = [[
+						vim.o.background = "dark"
+						require("onedark").setup({ style = "darker" })
+					]],
+				},
+				{
+					name = "Tinta",
+					colorscheme = "tinta",
+					before = [[
+						vim.o.background = "dark"
+						require("tinta").setup({ palette = "tinta-darker-cool" })
+					]],
+				},
+				{
+					name = "Bluloco Dark",
+					colorscheme = "bluloco-dark",
+					before = [[
+						vim.o.background = "dark"
+					]],
+				},
+				{
+					name = "Bluloco Light",
+					colorscheme = "bluloco-light",
+					before = [[
+						vim.o.background = "light"
+					]],
+				},
+			},
 		})
 	end,
 }

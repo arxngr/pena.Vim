@@ -3,7 +3,6 @@ return {
 		"neovim/nvim-lspconfig",
 		dependencies = {
 			{ "williamboman/mason.nvim", version = "^1.0.0" },
-			{ "williamboman/mason-lspconfig.nvim", version = "^1.0.0" },
 			{ "j-hui/fidget.nvim", opts = {} },
 			"hrsh7th/nvim-cmp",
 			"hrsh7th/cmp-nvim-lsp",
@@ -30,7 +29,7 @@ return {
 			vim.diagnostic.config({
 				virtual_text = true,
 				signs = true,
-				update_in_insert = true,
+				update_in_insert = false,
 				severity_sort = true,
 			})
 
