@@ -6,6 +6,8 @@ return {
 	},
 	config = function()
 		require("edgy").setup({
+			-- Let each view's percentage win over Edgy's default 10-row minimum.
+			options = { bottom = { size = 1 } },
 			animate = {
 				enabled = false,
 			},
@@ -27,10 +29,20 @@ return {
 			},
 			bottom = {
 				{
-					title = "Tasks",
+					title = "Overseer Tasks",
 					ft = "OverseerList",
-					size = { height = 0.23 },
-					open = "OverseerOpen bottom",
+					size = { height = 0.30 },
+					filter = function(_, win)
+						return vim.api.nvim_win_get_config(win).relative == ""
+					end,
+				},
+				{
+					title = "Overseer Console",
+					ft = "OverseerOutput",
+					size = { height = 0.30 },
+					filter = function(_, win)
+						return vim.api.nvim_win_get_config(win).relative == ""
+					end,
 				},
 				{
 					title = "DAP REPL",

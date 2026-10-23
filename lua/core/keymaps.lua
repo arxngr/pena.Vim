@@ -2,6 +2,8 @@ local keymap = vim.keymap.set
 local opts = { noremap = true, silent = true }
 vim.g.mapleader = " "
 
+keymap("n", "<leader>gs", function() require("core.git").status() end, { desc = "Git status" })
+
 -- General
 keymap("n", "d", '"_d', opts)
 keymap("x", "d", '"_d', opts)
@@ -40,7 +42,7 @@ end, { silent = true, noremap = true, desc = "Toggle signature" })
 keymap("n", "<leader>cr", vim.lsp.buf.rename, { desc = "Rename code", remap = true })
 keymap("v", "<", "<gv")
 keymap("v", ">", ">gv")
-keymap("n", "<leader>bd", ":bd<CR>", { desc = "Close Buffer" })
+keymap("n", "<leader>bd", function() require("core.buffers").close() end, { desc = "Close Buffer" })
 
 keymap("n", "<leader>cd", vim.diagnostic.open_float, { desc = "Open float diagnostic", remap = true })
 

@@ -8,15 +8,43 @@ local function start_highlighting()
 	end
 end
 
+local function configure_compiler()
+	local compiler = vim.env.CC
+	if not compiler or compiler == "" then
+		for _, name in ipairs({ "cc", "gcc", "clang", "cl", "zig" }) do
+			if vim.fn.executable(name) == 1 then
+				compiler = name == "zig" and "zig cc" or name
+				break
+			end
+		end
+	end
+	if not compiler or compiler == "" then return end
+	vim.env.CC = compiler
+	if M.legacy then require("nvim-treesitter.install").compilers = { compiler } end
+	return compiler
+end
+
 function M.update()
 	local languages = require("core.project_languages")
 	M.wanted = {}
 	for _, project in pairs(languages.projects) do
-		for language in pairs(project.languages) do
-			local profile = languages.profiles[language]
-			if profile then
-				for _, parser in ipairs(profile.parsers) do
-					M.wanted[parser] = true
+		local has_open_file = false
+		for _, bufnr in ipairs(vim.api.nvim_list_bufs()) do
+			if vim.api.nvim_buf_is_loaded(bufnr) and vim.bo[bufnr].buflisted and vim.bo[bufnr].buftype == "" then
+				local path = vim.api.nvim_buf_get_name(bufnr)
+				if path ~= "" and languages.root(path) == project.root then
+					has_open_file = true
+					break
+				end
+			end
+		end
+		if has_open_file then
+			for language in pairs(project.languages) do
+				local profile = languages.profiles[language]
+				if profile then
+					for _, parser in ipairs(profile.parsers) do
+						M.wanted[parser] = true
+					end
 				end
 			end
 		end
@@ -31,16 +59,8 @@ function M.update()
 	if #missing == 0 then
 		return
 	end
-	local compiler = false
-	for _, name in ipairs({ "cc", "gcc", "clang", "cl", "zig" }) do
-		if vim.fn.executable(name) == 1 then
-			compiler = true
-			break
-		end
-	end
-	if not compiler then
-		M.blocked.compiler =
-			"Parser installation skipped: install a C compiler (gcc, clang, cl, or zig) in PATH, then run :ProjectToolsRefresh"
+	if not configure_compiler() then
+		M.blocked.compiler = "C compiler unavailable"
 		return
 	end
 	M.blocked.compiler = nil
@@ -89,6 +109,7 @@ function M.setup()
 			M.available[parser] = true
 		end
 	end
+	configure_compiler()
 	local group = vim.api.nvim_create_augroup("pena-project-parsers", { clear = true })
 	vim.api.nvim_create_autocmd("FileType", {
 		group = group,

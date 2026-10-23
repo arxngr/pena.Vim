@@ -49,50 +49,27 @@ return {
 				return vim.lsp.handlers.signature_help(err, result, ctx, config)
 			end
 
+			local results = require("core.search")
+
 			-- keymaps for LSP
 			local function setup_lsp_keymaps(bufnr)
 				local map = function(keys, func, desc, mode)
 					mode = mode or "n"
-					vim.keymap.set(mode, keys, func, { buffer = bufnr, desc = "LSP: " .. desc })
+					vim.keymap.set(mode, keys, func, { buffer = bufnr, desc = "LSP: " .. desc, nowait = keys == "gr" })
 				end
 
 				map("<leader>rn", vim.lsp.buf.rename, "Rename")
 				map("<leader>ca", vim.lsp.buf.code_action, "Code Action", { "n", "x" })
-				map("gD", function()
-					local ok, snacks = pcall(require, "snacks")
-					if ok and snacks.picker then
-						snacks.picker.lsp_declarations()
-					else
-						vim.lsp.buf.declaration()
-					end
-				end, "Goto Declaration")
-
-				map("gd", function()
-					local ok, snacks = pcall(require, "snacks")
-					if ok and snacks.picker then
-						snacks.picker.lsp_definitions()
-					else
-						vim.lsp.buf.definition()
-					end
-				end, "Goto Definition")
-
-				map("gr", function()
-					local ok, snacks = pcall(require, "snacks")
-					if ok and snacks.picker then
-						snacks.picker.lsp_references()
-					else
-						vim.lsp.buf.references()
-					end
-				end, "References")
-
-				map("gi", function()
-					local ok, snacks = pcall(require, "snacks")
-					if ok and snacks.picker then
-						snacks.picker.lsp_implementations()
-					else
-						vim.lsp.buf.implementation()
-					end
-				end, "Goto Implementation")
+				map("gD", function() Snacks.picker.lsp_declarations() end, "Goto Declaration")
+				map("gd", function() Snacks.picker.lsp_definitions() end, "Goto Definition")
+				map("gr", results.references, "References")
+				map("gi", function() Snacks.picker.lsp_implementations() end, "Goto Implementation")
+				map("gI", function() Snacks.picker.lsp_implementations() end, "Goto Implementation")
+				map("gy", function() Snacks.picker.lsp_type_definitions() end, "Goto Type Definition")
+				map("<leader>ss", function()
+					vim.lsp.buf.document_symbol({ on_list = results.handler() })
+				end, "Document Symbols")
+				map("<leader>sS", results.workspace_symbols, "Workspace Symbols")
 			end
 
 			-- LSP attach autocmd

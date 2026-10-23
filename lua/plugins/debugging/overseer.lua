@@ -17,18 +17,15 @@ return {
 	},
 	opts = {
 		dap = true,
-		strategy = "toggleterm",
+		output = { use_terminal = true },
 		task_list = {
 			direction = "bottom",
+			min_height = 0.30,
+			max_height = 0.30,
 			keymaps = {
 				["<C-h>"] = false,
 				["<C-j>"] = false,
-				["<C-k>"] = {
-					function()
-						require("edgy").goto_main()
-					end,
-					desc = "Go to editing window",
-				},
+				["<C-k>"] = false,
 				["<C-l>"] = false,
 			},
 		},

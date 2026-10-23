@@ -43,27 +43,27 @@ return -- lazy.nvim
 				-- When using a function, the `items` argument are the default keymaps.
 				---@type snacks.dashboard.Item[]
 				keys = {
-					{ icon = " ", key = "f", desc = "Find File", action = ":lua Snacks.dashboard.pick('files')" },
-					{ icon = " ", key = "n", desc = "New File", action = ":ene | startinsert" },
+					{ icon = "󰈞 ", key = "f", desc = "Find File", action = ":lua Snacks.dashboard.pick('files')" },
+					{ icon = "󰝒 ", key = "n", desc = "New File", action = ":ene | startinsert" },
 					{
-						icon = " ",
+						icon = "󰍉 ",
 						key = "g",
 						desc = "Find Text",
-						action = ":lua Snacks.dashboard.pick('live_grep')",
+						action = ":lua require('core.search').grep({ cwd = vim.fn.getcwd() })",
 					},
 					{
-						icon = " ",
+						icon = "󰋚 ",
 						key = "r",
 						desc = "Recent Files",
 						action = ":lua Snacks.dashboard.pick('oldfiles')",
 					},
 					{
-						icon = " ",
+						icon = "󰒓 ",
 						key = "c",
 						desc = "Config",
 						action = ":lua Snacks.dashboard.pick('files', {cwd = vim.fn.stdpath('config')})",
 					},
-					{ icon = " ", key = "s", desc = "Restore Session", section = "session" },
+					{ icon = "󰆓 ", key = "s", desc = "Restore Session", section = "session" },
 					{
 						icon = "󰒲 ",
 						key = "L",
@@ -71,7 +71,7 @@ return -- lazy.nvim
 						action = ":Lazy",
 						enabled = package.loaded.lazy ~= nil,
 					},
-					{ icon = " ", key = "q", desc = "Quit", action = ":qa" },
+					{ icon = "󰗼 ", key = "q", desc = "Quit", action = ":qa" },
 				},
 				-- Used by the `header` section
 				header = [[ 
@@ -109,9 +109,9 @@ return -- lazy.nvim
 			},
 			sections = {
 				{ section = "header" },
-				{ icon = " ", title = "Keymaps", section = "keys", indent = 2, padding = 1 },
-				{ icon = " ", title = "Recent Files", section = "recent_files", indent = 2, padding = 1 },
-				{ icon = " ", title = "Projects", section = "projects", indent = 2, padding = 1 },
+				{ icon = "󰌌 ", title = "Keymaps", section = "keys", indent = 2, padding = 1 },
+				{ icon = "󰋚 ", title = "Recent Files", section = "recent_files", indent = 2, padding = 1 },
+				{ icon = "󰉋 ", title = "Projects", section = "projects", indent = 2, padding = 1 },
 				{ section = "startup" },
 			},
 		},
@@ -120,6 +120,7 @@ return -- lazy.nvim
 		rename = { enabled = true },
 		picker = {
 			enabled = true,
+			sources = require("core.search").sources(),
 			layouts = {
 				default = {
 					layout = {
@@ -156,13 +157,6 @@ return -- lazy.nvim
 				Snacks.picker.buffers()
 			end,
 			desc = "Buffers",
-		},
-		{
-			"<leader>/",
-			function()
-				Snacks.picker.grep()
-			end,
-			desc = "Grep",
 		},
 		{
 			"<leader>:",
@@ -251,32 +245,32 @@ return -- lazy.nvim
 			end,
 			desc = "Git Log File",
 		},
-		-- Grep
+		-- Text search
 		{
 			"<leader>sb",
 			function()
-				Snacks.picker.lines()
+				require("core.search").lines()
 			end,
 			desc = "Buffer Lines",
 		},
 		{
-			"<leader>sB",
-			function()
-				Snacks.picker.grep_buffers()
-			end,
-			desc = "Grep Open Buffers",
-		},
-		{
 			"<leader>sg",
 			function()
-				Snacks.picker.grep()
+				require("core.search").grep()
 			end,
 			desc = "Grep",
 		},
 		{
+			"<leader>sG",
+			function()
+				require("core.search").grep({ cwd = vim.fn.getcwd() })
+			end,
+			desc = "Grep (cwd)",
+		},
+		{
 			"<leader>sw",
 			function()
-				Snacks.picker.grep_word()
+				require("core.search").word()
 			end,
 			desc = "Visual selection or word",
 			mode = { "n", "x" },
@@ -414,57 +408,6 @@ return -- lazy.nvim
 				Snacks.picker.undo()
 			end,
 			desc = "Undo History",
-		},
-		-- LSP
-		{
-			"gd",
-			function()
-				Snacks.picker.lsp_definitions()
-			end,
-			desc = "Goto Definition",
-		},
-		{
-			"gD",
-			function()
-				Snacks.picker.lsp_declarations()
-			end,
-			desc = "Goto Declaration",
-		},
-		{
-			"gr",
-			function()
-				Snacks.picker.lsp_references()
-			end,
-			nowait = true,
-			desc = "References",
-		},
-		{
-			"gI",
-			function()
-				Snacks.picker.lsp_implementations()
-			end,
-			desc = "Goto Implementation",
-		},
-		{
-			"gy",
-			function()
-				Snacks.picker.lsp_type_definitions()
-			end,
-			desc = "Goto Type Definition",
-		},
-		{
-			"<leader>ss",
-			function()
-				Snacks.picker.lsp_symbols()
-			end,
-			desc = "LSP Symbols",
-		},
-		{
-			"<leader>sS",
-			function()
-				Snacks.picker.lsp_workspace_symbols()
-			end,
-			desc = "LSP Workspace Symbols",
 		},
 	},
 }

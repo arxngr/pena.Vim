@@ -175,7 +175,7 @@ function M.sync(retry)
 	end
 end
 
-function M.install_package(name, update)
+function M.install_package(name, update, version)
 	if not M.registry_ready then
 		return
 	end
@@ -211,7 +211,7 @@ function M.install_package(name, update)
 	end)
 	pkg:once("install:success", on_success)
 	pkg:once("install:failed", on_failure)
-	pkg:install()
+	pkg:install(version and { version = version } or nil)
 end
 
 local function update(projects)

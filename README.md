@@ -1,634 +1,307 @@
 # pena.Vim
 
-Modular Neovim configuration written in Lua, managed by [lazy.nvim](https://github.com/folke/lazy.nvim). Aimed at a clean, fast editing experience with LSP, debugging, testing, and git workflows built in.
+Keymaps and everyday workflows.
 
-<img width="2884" height="1920" alt="image" src="https://github.com/user-attachments/assets/910c83fd-d163-490e-8784-77a349a56e0e" />
+**Leader:** `Space`. Shortcuts use Normal mode unless noted; press `Esc` to leave Insert mode.
+`<C-x>` means Ctrl+x, `<M-x>` means Alt+x, and `<S-x>` means Shift+x.
 
----
+## Contents
 
-## Table of Contents
+- [Dashboard](#dashboard)
+- [Files and buffers](#files-and-buffers)
+- [Windows and terminal](#windows-and-terminal)
+- [Search and replace](#search-and-replace)
+- [Code navigation and actions](#code-navigation-and-actions)
+- [Diagnostics](#diagnostics)
+- [Folding](#folding)
+- [Git](#git)
+- [Debugging](#debugging)
+- [.NET projects](#net-projects)
+- [Tasks](#tasks)
+- [Testing](#testing)
+- [Editing](#editing)
+- [Markdown](#markdown)
+- [Other pickers](#other-pickers)
+- [Appearance and logging](#appearance-and-logging)
 
-- [Features](#features)
-- [Prerequisites](#prerequisites)
-- [Installation](#installation)
-  - [macOS](#macos)
-  - [Linux](#linux)
-  - [Windows](#windows)
-- [Keeping versions in sync](#keeping-versions-in-sync)
-- [Project tools](#project-tools)
-- [Markdown and diagrams](#markdown-and-diagrams)
-- [Keybindings](#keybindings)
-  - [General](#general)
-  - [Window and terminal navigation](#window-and-terminal-navigation)
-  - [Buffer management](#buffer-management)
-  - [Picker (Snacks)](#picker-snacks)
-  - [Search and replace](#search-and-replace)
-  - [LSP](#lsp)
-  - [Diagnostics](#diagnostics)
-  - [Trouble](#trouble)
-  - [Debugging (nvim-dap)](#debugging-nvim-dap)
-  - [Testing (vim-test)](#testing-vim-test)
-  - [Git](#git)
-  - [Treesitter text objects](#treesitter-text-objects)
-  - [Project tasks (Overseer)](#project-tasks-overseer)
-  - [Logging (Chainsaw)](#logging-chainsaw)
-  - [Editing (mini.nvim)](#editing-mininvim)
-  - [Miscellaneous](#miscellaneous)
-- [License](#license)
+## Dashboard
 
----
+Open the dashboard with `<leader>dd`.
 
-## Features
-
-- **LSP and autocompletion** via nvim-lspconfig, Mason, and nvim-cmp
-- **Debugging** via nvim-dap with project-selected adapters
-- **Testing** via vim-test with a reusable terminal strategy
-- **Fuzzy finding and picking** via Snacks.nvim (files, grep, buffers, LSP, git, diagnostics, and more)
-- **Search and replace** via grug-far.nvim
-- **File explorer** via Oil.nvim (floating)
-- **Git** via vim-fugitive, gitsigns.nvim, and LazyGit (Snacks)
-- **Diagnostics** via Trouble.nvim
-- **Formatting** via conform.nvim (format on save)
-- **Code folding** via nvim-ufo
-- **Session persistence** via persistence.nvim
-- **Breadcrumbs** via nvim-navic (winbar)
-- **Terminal** via ToggleTerm
-- **Project task runner** via Overseer.nvim
-- **Multi-cursor** via vim-visual-multi
-- **Surround, move, pairs, diff** via mini.nvim
-- **Colorscheme switcher** via Themery (OneDark, Tinta, [Bluloco dark/light](https://github.com/uloco/bluloco.nvim)); open with `<leader>uc`
-- **Coding metrics** via WakaTime
-- **Smart logging** via nvim-chainsaw
-- **Project detection** selects language servers, formatters, debuggers, and syntax parsers automatically
-
----
-
-## Prerequisites
-
-Install Neovim and Git first. Other tools support search, display, parser
-compilation, or the editor tools selected for your projects.
-
-| Dependency | Purpose |
+| Key | Action |
 |---|---|
-| [Neovim](https://neovim.io/) >= 0.12 | Runtime |
-| [Git](https://git-scm.com/) | Plugin management and version control |
-| C compiler (`gcc`, `clang`, MSVC `cl`, or `zig`) | Optional for startup; required to compile missing treesitter parsers |
-| [Node.js](https://nodejs.org/) and npm | Required by some project-selected editor tools |
-| [ripgrep](https://github.com/BurntSushi/ripgrep) | Grep-based search (Snacks, grug-far) |
-| [fd](https://github.com/sharkdp/fd) | Fast file finding (optional but recommended) |
-| A [Nerd Font](https://www.nerdfonts.com/) | Icons in the UI |
+| `f` | Find a file |
+| `n` | Create a file |
+| `g` | Search project text |
+| `r` | Browse recent files |
+| `c` | Find a configuration file |
+| `s` | Restore the project session |
+| `L` | Open the plugin manager |
+| `q` | Quit |
 
----
+## Files and buffers
 
-## Installation
-
-### macOS
-
-```bash
-# Install dependencies via Homebrew
-brew install neovim git ripgrep fd node
-
-# Install Xcode command line tools (C compiler for treesitter)
-xcode-select --install
-
-# Back up any existing config
-mv ~/.config/nvim ~/.config/nvim.bak
-mv ~/.local/share/nvim ~/.local/share/nvim.bak
-
-# Clone the repo
-git clone https://github.com/arxngr/pena.Vim ~/.config/nvim
-
-# Launch Neovim â€” lazy.nvim will install all plugins on first run
-nvim
-```
-
-### Linux
-
-**Ubuntu / Debian**
-
-```bash
-# Install Neovim (use the official unstable PPA for a recent version)
-sudo add-apt-repository ppa:neovim-ppa/unstable
-sudo apt update && sudo apt install neovim
-
-# Install dependencies
-sudo apt install git ripgrep fd-find nodejs npm build-essential
-# Note: on Ubuntu, fd is installed as 'fdfind'. Create an alias if needed:
-# echo 'alias fd=fdfind' >> ~/.bashrc
-
-# Back up any existing config
-mv ~/.config/nvim ~/.config/nvim.bak
-mv ~/.local/share/nvim ~/.local/share/nvim.bak
-
-# Clone the repo
-git clone https://github.com/arxngr/pena.Vim ~/.config/nvim
-
-nvim
-```
-
-**Arch / Manjaro**
-
-```bash
-sudo pacman -S neovim git ripgrep fd nodejs npm base-devel
-
-mv ~/.config/nvim ~/.config/nvim.bak
-mv ~/.local/share/nvim ~/.local/share/nvim.bak
-
-git clone https://github.com/arxngr/pena.Vim ~/.config/nvim
-nvim
-```
-
-**Fedora**
-
-```bash
-sudo dnf install neovim git ripgrep fd-find nodejs npm gcc
-
-mv ~/.config/nvim ~/.config/nvim.bak
-mv ~/.local/share/nvim ~/.local/share/nvim.bak
-
-git clone https://github.com/arxngr/pena.Vim ~/.config/nvim
-nvim
-```
-
-### Windows
-
-Use either [Scoop](https://scoop.sh/) or [Chocolatey](https://chocolatey.org/). PowerShell is recommended.
-
-**Using Scoop**
-
-```powershell
-scoop install neovim git ripgrep fd nodejs
-
-# Back up any existing config
-Move-Item $env:LOCALAPPDATA\nvim $env:LOCALAPPDATA\nvim.bak -ErrorAction SilentlyContinue
-Move-Item $env:LOCALAPPDATA\nvim-data $env:LOCALAPPDATA\nvim-data.bak -ErrorAction SilentlyContinue
-
-# Clone the repo (Windows config dir is %LOCALAPPDATA%\nvim)
-git clone https://github.com/arxngr/pena.Vim $env:LOCALAPPDATA\nvim
-
-nvim
-```
-
-**Using Chocolatey**
-
-```powershell
-choco install neovim git ripgrep fd nodejs
-
-Move-Item $env:LOCALAPPDATA\nvim $env:LOCALAPPDATA\nvim.bak -ErrorAction SilentlyContinue
-
-git clone https://github.com/arxngr/pena.Vim $env:LOCALAPPDATA\nvim
-
-nvim
-```
-
-On Windows you also need a C compiler for treesitter. Install [LLVM](https://github.com/llvm/llvm-project/releases) and ensure `clang` is on your `PATH`, or install the [Visual Studio Build Tools](https://visualstudio.microsoft.com/visual-cpp-build-tools/) and select the C++ workload.
-
----
-
-## Keeping versions in sync
-
-`lazy-lock.json` records the exact commit of every plugin. Commit this file to git so all machines use the same versions.
-
-```bash
-git add lazy-lock.json
-git commit -m "chore: lock plugin versions"
-```
-
-On another machine, after pulling the latest changes:
-
-```
-:Lazy restore
-```
-
-When you want to update plugins, run `:Lazy update` on one machine, commit the updated lock file, then pull and `:Lazy restore` on the others.
-
----
-
-## Project tools
-
-Language tools are selected from project manifests (including `.csproj`/`.sln`,
-`package.json`, `go.mod`, and `Cargo.toml`) and files you actually open.
-Unopened source files, bundled scripts, and incidental JSON/YAML files do not
-request tools just because they exist in the repository. Mixed projects still
-receive tooling for each detected manifest or open language. Dependency folders,
-IDE caches, and build outputs are excluded from manifest discovery.
-
-Only selected servers are configured and enabled through Neovim's native LSP API;
-Mason installs only their packages and the matching formatters/debuggers.
-For example, a C# project requests Roslyn and netcoredbg, not PHP or TypeScript
-servers. Opening a TypeScript file or finding a frontend `package.json` adds its
-tools. Closing the last buffer for an extra language removes that selection
-unless a manifest still requires it. Installed packages remain cached, not
-uninstalled. Tree-sitter may additionally request its shared CLI and selected
-parsers when a C compiler is available.
-
-Without a supported C compiler in `PATH`, automatic parser installation is
-skipped rather than attempted. Already installed parsers remain usable; missing
-parsers have no Tree-sitter highlighting until compiled. Check
-`:ProjectTools` → `parser_dependencies.compiler` for the status, install a compiler,
-then run `:ProjectToolsRefresh`. Mason does not install a system C compiler.
-Language servers and formatters remain independent of this parser check, but
-individual Mason packages can still fail if their own required runtimes or
-build tools are missing; inspect `:MasonLog` for those failures.
-
-Manifest scanning yields after at most 200 entries or approximately 4 ms of work
-per batch (a single filesystem operation can take longer). Diagnostics refresh
-after leaving Insert mode rather than on every edit.
-
-Use `:ProjectLanguages` to inspect detection, `:ProjectTools` to inspect selected
-tools and missing runtimes, and `:ProjectToolsRefresh` to rescan and retry installs.
-Mason installs editor tools; required system runtimes and compilers must already
-be available. Use `:MasonLog` for installation errors.
-
-For .NET, use `:DotnetProject` (`<leader>np`) to select a startup project, then
-`:DotnetRun` (`<leader>nr`), `:DotnetWatch` (`<leader>nw`), or `:DotnetDebug`.
-Run, watch, and debug offer the project's `Project` launch profiles. Once an
-ASP.NET Core server starts listening, Neovim opens the profile's `launchUrl`
-once it responds successfully. Without a launch URL, it checks for Swagger UI,
-then opens the homepage for a web project (including MVC, Razor Pages, and Blazor).
-This also works with debug output in the integrated terminal. Console projects
-run and debug without opening a browser unless their profile requests it.
-
-Detection uses curl and checks the profile's `launchUrl`, `/swagger/index.html`,
-and `/swagger`, with `/` as the final web-page fallback. Custom documentation paths can be set in `init.lua` with
-`vim.g.dotnet_swagger_paths = { "/api/docs", "/swagger/index.html", "/" }`.
-Set `vim.g.dotnet_auto_open_swagger = false` to disable all automatic browser opening;
-`launchBrowser = false` in the chosen launch profile also disables it. Detection
-uses the `Now listening on:` startup log when available and falls back to the
-project's standard `appsettings.json`, environment-specific appsettings, Kestrel
-endpoints, launch profile, and URL/port environment variables when logs are silent.
-It waits up to two minutes for a launch page, Swagger UI, or homepage to respond successfully. For bindings set
-only in application code or custom configuration, set
-`vim.g.dotnet_swagger_urls = { "http://localhost:12345" }`; adjust the wait with
-`vim.g.dotnet_swagger_timeout_ms`. It never changes the application's ports.
-The same detection also applies to ordinary `coreclr` launch configurations:
-Neovim locates the project from the output DLL or launch working directory and
-uses that launch's environment. No service-specific names or ports are required.
-On Windows, the .NET adapter launches the native `netcoredbg.exe` directly,
-bypassing Mason's `.CMD` wrapper so DAP initialization can complete.
-Windows `coreclr` sessions also normalize outgoing breakpoint source paths to
-backslashes before the initial breakpoints are sent. Neovim can provide forward
-slashes while Windows PDBs record backslashes; netcoredbg versions with exact
-absolute-path matching otherwise reject breakpoints even when symbols are loaded.
-This applies to both launch and attach, without changing buffers or other adapters.
-Restart Neovim after updating this configuration.
-
-If a breakpoint remains unverified, place it on executable code, check the selected
-startup project/profile, and rebuild matching Debug DLL/PDB files after stopping
-existing debug sessions. A briefly pending breakpoint before its module loads is
-normal. Enable `:lua require("dap").set_log_level("TRACE")` and use `:DapShowLog`
-to inspect the breakpoint response and module symbol status.
-
-## Markdown and diagrams
-
-Markdown files render automatically inside Neovim with `render-markdown.nvim`.
-Headings, tables, lists, checkboxes, and code blocks are easier to read; source
-text remains editable. Mermaid fences remain code inside the terminal preview.
-Use the browser preview to draw Mermaid diagrams and display images and math.
-The browser view updates as you edit and uses a locally running bundled server.
-
-| Key (in a Markdown buffer) | Action |
+| Key | Action |
 |---|---|
-| `<leader>mr` | Toggle in-editor rendering for the current buffer |
-| `<leader>ms` | Open a rendered Markdown split inside Neovim |
-| `<leader>mp` | Toggle live browser preview, including Mermaid diagrams |
-| `<leader>mP` | Stop the browser preview |
-
-Try [the Markdown example](examples/markdown-preview.md). `:MarkdownPreview`
-also opens the browser preview directly. If the preview server needs reinstalling,
-run `:Lazy build markdown-preview.nvim`. If in-editor rendering is missing, check
-`:checkhealth render-markdown` and install the `markdown` and `markdown_inline`
-Treesitter parsers. The browser preview uses its bundled Mermaid version, so some
-syntax from newer Mermaid releases may not work.
-
-## Keybindings
-
-**Leader key:** `Space`  
-**Local leader:** `,`
-
-### General
-
-| Mode | Key | Description |
-|---|---|---|
-| `n` | `<C-q>` | Quit |
-| `n` / `x` | `d` | Delete to black hole register (does not yank) |
-| `x` | `<leader>p` | Paste without overwriting the register |
-| `n` / `v` | `<C-c>` | Copy to system clipboard |
-| `n` / `v` | `<C-v>` | Paste from system clipboard |
-| `n` | `<C-d>` | Mark word under cursor and search for it |
-| `v` | `<` / `>` | Indent left / right (stays in visual mode) |
-| `n` | `<leader>wv` | Vertical split |
-| `n` | `<leader>hv` | Horizontal split |
-| `n` | `<leader>bd` | Close current buffer |
-| `n` | `<leader>dd` | Open dashboard |
-
-> Note: `d` is remapped to delete into the black hole register (`"_d`), so deleted text is never placed in the yank register. Use `"dd` or `"dw` if you need the default behaviour.
-
----
-
-### Window and terminal navigation
-
-| Mode | Key | Description |
-|---|---|---|
-| `n` | `<C-h/j/k/l>` | Move between windows |
-| `t` | `<C-h/j/k/l>` | Move between windows from terminal mode |
-| `t` | `<C-x>` | Exit terminal mode |
-
----
-
-### Buffer management
-
-| Key | Description |
-|---|---|
-| `<S-h>` | Previous buffer |
-| `<S-l>` | Next buffer |
-| `<leader>bp` | Toggle pin |
-| `<leader>bP` | Delete all non-pinned buffers |
-| `<leader>br` | Delete buffers to the right |
-| `<leader>bl` | Delete buffers to the left |
-| `<leader>bd` | Close current buffer |
-
----
-
-### Picker (Snacks)
-
-#### Quick access
-
-| Key | Description |
-|---|---|
-| `<leader><space>` | Smart find files |
-| `<leader>,` | Buffers |
-| `<leader>/` | Grep |
-| `<leader>:` | Command history |
-| `<leader>n` | Notification history |
-
-#### Find
-
-| Key | Description |
-|---|---|
+| `<leader><space>` | Smart file finder |
 | `<leader>ff` | Find files |
-| `<leader>fb` | Find buffers |
-| `<leader>fc` | Find config file |
-| `<leader>fg` | Find git files |
-| `<leader>fp` | Projects |
-| `<leader>fr` | Recent files |
+| `<leader>fg` | Find Git-tracked files |
+| `<leader>fr` | Browse recent files |
+| `<leader>fp` | Choose a project |
+| `<leader>fc` | Find a configuration file |
+| `<leader>e` | Open the file explorer |
+| `<leader>,` / `<leader>fb` | Choose an open buffer |
+| `<S-h>` / `<S-l>` | Previous / next buffer |
+| `<leader>bp` | Pin or unpin the current buffer |
+| `<leader>bP` | Close unpinned buffers |
+| `<leader>br` / `<leader>bl` | Close buffers to the right / left |
+| `<leader>bd` | Close the current buffer; choose save, discard, or cancel for unsaved changes |
 
-#### Grep
+## Windows and terminal
 
-| Key | Description |
+| Key | Action |
 |---|---|
-| `<leader>sb` | Buffer lines |
-| `<leader>sB` | Grep open buffers |
-| `<leader>sg` | Grep |
-| `<leader>sw` | Grep word under cursor or selection (`n` / `x`) |
+| `<leader>wv` | Create a vertical split |
+| `<leader>hv` | Create a horizontal split |
+| `<C-h>` / `<C-j>` / `<C-k>` / `<C-l>` | Move left / down / up / right between windows |
+| `<C-q>` | Close the current window |
+| `<leader>dt` | Toggle the floating terminal |
+| `<C-x>` in Terminal mode | Leave Terminal mode |
 
-#### Search
+Window-navigation shortcuts also work in Terminal mode. Touchpad and mouse-wheel
+scrolling work over the hovered window, including search results.
 
-| Key | Description |
+## Search and replace
+
+| Key | Action |
 |---|---|
-| `<leader>s"` | Registers |
-| `<leader>s/` | Search history |
-| `<leader>sa` | Autocmds |
-| `<leader>sc` | Command history |
-| `<leader>sC` | Commands |
-| `<leader>sd` | Diagnostics |
-| `<leader>sD` | Buffer diagnostics |
-| `<leader>sh` | Help pages |
-| `<leader>sH` | Highlights |
-| `<leader>si` | Icons |
-| `<leader>sj` | Jumps |
-| `<leader>sk` | Keymaps |
-| `<leader>sl` | Location list |
-| `<leader>sm` | Marks |
-| `<leader>sM` | Man pages |
-| `<leader>sp` | Plugin spec |
-| `<leader>sq` | Quickfix list |
-| `<leader>sR` | Resume last picker |
-| `<leader>su` | Undo history |
-| `<leader>ss` | LSP symbols |
-| `<leader>sS` | LSP workspace symbols |
+| `<leader>sg` | Search project text |
+| `<leader>sG` | Search text in the current working directory |
+| `<leader>sb` | Search the current buffer, including unsaved edits |
+| `<leader>sw` | Search the word under the cursor, or selected text in Visual mode |
+| `<leader>sr` | Open search and replace; starts with the current file type |
+| `/` / `?` in a file | Search forward / backward |
+| `n` / `N` in a file | Repeat the search in the same / opposite direction |
 
----
+For text queries, type your search and press `Enter`. Press `Ctrl-C` to cancel.
+`<leader>sw` searches immediately. Search and replace also opens from Visual mode.
 
-### Search and replace
+### Search-result controls
 
-| Mode | Key | Description |
-|---|---|---|
-| `n` / `v` | `<leader>sr` | Open grug-far (scoped to current file type) |
+These controls apply to text-search results, references, and symbol lists.
 
----
-
-### LSP
-
-| Mode | Key | Description |
-|---|---|---|
-| `n` | `gd` | Go to definition |
-| `n` | `gD` | Go to declaration |
-| `n` | `gr` | References |
-| `n` | `gI` | Go to implementation |
-| `n` | `gy` | Go to type definition |
-| `n` | `<leader>rn` | Rename symbol |
-| `n` / `x` | `<leader>ca` | Code action |
-| `n` | `<leader>cr` | Rename (core keymap) |
-| `n` | `<leader>k` | Toggle signature help |
-| `n` | `<leader>uh` | Toggle inlay hints (all buffers) |
-
----
-
-### Diagnostics
-
-| Key | Description |
+| Key | Action |
 |---|---|
-| `<leader>cd` | Open floating diagnostic |
-| `]d` | Next diagnostic |
-| `[d` | Previous diagnostic |
-| `]e` | Next error |
-| `[e` | Previous error |
-| `]w` | Next warning |
-| `[w` | Previous warning |
+| `j` / `k`, arrow keys | Select a result and preview it in the original window |
+| `/` / `?` | Search result text forward / backward without filtering the list |
+| `n` / `N` | Repeat that result search in the same / opposite direction |
+| `Enter` / double-click | Open the selected result and close the list |
+| `q` / `Esc` | Close the list and restore the previous buffer and cursor |
 
----
+Results show file icons, paths, and matching code. Unsaved edits are preserved
+when previewing or cancelling.
 
-### Trouble
+## Code navigation and actions
 
-| Key | Description |
+| Key | Action |
 |---|---|
-| `<leader>xx` | Toggle diagnostics |
-| `<leader>xX` | Buffer diagnostics |
-| `<leader>cs` | LSP references |
-| `<leader>xL` | Location list |
-| `<leader>xQ` | Quickfix list |
-| `[q` / `]q` | Previous / next Trouble or quickfix item |
+| `gd` | Go to definition |
+| `gD` | Go to declaration |
+| `gr` | Find references |
+| `gi` / `gI` | Go to implementation |
+| `gy` | Go to type definition |
+| `<leader>ss` | Browse symbols in the current file |
+| `<leader>sS` | Search workspace symbols |
+| `<leader>rn` / `<leader>cr` | Rename a symbol |
+| `<leader>ca` | Code actions; also works in Visual mode |
+| `<leader>k` | Show signature help |
+| `<leader>uh` | Toggle inlay hints |
 
----
+A single definition jumps directly; multiple matches open the result list.
 
-### Debugging (nvim-dap)
+### Code selection and movement
 
-Debug adapters are installed for the languages detected in your open projects.
+Use text objects in Visual mode or after an editing command, such as `daf`.
 
-| Key | Description |
+| Key | Action |
 |---|---|
-| `<leader>da` | Start / continue |
-| `<leader>dc` | Continue |
+| `af` / `if` | Select around / inside a function |
+| `ac` / `ic` | Select around / inside a class |
+| `]f` / `[f` | Next / previous function |
+| `]c` / `[c` | Next / previous class |
+
+## Diagnostics
+
+| Key | Action |
+|---|---|
+| `<leader>cd` | Show diagnostics for the current line |
+| `]d` / `[d` | Next / previous diagnostic |
+| `]e` / `[e` | Next / previous error |
+| `]w` / `[w` | Next / previous warning |
+| `<leader>sd` | Browse project diagnostics |
+| `<leader>sD` | Browse current-buffer diagnostics |
+| `<leader>xx` | Toggle the diagnostics panel |
+| `<leader>xX` | Toggle current-buffer diagnostics |
+| `<leader>cs` | Toggle the code-navigation panel |
+| `<leader>xL` / `<leader>xQ` | Toggle the location / quickfix list |
+| `[q` / `]q` | Previous / next panel or quickfix item |
+
+## Folding
+
+Files start expanded.
+
+| Key | Action |
+|---|---|
+| `za` | Toggle the fold under the cursor |
+| `zc` / `zo` | Close / open the current fold |
+| `zM` / `zR` | Close / open all folds |
+
+## Git
+
+| Key | Action |
+|---|---|
+| `<leader>gs` | Open Git status and preview changed files |
+| `<leader>gd` | Open a diff for the current file |
+| `<leader>gc` | Commit changes |
+| `<leader>gp` | Push changes |
+| `<leader>gb` | Show blame |
+| `<leader>gl` | Browse Git history |
+| `<leader>gL` | Browse history for the current line |
+| `<leader>gf` | Browse history for the current file |
+
+### Git status and diff controls
+
+| Control | Action |
+|---|---|
+| Move through status entries | Preview the selected file |
+| `Enter` / double-click a status entry | Open its diff |
+| Click the source preview | Open that file's diff |
+| `q` / `Esc` in status | Return to the previous buffer and cursor |
+| `q` / `Ctrl-O` in either diff pane | Close the diff and restore the previous buffer, cursor, and layout |
+
+Use `<leader>gd` or the status list to open diffs with these return controls.
+Unsaved edits and unrelated windows are kept. `:Git` opens the full Git interface.
+
+## Debugging
+
+| Key | Action |
+|---|---|
+| `<leader>da` / `<leader>dc` | Start or continue debugging |
+| `<leader>db` | Toggle a breakpoint |
+| `<leader>dq` | Clear all breakpoints |
 | `<leader>di` | Step into |
 | `<leader>do` | Step over |
 | `<leader>dO` | Step out |
-| `<leader>db` | Toggle breakpoint |
-| `<leader>dq` | Clear all breakpoints |
-| `<leader>dw` | Hover variable |
-| `<leader>de` | Evaluate expression (`n` / `v`) |
-| `<leader>ds` | Stacks (float) |
-| `<leader>dr` | Toggle REPL |
-| `<leader>dlb` | Breakpoints (float) |
-| `<leader>dh` | Watches (float) |
-| `<leader>dv` | Scopes (float) |
-| `<leader>dT` | Terminate session |
-| `<leader>dR` | Toggle auto-reload on save |
+| `<leader>dw` | Inspect the variable under the cursor |
+| `<leader>de` | Evaluate an expression; also works in Visual mode |
+| `<leader>ds` | Show the call stack |
+| `<leader>dr` | Toggle the debug console |
+| `<leader>dlb` | Show breakpoints |
+| `<leader>dh` | Show watches |
+| `<leader>dv` | Show scopes |
+| `<leader>dT` | Stop debugging |
+| `<leader>dR` | Toggle automatic reload on save |
 
----
+## .NET projects
 
-### Testing (vim-test)
+Choose a startup project, then build, run, watch, or debug it.
 
-Tests run in a reusable split terminal.
-
-| Key | Description |
+| Key | Action |
 |---|---|
-| `<leader>tn` | Run nearest test |
-| `<leader>tf` | Run current file |
-| `<leader>ts` | Run test suite |
-| `<leader>tl` | Run last test |
-| `<leader>tv` | Visit last test file |
+| `<leader>np` | Choose the startup project |
+| `<leader>nb` | Build |
+| `<leader>nr` | Run |
+| `<leader>nw` | Run with watch |
+| `<leader>nt` | Run tests |
+| `<leader>na` | Attach the debugger |
 
----
-
-### Git
-
-#### vim-fugitive
-
-| Key | Description |
+| Command | Action |
 |---|---|
-| `<leader>gs` | Git status |
-| `<leader>gc` | Git commit |
-| `<leader>gp` | Git push |
-| `<leader>gb` | Git blame |
-| `<leader>gd` | Git diff split |
+| `:DotnetDebug` | Debug the selected project |
+| `:DotnetRestore` | Restore project packages |
+| `:DotnetFormat` | Format the project |
 
-#### Snacks git log
+## Tasks
 
-| Key | Description |
+| Key | Action |
 |---|---|
-| `<leader>gl` | Git log |
-| `<leader>gL` | Git log (current line) |
-| `<leader>gf` | Git log (current file) |
+| `<leader>ow` | Toggle the task list |
+| `<leader>oo` | Run a task |
+| `<leader>ot` | Open task actions |
 
-#### mini.diff
+Tasks and their consoles share the bottom 30% of the screen. In the task list,
+use `<C-s>` to open output in a split.
 
-| Key | Description |
+## Testing
+
+| Key | Action |
 |---|---|
-| `<leader>go` | Toggle diff overlay |
+| `<leader>tn` | Run the nearest test |
+| `<leader>tf` | Run tests in the current file |
+| `<leader>ts` | Run the test suite |
+| `<leader>tl` | Repeat the last test run |
+| `<leader>tv` | Return to the last test file |
 
-Gitsigns is also active and shows inline blame at end of line.
+## Editing
 
----
-
-### Treesitter text objects
-
-#### Select (visual / operator-pending)
-
-| Key | Description |
+| Key | Action |
 |---|---|
-| `af` | Around function |
-| `if` | Inside function |
+| `<C-c>` in Visual mode | Copy selected text to the clipboard |
+| `<C-v>` | Paste from the clipboard; also works in Visual mode |
+| `d` | Delete without replacing the copied text |
+| `<leader>p` in Visual mode | Paste without replacing the copied text |
+| `<` / `>` in Visual mode | Indent left / right and keep the selection |
+| `<C-d>` | Search for the word under the cursor |
+| `<M-h>` / `<M-j>` / `<M-k>` / `<M-l>` | Move a line or selection left / down / up / right |
+| `gsa` | Add surrounding quotes or brackets |
+| `gsd` | Delete surrounding quotes or brackets |
+| `gsr` | Replace surrounding quotes or brackets |
+| `gsf` / `gsF` | Find the next / previous surrounding pair |
+| `gsh` | Highlight the surrounding pair |
 
-#### Move
+## Markdown
 
-| Key | Description |
+| Key | Action |
 |---|---|
-| `]f` | Next function start |
-| `]F` | Next function end |
-| `]c` | Next class start |
-| `]C` | Next class end |
-| `]a` | Next parameter start |
-| `]A` | Next parameter end |
-| `[f` | Previous function start |
-| `[F` | Previous function end |
-| `[c` | Previous class start |
-| `[C` | Previous class end |
-| `[a` | Previous parameter start |
-| `[A` | Previous parameter end |
+| `<leader>mr` | Toggle rendered Markdown in the editor |
+| `<leader>ms` | Open a Markdown preview split |
+| `<leader>mp` | Toggle browser preview |
+| `<leader>mP` | Stop browser preview |
 
----
+Browser preview displays diagrams and math. See the [Markdown example](examples/markdown-preview.md).
 
-### Project tasks (Overseer)
+## Other pickers
 
-The task list docks in Edgy's bottom **Tasks** panel. `<leader>ow` toggles it;
-`:OverseerOpen bottom` opens it explicitly. Task output continues to use the
-configured terminal strategy.
-Press `<C-k>` in the task list to return directly to an editing window, even
-when Overseer's output preview is between it and the editor. The other
-`<C-h/j/l>` keys use the normal directional window mappings.
-
-| Key | Description |
+| Key | Action |
 |---|---|
-| `<leader>ow` | Toggle task list |
-| `<leader>oo` | Run task |
-| `<leader>oq` | Quick action on recent task |
-| `<leader>oi` | Overseer info |
-| `<leader>ob` | Task builder |
-| `<leader>ot` | Task action menu |
-| `<leader>oc` | Clear task cache |
+| `<leader>:` / `<leader>sc` | Command history |
+| `<leader>n` | Notification history |
+| `<leader>s"` | Registers |
+| `<leader>s/` | Search history |
+| `<leader>sa` | Autocommands |
+| `<leader>sC` | Available commands |
+| `<leader>sh` | Help pages |
+| `<leader>sH` | Highlight groups |
+| `<leader>si` | Icons |
+| `<leader>sj` | Jump history |
+| `<leader>sk` | Keymaps |
+| `<leader>sl` | Location list |
+| `<leader>sm` | Marks |
+| `<leader>sM` | Manual pages |
+| `<leader>sp` | Plugins |
+| `<leader>sq` | Quickfix list |
+| `<leader>sR` | Resume the last picker |
+| `<leader>su` | Undo history |
 
----
+## Appearance and logging
 
-### Logging (Chainsaw)
-
-Inserts language-aware log statements for the variable or expression under the cursor.
-
-| Key | Description |
+| Key | Action |
 |---|---|
-| `<leader>ll` | Log variable |
-| `<leader>lt` | Log type |
-| `<leader>lm` | Log message |
-| `<leader>lr` | Remove all log statements |
+| `<leader>uc` | Switch colorscheme |
+| `<leader>ut` | Toggle transparency |
+| `<leader>ll` | Log the variable under the cursor |
+| `<leader>lt` | Log its type |
+| `<leader>lm` | Insert a log message |
+| `<leader>lr` | Remove log statements |
 
----
-
-### Editing (mini.nvim)
-
-#### mini.surround
-
-| Key | Description |
-|---|---|
-| `gsa` | Add surrounding |
-| `gsd` | Delete surrounding |
-| `gsf` | Find surrounding (right) |
-| `gsF` | Find surrounding (left) |
-| `gsh` | Highlight surrounding |
-| `gsr` | Replace surrounding |
-| `gsn` | Update `n_lines` |
-
-#### mini.move
-
-| Key | Description |
-|---|---|
-| `<M-h>` | Move selection left |
-| `<M-l>` | Move selection right |
-| `<M-j>` | Move selection down |
-| `<M-k>` | Move selection up |
-
----
-
-### Miscellaneous
-
-| Key | Description |
-|---|---|
-| `<leader>dt` | Toggle floating terminal |
-| `<leader>e` | Toggle Oil file explorer (float) |
-| `<leader>ut` | Toggle background transparency |
-| `<leader>uc` | Switch colorscheme (Themery) |
-
----
-
-## License
-
-MIT â€” see [LICENSE](LICENSE).
+Choose OneDark, Tinta, Bluloco Dark, or Bluloco Light with `<leader>uc`.
