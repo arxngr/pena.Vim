@@ -383,6 +383,8 @@ local function code_source()
 			["/"] = "pena_forward", ["?"] = "pena_backward",
 			["n"] = "pena_next", ["N"] = "pena_previous",
 			["q"] = "cancel", ["<Esc>"] = "cancel", ["i"] = false, ["a"] = false,
+			-- Keep window navigation global; Snacks otherwise uses these for list movement.
+			["<c-j>"] = false, ["<c-k>"] = false,
 		} } },
 	}
 end

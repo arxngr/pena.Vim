@@ -5,6 +5,10 @@ Keymaps and everyday workflows.
 **Leader:** `Space`. Shortcuts use Normal mode unless noted; press `Esc` to leave Insert mode.
 `<C-x>` means Ctrl+x, `<M-x>` means Alt+x, and `<S-x>` means Shift+x.
 
+Completion and its sources load when entering Insert mode, rather than during
+startup. Python tools use the first executable `python3`, `python`, or `py` on
+`PATH`; ensure that command is a working interpreter, not a Windows Store alias.
+
 ## Contents
 
 - [Dashboard](#dashboard)
@@ -93,13 +97,15 @@ These controls apply to text-search results, references, and symbol lists.
 | Key | Action |
 |---|---|
 | `j` / `k`, arrow keys | Select a result and preview it in the original window |
+| `<C-k>` / `<C-j>` | Move to the window above / below; keep results open |
 | `/` / `?` | Search result text forward / backward without filtering the list |
 | `n` / `N` | Repeat that result search in the same / opposite direction |
 | `Enter` / double-click | Open the selected result and close the list |
 | `q` / `Esc` | Close the list and restore the previous buffer and cursor |
 
 Results show file icons, paths, and matching code. Unsaved edits are preserved
-when previewing or cancelling.
+when previewing or cancelling. Leaving the list restores the source buffer and
+cursor; returning resumes the selected result's preview.
 
 ## Code navigation and actions
 
