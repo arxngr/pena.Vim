@@ -59,10 +59,7 @@ function M.runtime(name)
 	if name == "python" then
 		for _, candidate in ipairs({ "python3", "python", "py" }) do
 			if vim.fn.executable(candidate) == 1 then
-				local result = vim.system({ candidate, "--version" }, { text = true }):wait(1000)
-				if result.code == 0 then
-					return vim.fn.exepath(candidate)
-				end
+				return vim.fn.exepath(candidate)
 			end
 		end
 		return

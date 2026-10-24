@@ -4,7 +4,6 @@ return {
 		dependencies = {
 			{ "williamboman/mason.nvim", version = "^1.0.0" },
 			{ "j-hui/fidget.nvim", opts = {} },
-			"hrsh7th/nvim-cmp",
 			"hrsh7th/cmp-nvim-lsp",
 		},
 		opts = {
