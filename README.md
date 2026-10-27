@@ -223,9 +223,14 @@ Choose a startup project, then build, run, watch, or debug it.
 
 | Command | Action |
 |---|---|
+| `:Roslyn target` | Choose the solution used for C# language support |
 | `:DotnetDebug` | Debug the selected project |
 | `:DotnetRestore` | Restore project packages |
 | `:DotnetFormat` | Format the project |
+
+Roslyn target selection is separate from the startup project. Switching solutions
+shuts the server down gracefully and reattaches its open buffers. Selecting the
+current solution or cancelling the picker leaves the server running.
 
 ## Tasks
 
